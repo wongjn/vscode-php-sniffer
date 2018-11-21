@@ -10,16 +10,21 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.sayHello"
+        "onLanguage:php"
     ],
     "main": "./out/extension",
     "contributes": {
-        "commands": [
-            {
-                "command": "extension.sayHello",
-                "title": "Hello World"
+        "configuration": {
+            "type": "object",
+            "title": "PHPCBF formatter settings",
+            "properties": {
+                "phpcbf.standard": {
+                    "type": "string",
+                    "default": "",
+                    "description": "The PHPCS standard(s) to fix against. Separate multiple standards with a comma."
+                }
             }
-        ]
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
