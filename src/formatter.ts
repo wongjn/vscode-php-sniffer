@@ -31,8 +31,13 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
     const time = Date.now();
 
     const config = workspace.getConfiguration('phpcbf');
+    const isFullDocument = Formatter.isFullDocumentRange(range, document);
 
-    const args = [`--standard=${config.get('standard', '')}`, '-'];
+    const args = [
+      `--standard=${config.get('standard', '')}`,
+      isFullDocument ? '' : `--exclude=${config.get('snippetExcludeSniffs', []).join(',')}`,
+      '-',
+    ];
     const spawnOptions = { shell: process.platform === 'win32' };
     const command = spawn('phpcbf', args, spawnOptions);
 

@@ -14,8 +14,12 @@ Uses `phpcbf` on your system to format PHP code.
 
 This extension contributes the following settings:
 
-* `phpcbf.standard`: The standards to check against; this is passed to the
-`phpcbf` command with `--standard=`.
+* `phpcbf.standard`: The standards to check against. This is passed to the
+`phpcbf` command as the value for `--standard`.
+* `phpcbf.snippetExcludeSniffs`: Sniffs to exclude when formatting a code
+snippet (such as formatting on paste or selection). This is passed to the
+`phpcbf` command as the value for `--exclude` when **not** formatting a whole
+file.
 
 ## Known Issues
 

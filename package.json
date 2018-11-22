@@ -22,6 +22,11 @@
                     "type": "string",
                     "default": "",
                     "description": "The PHPCS standard(s) to fix against. Separate multiple standards with a comma."
+                },
+                "phpcbf.snippetExcludeSniffs": {
+                    "type": "array",
+                    "default": [],
+                    "description": "Sniffs to exclude when formatting a code snippet (such as formatting on paste or selection)."
                 }
             }
         }
