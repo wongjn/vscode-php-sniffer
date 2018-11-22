@@ -69,7 +69,8 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
         }
 
         if (code !== 1) {
-          return reject(stderr);
+          console.error(stdout);
+          return reject(stdout);
         }
 
         const replacement = Formatter.postProcessText(stdout, processedState);
