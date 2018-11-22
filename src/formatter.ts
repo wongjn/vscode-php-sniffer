@@ -1,23 +1,35 @@
 import {
-  DocumentFormattingEditProvider,
+  DocumentRangeFormattingEditProvider,
   CancellationToken,
+  EndOfLine,
   FormattingOptions,
   Position,
+  Range,
   TextDocument,
   TextEdit,
   workspace,
-  Range,
 } from 'vscode';
 import { spawn } from 'child_process';
 
-export class Formatter implements DocumentFormattingEditProvider {
+interface TextProcessState {
+  text: string;
+  eol: string;
+  needsPhpTag: boolean;
+}
 
-  public async provideDocumentFormattingEdits(
+export class Formatter implements DocumentRangeFormattingEditProvider {
+
+  /**
+   * {@inheritDoc}
+   */
+  public async provideDocumentRangeFormattingEdits(
     document: TextDocument,
+    range: Range,
     options: FormattingOptions,
     token: CancellationToken
   ): Promise<TextEdit[]> {
     const time = Date.now();
+
     const config = workspace.getConfiguration('phpcbf');
 
     const args = [`--standard=${config.get('standard', '')}`, '-'];
@@ -29,7 +41,8 @@ export class Formatter implements DocumentFormattingEditProvider {
 
     token.onCancellationRequested(() => !command.killed && command.kill());
 
-    command.stdin.write(document.getText());
+    const processedState = Formatter.prepareText(document, range);
+    command.stdin.write(processedState.text);
     command.stdin.end();
 
     command.stdout.setEncoding('utf8');
@@ -48,15 +61,67 @@ export class Formatter implements DocumentFormattingEditProvider {
           return reject(stderr);
         }
 
-        const fileStart = new Position(0, 0);
-        const fileEnd = document.lineAt(document.lineCount - 1).range.end;
-        const textEdit = new TextEdit(new Range(fileStart, fileEnd), stdout);
+        const replacement = Formatter.postProcessText(stdout, processedState);
 
         console.log(`Took ${Date.now() - time}ms to run.`);
-        
-        return resolve([textEdit]);
+        return resolve([new TextEdit(range, replacement)]);
       });
     });
+  }
+
+  /**
+   * Prepares text for `phpcbf` to run on.
+   * 
+   * @param document - The document the formatting is running on.
+   * @param range    - The range that formatting should be acting upon.
+   * @returns A state object that includes the text. This should be passed to
+   *   `postProcessText()` for reverting some of the needed changes made here.
+   */
+  protected static prepareText(document: TextDocument, range: Range): TextProcessState {
+    const text = document.getText(range);
+
+    const isFullDocument = this.isFullDocumentRange(range, document);
+    const needsPhpTag = !isFullDocument && !text.includes('<?');
+    const eol: string = document.eol === EndOfLine.LF ? '\n' : '\r\n';
+
+    return {
+      text: `${needsPhpTag ? `<?php${eol}` : ''}${text}`,
+      eol,
+      needsPhpTag,
+    };
+  }
+
+  /**
+   * Post-process the result from `phpcbf`.
+   * 
+   * Reverts changes made by `prepareText()`.
+   * 
+   * @param rawResult    - The resulting text from `phpcbf`.
+   * @param processState - The process state from `prepareText()`.
+   * @returns The actual formatted version of text.
+   */
+  protected static postProcessText(rawResult: string, { needsPhpTag, eol }: TextProcessState): string {
+    if (!needsPhpTag) {
+      return rawResult;
+    }
+
+    return rawResult.replace(`<?php${eol}`, '');
+  }
+
+  /**
+   * Tests whether a range is for the full document.
+   * 
+   * @param range    - The range to test.
+   * @param document - The document to test with.
+   * @returns `true` if the given `range` is the full `document`.
+   */
+  public static isFullDocumentRange(range: Range, document: TextDocument): boolean {
+    const documentRange = new Range(
+      new Position(0, 0),
+      document.lineAt(document.lineCount - 1).range.end,
+    );
+
+    return range.isEqual(documentRange);
   }
 
 }
