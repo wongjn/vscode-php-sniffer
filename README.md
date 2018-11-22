@@ -14,6 +14,7 @@ Uses `phpcbf` on your system to format PHP code.
 
 This extension contributes the following settings:
 
+* `phpcbf.executable`: The command to run to run `phpcbf`. Use this to specify a different executable if it is not in your global `PATH`, such as when using a project-scoped `phpcs` dependency.
 * `phpcbf.standard`: The standards to check against. This is passed to the
 `phpcbf` command as the value for `--standard`.
 * `phpcbf.snippetExcludeSniffs`: Sniffs to exclude when formatting a code

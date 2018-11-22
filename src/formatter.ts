@@ -33,6 +33,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
     const isFullDocument = Formatter.isFullDocumentRange(range, document);
 
     const config = workspace.getConfiguration('phpcbf');
+    const executable: string = config.get('executable', 'phpcbf');
     const standard: string = config.get('standard', '');
     const excludes: Array<string> = config.get('snippetExcludeSniffs', []);
 
@@ -45,10 +46,9 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
     }
 
     const spawnOptions = { shell: process.platform === 'win32' };
-    const command = spawn('phpcbf', [...args, '-'], spawnOptions);
+    const command = spawn(executable, [...args, '-'], spawnOptions);
 
     let stdout = '';
-    let stderr = '';
 
     token.onCancellationRequested(() => !command.killed && command.kill());
 
@@ -58,7 +58,6 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
     command.stdout.setEncoding('utf8');
     command.stdout.on('data', data => stdout += data);
-    command.stderr.on('data', data => stderr += data);
 
     return new Promise<TextEdit[]>((resolve, reject) => {
       command.on('close', code => {

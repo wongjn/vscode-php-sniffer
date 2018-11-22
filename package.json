@@ -18,6 +18,11 @@
             "type": "object",
             "title": "PHPCBF formatter settings",
             "properties": {
+                "phpcbf.executable": {
+                    "type": "string",
+                    "default": "phpcbf",
+                    "markdownDescription": "The command to run to run `phpcbf`. Use this to specify a different executable if it is not in your global `PATH`, such as when using a project-scoped `phpcs` dependency."
+                },
                 "phpcbf.standard": {
                     "type": "string",
                     "default": "",
