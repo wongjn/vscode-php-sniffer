@@ -56,7 +56,11 @@ export class Validator {
    * @param event - The configuration change event.
    */
   protected onConfigChange(event: ConfigurationChangeEvent): void {
-    if (event.affectsConfiguration('phpcbf.run')) {
+    if (!event.affectsConfiguration('phpcbf')) {
+      return;
+    }
+    
+    if (event.affectsConfiguration('phpcbf.run') || event.affectsConfiguration('phpcbf.onTypeDelay')) {
       this.setValidatorListener();
     }
 
