@@ -64,13 +64,12 @@ export class Validator {
 
     const args = [
       '--report=json',
+      `--standard=${standard}`,
+      '-'
     ];
-    if (standard) {
-      args.push(`--standard=${standard}`);
-    }
 
     const spawnOptions = { shell: process.platform === 'win32' };
-    const command = spawn(`${execFolder}phpcs`, [...args, '-'], spawnOptions);
+    const command = spawn(`${execFolder}phpcs`, args, spawnOptions);
 
     let stdout = '';
 

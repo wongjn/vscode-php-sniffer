@@ -37,16 +37,14 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
     const standard: string = config.get('standard', '');
     const excludes: Array<string> = config.get('snippetExcludeSniffs', []);
 
-    const args = [];
-    if (standard) {
-      args.push(`--standard=${standard}`);
-    }
-    if (excludes.length && !isFullDocument) {
-      args.push(`--exclude=${excludes.join(',')}`);
-    }
+    const args = [
+      `--standard="${standard}"`,
+      `--exclude="${excludes.length && !isFullDocument ? excludes.join(',') : ''}"`,
+      '-',
+    ];
 
     const spawnOptions = { shell: process.platform === 'win32' };
-    const command = spawn(`${execFolder}phpcbf`, [...args, '-'], spawnOptions);
+    const command = spawn(`${execFolder}phpcbf`, args, spawnOptions);
 
     let stdout = '';
 
