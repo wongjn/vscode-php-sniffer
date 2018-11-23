@@ -1,32 +1,33 @@
-# PHPCBF Formatter
+# PHP Sniffer
 
-Formats PHP code using phpcbf.
+Uses [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer) to format
+and lint PHP code.
 
 ## Features
 
-Uses `phpcbf` on your system to format PHP code.
+- Runs `phpcs` to lint PHP code.
+- Runs `phpcbf` to format fixable PHP code validation errors.
 
 ## Requirements
 
-`phpcbf`, which is an executable from [PHP_Codesniffer](https://github.com/squizlabs/PHP_CodeSniffer).
+- [PHP](https://php.net)
+- [PHP_Codesniffer](https://github.com/squizlabs/PHP_CodeSniffer)
 
 ## Extension Settings
 
 This extension contributes the following settings:
 
-* `phpcbf.executablesFolder`: The folder where both `phpcs` and `phpcbf`
+* `phpSniffer.executablesFolder`: The folder where both `phpcs` and `phpcbf`
 executables are. Use this to specify a different executable if it is not in your
 global `PATH`, such as when using a project-scoped `phpcs` dependency. Include a
 trailing slash.
-* `phpcbf.standard`: The standards to check against. This is passed to the
-`phpcbf` command as the value for `--standard`.
-* `phpcbf.snippetExcludeSniffs`: Sniffs to exclude when formatting a code
-snippet (such as formatting on paste or selection). This is passed to the
-`phpcbf` command as the value for `--exclude` when **not** formatting a whole
-file.
+* `phpSniffer.standard`: The standards to check against. This is passed to the
+`phpcbf` and `phpcs` executables as the value for `--standard`.
+* `phpSniffer.snippetExcludeSniffs`: Sniffs to exclude when formatting a code
+snippet (such as when _formatting on paste_ or on the command
+`format on selection`). This is passed to the `phpcbf` command as the value for
+`--exclude` when **not** formatting a whole file.
 
 ## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
 
 ## Release Notes

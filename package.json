@@ -1,7 +1,7 @@
 {
-    "name": "phpcbf-formatter",
-    "displayName": "PHPCBF Formatter",
-    "description": "Formats PHP code using phpcbf.",
+    "name": "php-sniffer",
+    "displayName": "PHP Sniffer",
+    "description": "Uses PHP_CodeSniffer to format and lint PHP code.",
     "version": "0.0.1",
     "engines": {
         "vscode": "^1.29.0"
@@ -16,40 +16,40 @@
     "contributes": {
         "configuration": {
             "type": "object",
-            "title": "PHPCBF formatter settings",
+            "title": "PHP Sniffer",
             "properties": {
-                "phpcbf.run": {
+                "phpSniffer.run": {
                     "type": "string",
                     "default": "onSave",
                     "enum": [
                         "onSave",
                         "onType"
                     ],
-                    "markdownDescription": "When to run the `phpcs`. Can be `onSave` or `onType`."
+                    "markdownDescription": "When to run the `phpcs`."
                 },
-                "phpcbf.onTypeDelay": {
+                "phpSniffer.onTypeDelay": {
                     "type": "number",
                     "default": 250,
                     "minimum": 0,
-                    "markdownDescription": "When `phpcbf.run` is `onType`, this sets the amount of milliseconds the validator will wait after typing has stopped before it will run."
+                    "markdownDescription": "When `phpSniffer.run` is `onType`, this sets the amount of milliseconds the validator will wait after typing has stopped before it will run."
                 },
-                "phpcbf.executablesFolder": {
+                "phpSniffer.executablesFolder": {
                     "scope": "resource",
                     "type": "string",
                     "default": "",
-                    "markdownDescription": "The folder where both `phpcs` and `phpcbf` executables are. Use this to specify different executables if it is not in your global `PATH`, such as when using a project-scoped `phpcs` dependency. Include a trailing slash."
+                    "markdownDescription": "The folder where both `phpcs` and `phpcbf` executables are. Use this to specify a different executable if it is not in your global `PATH`, such as when using a project-scoped `phpcs` dependency. Include a trailing slash."
                 },
-                "phpcbf.standard": {
+                "phpSniffer.standard": {
                     "scope": "resource",
                     "type": "string",
                     "default": "",
-                    "description": "The PHPCS standard(s) to fix against. Separate multiple standards with a comma."
+                    "markdownDescription": "The standards to check against. This is passed to the `phpcbf` and `phpcs` executables as the value for `--standard`."
                 },
-                "phpcbf.snippetExcludeSniffs": {
+                "phpSniffer.snippetExcludeSniffs": {
                     "scope": "resource",
                     "type": "array",
                     "default": [],
-                    "description": "Sniffs to exclude when formatting a code snippet (such as formatting on paste or selection)."
+                    "markdownDescription": "Sniffs to exclude when formatting a code snippet (such as when _formatting on paste_ or on the command `format on selection`). This is passed to the `phpcbf` command as the value for `--exclude` when **not** formatting a whole file."
                 }
             }
         }

@@ -32,7 +32,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
     options: FormattingOptions,
     token: CancellationToken
   ): Promise<TextEdit[]> {
-    const config = workspace.getConfiguration('phpcbf', document.uri);
+    const config = workspace.getConfiguration('phpSniffer', document.uri);
     const execFolder: string = config.get('executablesFolder', '');
     const standard: string = config.get('standard', '');
     const excludes: Array<string> = config.get('snippetExcludeSniffs', []);

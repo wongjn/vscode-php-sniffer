@@ -50,11 +50,11 @@ export class Validator {
    * @param event - The configuration change event.
    */
   protected onConfigChange(event: ConfigurationChangeEvent): void {
-    if (!event.affectsConfiguration('phpcbf')) {
+    if (!event.affectsConfiguration('phpSniffer')) {
       return;
     }
     
-    if (event.affectsConfiguration('phpcbf.run') || event.affectsConfiguration('phpcbf.onTypeDelay')) {
+    if (event.affectsConfiguration('phpSniffer.run') || event.affectsConfiguration('phpSniffer.onTypeDelay')) {
       this.setValidatorListener();
     }
 
@@ -69,7 +69,7 @@ export class Validator {
       this.validatorListener.dispose();
     }
 
-    const config = workspace.getConfiguration('phpcbf');
+    const config = workspace.getConfiguration('phpSniffer');
     const run: runConfig = config.get('run', runConfig.save);
     const delay: number = config.get('onTypeDelay', 250);
 
@@ -104,7 +104,7 @@ export class Validator {
       return;
     }
 
-    const config = workspace.getConfiguration('phpcbf', document.uri);
+    const config = workspace.getConfiguration('phpSniffer', document.uri);
     const execFolder: string = config.get('executablesFolder', '');
     const standard: string = config.get('standard', '');
 
