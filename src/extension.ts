@@ -1,5 +1,6 @@
 import { ExtensionContext, languages } from 'vscode';
 import { Formatter } from './formatter';
+import { Validator } from './validator';
 
 export function activate(context: ExtensionContext) {
   context.subscriptions.push(
@@ -8,4 +9,6 @@ export function activate(context: ExtensionContext) {
       new Formatter(),
     )
   );
+  
+  context.subscriptions.push(new Validator(context.subscriptions));
 }

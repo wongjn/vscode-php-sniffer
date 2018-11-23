@@ -18,11 +18,11 @@
             "type": "object",
             "title": "PHPCBF formatter settings",
             "properties": {
-                "phpcbf.executable": {
+                "phpcbf.executablesFolder": {
                     "scope": "resource",
                     "type": "string",
-                    "default": "phpcbf",
-                    "markdownDescription": "The command to run to run `phpcbf`. Use this to specify a different executable if it is not in your global `PATH`, such as when using a project-scoped `phpcs` dependency."
+                    "default": "",
+                    "markdownDescription": "The folder where both `phpcs` and `phpcbf` executables are. Use this to specify different executables if it is not in your global `PATH`, such as when using a project-scoped `phpcs` dependency. Include a trailing slash."
                 },
                 "phpcbf.standard": {
                     "scope": "resource",
