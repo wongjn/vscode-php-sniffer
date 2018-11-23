@@ -18,6 +18,21 @@
             "type": "object",
             "title": "PHPCBF formatter settings",
             "properties": {
+                "phpcbf.run": {
+                    "type": "string",
+                    "default": "onSave",
+                    "enum": [
+                        "onSave",
+                        "onType"
+                    ],
+                    "markdownDescription": "When to run the `phpcs`. Can be `onSave` or `onType`."
+                },
+                "phpcbf.onTypeDelay": {
+                    "type": "number",
+                    "default": 250,
+                    "minimum": 0,
+                    "markdownDescription": "When `phpcbf.run` is `onType`, this sets the amount of milliseconds the validator will wait after typing has stopped before it will run."
+                },
                 "phpcbf.executablesFolder": {
                     "scope": "resource",
                     "type": "string",
@@ -47,10 +62,14 @@
         "test": "npm run compile && node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.21",
-        "tslint": "^5.8.0",
+        "@types/lodash": "^4.14.118",
+        "@types/mocha": "^2.2.42",
         "@types/node": "^8.10.25",
-        "@types/mocha": "^2.2.42"
+        "tslint": "^5.8.0",
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.21"
+    },
+    "dependencies": {
+        "lodash": "^4.17.11"
     }
 }
