@@ -13,8 +13,12 @@ import { spawn } from 'child_process';
 
 interface TextProcessState {
   text: string;
-  eol: string;
-  needsPhpTag: boolean;
+  postProcessor: (rawResult: string) => string;
+}
+
+interface Intentation {
+  replace: RegExp;
+  indent: string;
 }
 
 export class Formatter implements DocumentRangeFormattingEditProvider {
@@ -47,8 +51,8 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
     token.onCancellationRequested(() => !command.killed && command.kill());
 
-    const processedState = Formatter.prepareText(document, range);
-    command.stdin.write(processedState.text);
+    const { text, postProcessor } = Formatter.prepareText(document, range, options);
+    command.stdin.write(text);
     command.stdin.end();
 
     command.stdout.setEncoding('utf8');
@@ -62,7 +66,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
           return reject(message);
         }
 
-        const replacement = Formatter.postProcessText(stdout, processedState);
+        const replacement = postProcessor(stdout);
         return resolve([new TextEdit(range, replacement)]);
       });
     });
@@ -71,40 +75,88 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
   /**
    * Prepares text for `phpcbf` to run on.
    * 
-   * @param document - The document the formatting is running on.
-   * @param range    - The range that formatting should be acting upon.
-   * @returns A state object that includes the text. This should be passed to
-   *   `postProcessText()` for reverting some of the needed changes made here.
+   * @param document      - The document the formatting is running on.
+   * @param range         - The range that formatting should be acting upon.
+   * @param formatOptions - The options that the document is formatted by.
+   * @returns A state object that includes the text. The postProcessor member
+   *   should be run on the formatted text to reverse changes made here.
+   * 
+   * @todo PHP tag and indentation processes here could be extracted to a common
+   *   (functional?) interface of some sort, i.e. a micro-plugin system.
    */
-  protected static prepareText(document: TextDocument, range: Range): TextProcessState {
-    const text = document.getText(range);
+  protected static prepareText(document: TextDocument, range: Range, formatOptions: FormattingOptions): TextProcessState {
+    let text = document.getText(range);
 
     const isFullDocument = this.isFullDocumentRange(range, document);
     const needsPhpTag = !isFullDocument && !text.includes('<?');
     const eol: string = document.eol === EndOfLine.LF ? '\n' : '\r\n';
+    const lines = text.split(eol);
+
+    const indentation = isFullDocument ? null : this.getIndentation(lines, formatOptions);
+    if (indentation) {
+      // Temporarily remove indentation.
+      text = lines.map(line => line.replace(indentation.replace, '')).join(eol);
+    }
 
     return {
       text: `${needsPhpTag ? `<?php${eol}` : ''}${text}`,
-      eol,
-      needsPhpTag,
+      postProcessor: (rawResult: string): string => {
+        let result = rawResult;
+
+        if (needsPhpTag) {
+          result = result.replace(`<?php${eol}`, '');
+        }
+
+        // Restore removed indentation.
+        if (indentation) {
+          result = result
+            .split(eol)
+            .map(line => `${line.length > 0 ? indentation.indent : ''}${line}`)
+            .join(eol);
+        }
+
+        return result;
+      },
     };
   }
 
   /**
-   * Post-process the result from `phpcbf`.
+   * Gets indentation information for a document.
    * 
-   * Reverts changes made by `prepareText()`.
-   * 
-   * @param rawResult    - The resulting text from `phpcbf`.
-   * @param processState - The process state from `prepareText()`.
-   * @returns The actual formatted version of text.
+   * @param lines  - The text as an array of strings per line.
+   * @param param1 - Indentation options for the document.
    */
-  protected static postProcessText(rawResult: string, { needsPhpTag, eol }: TextProcessState): string {
-    if (!needsPhpTag) {
-      return rawResult;
+  protected static getIndentation(lines: string[], { insertSpaces, tabSize }: FormattingOptions): Intentation | null {
+    const unit = insertSpaces ? ' '.repeat(tabSize) : '\t';
+    const indentMatcher = new RegExp(`^((?:${unit})*).+`);
+    const unitCounter = new RegExp(unit, 'g');
+    let count = Number.MAX_SAFE_INTEGER;
+
+    for (const line of lines) {
+      const match = indentMatcher.exec(line);
+      if (!(match instanceof Array)) {
+        continue;
+      }
+      const [, lineIndent] = match;
+
+      // Minimum reached, do nothing more.
+      if (lineIndent === '') {
+        count = 0;
+        break;
+      }
+
+      count = Math.min(lineIndent.match(unitCounter)!.length, count);
+    }
+    
+    // No indentation found.
+    if (count === 0) {
+      return null;
     }
 
-    return rawResult.replace(`<?php${eol}`, '');
+    return {
+      replace: new RegExp(`^(${unit}){0,${count}}`),
+      indent: unit.repeat(count),
+    };
   }
 
   /**
