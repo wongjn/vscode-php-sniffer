@@ -32,7 +32,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
     const isFullDocument = Formatter.isFullDocumentRange(range, document);
 
-    const config = workspace.getConfiguration('phpcbf');
+    const config = workspace.getConfiguration('phpcbf', document.uri);
     const executable: string = config.get('executable', 'phpcbf');
     const standard: string = config.get('standard', '');
     const excludes: Array<string> = config.get('snippetExcludeSniffs', []);

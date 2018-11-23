@@ -19,16 +19,19 @@
             "title": "PHPCBF formatter settings",
             "properties": {
                 "phpcbf.executable": {
+                    "scope": "resource",
                     "type": "string",
                     "default": "phpcbf",
                     "markdownDescription": "The command to run to run `phpcbf`. Use this to specify a different executable if it is not in your global `PATH`, such as when using a project-scoped `phpcs` dependency."
                 },
                 "phpcbf.standard": {
+                    "scope": "resource",
                     "type": "string",
                     "default": "",
                     "description": "The PHPCS standard(s) to fix against. Separate multiple standards with a comma."
                 },
                 "phpcbf.snippetExcludeSniffs": {
+                    "scope": "resource",
                     "type": "array",
                     "default": [],
                     "description": "Sniffs to exclude when formatting a code snippet (such as formatting on paste or selection)."
