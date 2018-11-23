@@ -148,6 +148,7 @@ export class Validator {
           );
         });
       } catch(error) {
+        console.error(stdout);
         console.error(error.toString());
       }
 
