@@ -28,14 +28,11 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
     options: FormattingOptions,
     token: CancellationToken
   ): Promise<TextEdit[]> {
-    const time = Date.now();
-
-    const isFullDocument = Formatter.isFullDocumentRange(range, document);
-
     const config = workspace.getConfiguration('phpcbf', document.uri);
     const execFolder: string = config.get('executablesFolder', '');
     const standard: string = config.get('standard', '');
     const excludes: Array<string> = config.get('snippetExcludeSniffs', []);
+    const isFullDocument = Formatter.isFullDocumentRange(range, document);
 
     const args = [
       `--standard="${standard}"`,
@@ -59,20 +56,13 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
     return new Promise<TextEdit[]>((resolve, reject) => {
       command.on('close', code => {
-        if (token.isCancellationRequested) {
-          const message = 'Formatting cancelled.';
+        if (token.isCancellationRequested || code !== 1) {
+          const message = code !== 1 ? stdout : 'Formatting cancelled.';
           console.warn(message);
           return reject(message);
         }
 
-        if (code !== 1) {
-          console.error(stdout);
-          return reject(stdout);
-        }
-
         const replacement = Formatter.postProcessText(stdout, processedState);
-
-        console.log(`Took ${Date.now() - time}ms to run.`);
         return resolve([new TextEdit(range, replacement)]);
       });
     });
