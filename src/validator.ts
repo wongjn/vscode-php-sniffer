@@ -6,7 +6,6 @@ import {
   languages,
   Range,
   TextDocument,
-  Uri,
   workspace,
   ConfigurationChangeEvent,
   TextDocumentChangeEvent,
@@ -22,11 +21,6 @@ const enum runConfig {
 
 export class Validator {
   private diagnosticCollection: DiagnosticCollection = languages.createDiagnosticCollection();
-
-  /**
-   * A list of documents being parsed.
-   */
-  private documentQueue: Set<Uri> = new Set();
 
   /**
    * The active validator listener.
@@ -95,7 +89,6 @@ export class Validator {
    * Refreshes validation on any open documents.
    */
   protected refresh(): void {
-    this.documentQueue.clear();
     this.diagnosticCollection!.clear();
 
     workspace.textDocuments.forEach(this.validate, this);
@@ -107,11 +100,9 @@ export class Validator {
    * @param document - The document to lint.
    */
   protected validate(document: TextDocument): void {
-    if (document.languageId !== 'php' || this.documentQueue.has(document.uri)) {
+    if (document.languageId !== 'php') {
       return;
     }
-
-    this.documentQueue.add(document.uri);
 
     const config = workspace.getConfiguration('phpcbf', document.uri);
     const execFolder: string = config.get('executablesFolder', '');
@@ -139,14 +130,14 @@ export class Validator {
 
       try {
         const { files: { STDIN: report } }: PHPCSReport = JSON.parse(stdout);
-        report.messages.forEach(({ message, line, column, type }) => {
+        report.messages.forEach(({ message, line, column, type, source }) => {
           const zeroLine = line - 1;
           const ZeroColumn = column - 1;
 
           diagnostics.push(
             new Diagnostic(
               new Range(zeroLine, ZeroColumn, zeroLine, Number.MAX_VALUE),
-              message,
+              `[${source}]\n${message}`,
               type === PHPCSMessageType.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
             ),
           );
@@ -157,7 +148,6 @@ export class Validator {
       }
 
       this.diagnosticCollection.set(document.uri, diagnostics);
-      this.documentQueue.delete(document.uri);
     });
   }
 
