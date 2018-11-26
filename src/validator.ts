@@ -1,4 +1,6 @@
 import {
+  CancellationTokenSource,
+  ConfigurationChangeEvent,
   Diagnostic,
   DiagnosticCollection,
   DiagnosticSeverity,
@@ -6,9 +8,9 @@ import {
   languages,
   Range,
   TextDocument,
-  workspace,
-  ConfigurationChangeEvent,
   TextDocumentChangeEvent,
+  workspace,
+  Uri,
 } from 'vscode';
 import { spawn } from 'child_process';
 import { PHPCSReport, PHPCSMessageType } from './phpcs-report';
@@ -25,7 +27,12 @@ export class Validator {
   /**
    * The active validator listener.
    */
-  private validatorListener: Disposable | null = null;
+  private validatorListener?: Disposable;
+
+  /**
+   * Token to cancel a current validation runs.
+   */
+  private runnerCancellations: Map<Uri, CancellationTokenSource> = new Map();
 
   constructor(subscriptions: Disposable[]) {
     workspace.onDidChangeConfiguration(this.onConfigChange, this, subscriptions);
@@ -74,11 +81,11 @@ export class Validator {
     const delay: number = config.get('onTypeDelay', 250);
 
     if (run === runConfig.type as string) {
-      const debounced = debounce(
+      const validator = debounce(
         ({ document }: TextDocumentChangeEvent): void => { this.validate(document); },
         delay,
       );
-      this.validatorListener = workspace.onDidChangeTextDocument(debounced);
+      this.validatorListener = workspace.onDidChangeTextDocument(validator);
     }
     else {
       this.validatorListener = workspace.onDidSaveTextDocument(this.validate, this);
@@ -104,6 +111,16 @@ export class Validator {
       return;
     }
 
+    const oldRunner = this.runnerCancellations.get(document.uri);
+    if (oldRunner) {
+      oldRunner.cancel();
+      oldRunner.dispose();
+    }
+
+    const runner = new CancellationTokenSource();
+    this.runnerCancellations.set(document.uri, runner);
+    const { token } = runner;
+
     const config = workspace.getConfiguration('phpSniffer', document.uri);
     const execFolder: string = config.get('executablesFolder', '');
     const standard: string = config.get('standard', '');
@@ -116,6 +133,9 @@ export class Validator {
 
     const spawnOptions = { shell: process.platform === 'win32' };
     const command = spawn(`${execFolder}phpcs`, args, spawnOptions);
+    console.log(`Run ${command.pid}`);
+
+    token.onCancellationRequested(() => !command.killed && command.kill());
 
     let stdout = '';
 
@@ -126,28 +146,38 @@ export class Validator {
     command.stdout.on('data', data => stdout += data);
 
     command.on('close', code => {
-      const diagnostics: Diagnostic[] = [];
+      if (token.isCancellationRequested) {
+        console.warn('Validation cancelled.');
+        console.log(`Cancel ${command.pid}`);
+      }
+      else {
+        console.log(`Close ${command.pid}`);
+        const diagnostics: Diagnostic[] = [];
+        
+        try {
+          const { files: { STDIN: report } }: PHPCSReport = JSON.parse(stdout);
+          report.messages.forEach(({ message, line, column, type, source }) => {
+            const zeroLine = line - 1;
+            const ZeroColumn = column - 1;
 
-      try {
-        const { files: { STDIN: report } }: PHPCSReport = JSON.parse(stdout);
-        report.messages.forEach(({ message, line, column, type, source }) => {
-          const zeroLine = line - 1;
-          const ZeroColumn = column - 1;
+            diagnostics.push(
+              new Diagnostic(
+                new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
+                `[${source}]\n${message}`,
+                type === PHPCSMessageType.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
+              ),
+            );
+          });
+        } catch(error) {
+          console.error(stdout);
+          console.error(error.toString());
+        }
 
-          diagnostics.push(
-            new Diagnostic(
-              new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
-              `[${source}]\n${message}`,
-              type === PHPCSMessageType.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
-            ),
-          );
-        });
-      } catch(error) {
-        console.error(stdout);
-        console.error(error.toString());
+        this.diagnosticCollection.set(document.uri, diagnostics);
       }
 
-      this.diagnosticCollection.set(document.uri, diagnostics);
+      runner.dispose();
+      this.runnerCancellations.delete(document.uri);
     });
   }
 
