@@ -40,7 +40,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
     const args = [
       `--standard="${standard}"`,
-      `--exclude="${excludes.length && !isFullDocument ? excludes.join(',') : ''}"`,
+      excludes.length && !isFullDocument ? `--exclude="${excludes.join(',')}"` : '',
       '-',
     ];
 
