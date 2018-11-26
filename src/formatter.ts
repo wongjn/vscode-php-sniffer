@@ -16,7 +16,7 @@ interface TextProcessState {
   postProcessor: (rawResult: string) => string;
 }
 
-interface Intentation {
+interface Indentation {
   replace: RegExp;
   indent: string;
 }
@@ -126,7 +126,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
    * @param lines  - The text as an array of strings per line.
    * @param param1 - Indentation options for the document.
    */
-  protected static getIndentation(lines: string[], { insertSpaces, tabSize }: FormattingOptions): Intentation | null {
+  protected static getIndentation(lines: string[], { insertSpaces, tabSize }: FormattingOptions): Indentation | null {
     const unit = insertSpaces ? ' '.repeat(tabSize) : '\t';
     const indentMatcher = new RegExp(`^((?:${unit})*).+`);
     const unitCounter = new RegExp(unit, 'g');
