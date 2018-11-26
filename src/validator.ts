@@ -9,8 +9,9 @@ import {
   Range,
   TextDocument,
   TextDocumentChangeEvent,
-  workspace,
   Uri,
+  window,
+  workspace,
 } from 'vscode';
 import { spawn } from 'child_process';
 import { PHPCSReport, PHPCSMessageType } from './phpcs-report';
@@ -133,7 +134,6 @@ export class Validator {
 
     const spawnOptions = { shell: process.platform === 'win32' };
     const command = spawn(`${execFolder}phpcs`, args, spawnOptions);
-    console.log(`Run ${command.pid}`);
 
     token.onCancellationRequested(() => !command.killed && command.kill());
 
@@ -145,40 +145,45 @@ export class Validator {
     command.stdout.setEncoding('utf8');
     command.stdout.on('data', data => stdout += data);
 
-    command.on('close', code => {
-      if (token.isCancellationRequested) {
-        console.warn('Validation cancelled.');
-        console.log(`Cancel ${command.pid}`);
-      }
-      else {
-        console.log(`Close ${command.pid}`);
-        const diagnostics: Diagnostic[] = [];
-        
-        try {
-          const { files: { STDIN: report } }: PHPCSReport = JSON.parse(stdout);
-          report.messages.forEach(({ message, line, column, type, source }) => {
-            const zeroLine = line - 1;
-            const ZeroColumn = column - 1;
+    const done = new Promise((resolve, reject) => {
+      command.on('close', code => {
+        if (token.isCancellationRequested) {
+          console.warn('Validation cancelled.');
+          resolve();
+        }
+        else {
+          const diagnostics: Diagnostic[] = [];
+          
+          try {
+            const { files: { STDIN: report } }: PHPCSReport = JSON.parse(stdout);
+            report.messages.forEach(({ message, line, column, type, source }) => {
+              const zeroLine = line - 1;
+              const ZeroColumn = column - 1;
 
-            diagnostics.push(
-              new Diagnostic(
-                new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
-                `[${source}]\n${message}`,
-                type === PHPCSMessageType.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
-              ),
-            );
-          });
-        } catch(error) {
-          console.error(stdout);
-          console.error(error.toString());
+              diagnostics.push(
+                new Diagnostic(
+                  new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
+                  `[${source}]\n${message}`,
+                  type === PHPCSMessageType.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
+                ),
+              );
+            });
+            resolve();
+          } catch(error) {
+            console.error(stdout);
+            console.error(error.toString());
+            reject();
+          }
+
+          this.diagnosticCollection.set(document.uri, diagnostics);
         }
 
-        this.diagnosticCollection.set(document.uri, diagnostics);
-      }
-
-      runner.dispose();
-      this.runnerCancellations.delete(document.uri);
+        runner.dispose();
+        this.runnerCancellations.delete(document.uri);
+      });
     });
+
+    window.setStatusBarMessage('PHP Sniffer: validating…', done);
   }
 
   /**
