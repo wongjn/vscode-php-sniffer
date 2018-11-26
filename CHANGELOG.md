@@ -3,5 +3,5 @@ All notable changes to the "phpcbf-formatter" extension will be documented in th
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased]
+## [0.1.0] - 2018-11-26
 - Initial release

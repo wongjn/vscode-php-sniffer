@@ -2,7 +2,7 @@
     "name": "php-sniffer",
     "displayName": "PHP Sniffer",
     "description": "Uses PHP_CodeSniffer to format and lint PHP code.",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "engines": {
         "vscode": "^1.21.0"
     },
@@ -33,7 +33,7 @@
                         "onSave",
                         "onType"
                     ],
-                    "markdownDescription": "When to run the `phpcs`."
+                    "markdownDescription": "When to run `phpcs`."
                 },
                 "phpSniffer.onTypeDelay": {
                     "type": "number",
@@ -45,7 +45,7 @@
                     "scope": "resource",
                     "type": "string",
                     "default": "",
-                    "markdownDescription": "The folder where both `phpcs` and `phpcbf` executables are. Use this to specify a different executable if it is not in your global `PATH`, such as when using a project-scoped `phpcs` dependency. Include a trailing slash."
+                    "markdownDescription": "Use this to specify a different executable if it is not in your global `PATH`, such as when using `PHP_Codesniffer` as a project-scoped dependency. Include a trailing slash"
                 },
                 "phpSniffer.standard": {
                     "scope": "resource",

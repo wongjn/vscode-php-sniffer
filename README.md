@@ -17,10 +17,16 @@ and lint PHP code.
 
 This extension contributes the following settings:
 
+* `phpSniffer.run`: When to run `phpcs` (the linter). Can be `onSave` or
+`onType`.
+* `phpSniffer.onTypeDelay`: When `phpSniffer.run` is `onType`, this sets the
+amount of milliseconds the validator will wait after typing has stopped before
+it will run. The validator will also cancel an older run if the run is on the
+same file.
 * `phpSniffer.executablesFolder`: The folder where both `phpcs` and `phpcbf`
 executables are. Use this to specify a different executable if it is not in your
-global `PATH`, such as when using a project-scoped `phpcs` dependency. Include a
-trailing slash.
+global `PATH`, such as when using `PHP_Codesniffer` as a project-scoped
+dependency. Include a trailing slash.
 * `phpSniffer.standard`: The standards to check against. This is passed to the
 `phpcbf` and `phpcs` executables as the value for `--standard`.
 * `phpSniffer.snippetExcludeSniffs`: Sniffs to exclude when formatting a code
