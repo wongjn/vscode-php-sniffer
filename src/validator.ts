@@ -136,7 +136,7 @@ export class Validator {
 
           diagnostics.push(
             new Diagnostic(
-              new Range(zeroLine, ZeroColumn, zeroLine, Number.MAX_VALUE),
+              new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
               `[${source}]\n${message}`,
               type === PHPCSMessageType.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
             ),
