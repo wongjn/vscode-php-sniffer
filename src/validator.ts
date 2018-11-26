@@ -23,7 +23,7 @@ const enum runConfig {
 }
 
 export class Validator {
-  private diagnosticCollection: DiagnosticCollection = languages.createDiagnosticCollection();
+  private diagnosticCollection: DiagnosticCollection = languages.createDiagnosticCollection('php');
 
   /**
    * The active validator listener.
@@ -128,7 +128,7 @@ export class Validator {
 
     const args = [
       '--report=json',
-      `--standard=${standard}`,
+      `--standard="${standard}"`,
       '-'
     ];
 
