@@ -135,7 +135,7 @@ export class Validator {
     const spawnOptions = { shell: process.platform === 'win32' };
     const command = spawn(`${execFolder}phpcs`, args, spawnOptions);
 
-    token.onCancellationRequested(() => !command.killed && command.kill());
+    token.onCancellationRequested(() => !command.killed && command.kill('SIGINT'));
 
     let stdout = '';
 
@@ -144,6 +144,8 @@ export class Validator {
 
     command.stdout.setEncoding('utf8');
     command.stdout.on('data', data => stdout += data);
+
+    command.on('exit', () => command.stdin.destroy());
 
     const done = new Promise((resolve, reject) => {
       command.on('close', code => {
