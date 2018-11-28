@@ -38,6 +38,11 @@ snippet (such as when _formatting on paste_ or on the command
 
 ## Release Notes
 
+### [0.1.2] - 2018-11-28
+
+#### Fixed
+- Attempt to alleviate PHP process memory leak
+
 ### [0.1.1] - 2018-11-27
 
 #### Security
