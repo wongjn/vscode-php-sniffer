@@ -46,30 +46,39 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
     const spawnOptions = { shell: process.platform === 'win32' };
     const command = spawn(`${execFolder}phpcbf`, args, spawnOptions);
+    
+    try {
+      let stdout = '';
 
-    let stdout = '';
+      token.onCancellationRequested(() => !command.killed && command.kill());
 
-    token.onCancellationRequested(() => !command.killed && command.kill());
+      const { text, postProcessor } = Formatter.prepareText(document, range, options);
+      command.stdin.write(text);
+      command.stdin.end();
 
-    const { text, postProcessor } = Formatter.prepareText(document, range, options);
-    command.stdin.write(text);
-    command.stdin.end();
+      command.stdout.setEncoding('utf8');
+      command.stdout.on('data', data => stdout += data);
 
-    command.stdout.setEncoding('utf8');
-    command.stdout.on('data', data => stdout += data);
+      return new Promise<TextEdit[]>((resolve, reject) => {
+        command.on('close', code => {
+          if (token.isCancellationRequested || code !== 1) {
+            const message = code !== 1 ? stdout : 'Formatting cancelled.';
+            console.warn(message);
+            return reject(message);
+          }
 
-    return new Promise<TextEdit[]>((resolve, reject) => {
-      command.on('close', code => {
-        if (token.isCancellationRequested || code !== 1) {
-          const message = code !== 1 ? stdout : 'Formatting cancelled.';
-          console.warn(message);
-          return reject(message);
-        }
-
-        const replacement = postProcessor(stdout);
-        return resolve([new TextEdit(range, replacement)]);
+          const replacement = postProcessor(stdout);
+          return resolve([new TextEdit(range, replacement)]);
+        });
       });
-    });
+    }
+    catch (error) {
+      if (!command.killed) {
+        command.kill();
+      }
+
+      throw error;
+    }
   }
 
   /**
