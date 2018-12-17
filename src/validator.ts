@@ -13,7 +13,7 @@ import {
   window,
   workspace,
 } from 'vscode';
-import { spawn } from 'child_process';
+import { exec } from 'child_process';
 import { PHPCSReport, PHPCSMessageType } from './phpcs-report';
 import { debounce } from 'lodash';
 
@@ -139,12 +139,14 @@ export class Validator {
     token.onCancellationRequested(() => !command.killed && command.kill('SIGINT'));
 
     let stdout = '';
+    let stderr = '';
 
     command.stdin.write(document.getText());
     command.stdin.end();
 
     command.stdout.setEncoding('utf8');
     command.stdout.on('data', data => stdout += data);
+    command.stderr.on('data', data => stderr += data);
 
     command.on('exit', () => command.stdin.destroy());
 
@@ -156,7 +158,7 @@ export class Validator {
         }
         else {
           const diagnostics: Diagnostic[] = [];
-          
+           
           try {
             const { files: { STDIN: report } }: PHPCSReport = JSON.parse(stdout);
             report.messages.forEach(({ message, line, column, type, source }) => {
@@ -174,6 +176,7 @@ export class Validator {
             resolve();
           } catch(error) {
             console.error(stdout);
+            console.error(stderr);
             console.error(error.toString());
             reject();
           }
