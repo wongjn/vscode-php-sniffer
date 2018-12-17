@@ -132,8 +132,9 @@ export class Validator {
       '-'
     ];
 
-    const spawnOptions = { shell: process.platform === 'win32' };
-    const command = spawn(`${execFolder}phpcs`, args, spawnOptions);
+    const spawnOptions = { timeout: 2000 };
+    const executable = `phpcs${process.platform === 'win32' ? '.bat' : ''}`;
+    const command = exec(`${execFolder}${executable} ${args.join(' ')}`, spawnOptions);
 
     token.onCancellationRequested(() => !command.killed && command.kill('SIGINT'));
 
