@@ -38,6 +38,12 @@ snippet (such as when _formatting on paste_ or on the command
 
 ## Release Notes
 
+### [0.1.4] - 2018-12-17
+
+#### Changed
+- Log stderr
+- Switch to exec function to add timeout
+
 ### [0.1.3] - 2018-12-13
 
 #### Fixed

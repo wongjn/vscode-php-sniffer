@@ -3,6 +3,12 @@ All notable changes to the "phpcbf-formatter" extension will be documented in th
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.1.4] - 2018-12-17
+
+### Changed
+- Log stderr
+- Switch to exec function to add timeout
+
 ## [0.1.3] - 2018-12-13
 
 ### Fixed
