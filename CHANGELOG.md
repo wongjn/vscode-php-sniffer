@@ -3,6 +3,11 @@ All notable changes to the "phpcbf-formatter" extension will be documented in th
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.1.5] - 2018-12-27
+
+### Fixed
+- Another attempt to fix memory leak with PHP CLI
+
 ## [0.1.4] - 2018-12-17
 
 ### Changed
