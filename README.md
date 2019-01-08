@@ -37,34 +37,3 @@ snippet (such as when _formatting on paste_ or on the command
 `--exclude` when **not** formatting a whole file.
 
 ## Known Issues
-
-## Release Notes
-
-### [0.1.5] - 2018-12-27
-
-#### Fixed
-- Another attempt to fix memory leak with PHP CLI
-
-### [0.1.4] - 2018-12-17
-
-#### Changed
-- Log stderr
-- Switch to exec function to add timeout
-
-### [0.1.3] - 2018-12-13
-
-#### Fixed
-- Attempt to kill process on error
-
-### [0.1.2] - 2018-11-28
-
-#### Fixed
-- Attempt to alleviate PHP process memory leak
-
-### [0.1.1] - 2018-11-27
-
-#### Security
-- Patch Event-Stream package vulnerability
-
-### [0.1.0] - 2018-11-26
-- Initial release

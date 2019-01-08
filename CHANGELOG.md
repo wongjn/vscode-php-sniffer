@@ -3,6 +3,11 @@ All notable changes to the "phpcbf-formatter" extension will be documented in th
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.1.6] - 2019-01-08
+
+### Changed
+- - Allow path settings to resolve relatively
+
 ## [0.1.5] - 2018-12-27
 
 ### Fixed
