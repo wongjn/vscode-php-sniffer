@@ -44,7 +44,12 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
       '-',
     ];
 
-    const spawnOptions = { shell: process.platform === 'win32' };
+    const spawnOptions = {
+      cwd: workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
+        ? workspace.workspaceFolders[0].uri.fsPath
+        : undefined,
+      shell: process.platform === 'win32',
+    };
     const command = spawn(`${execFolder}phpcbf`, args, spawnOptions);
     
     try {

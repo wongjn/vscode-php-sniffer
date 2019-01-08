@@ -45,13 +45,13 @@
                     "scope": "resource",
                     "type": "string",
                     "default": "",
-                    "markdownDescription": "Use this to specify a different executable if it is not in your global `PATH`, such as when using `PHP_Codesniffer` as a project-scoped dependency. Include a trailing slash"
+                    "markdownDescription": "Use this to specify a different executable if it is not in your global `PATH`, such as when using `PHP_Codesniffer` as a project-scoped dependency. Include a trailing slash. Can be absolute or relative to the first folder in the workspace."
                 },
                 "phpSniffer.standard": {
                     "scope": "resource",
                     "type": "string",
                     "default": "",
-                    "markdownDescription": "The standards to check against. This is passed to the `phpcbf` and `phpcs` executables as the value for `--standard`."
+                    "markdownDescription": "The standards to check against. This is passed to the `phpcbf` and `phpcs` executables as the value for `--standard`. Can be absolute or relative to the first folder in the workspace."
                 },
                 "phpSniffer.snippetExcludeSniffs": {
                     "scope": "resource",

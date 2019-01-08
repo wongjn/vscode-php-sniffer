@@ -66,6 +66,7 @@ export class Validator {
     workspace.onDidChangeConfiguration(this.onConfigChange, this, subscriptions);
     workspace.onDidOpenTextDocument(this.validate, this, subscriptions);
     workspace.onDidCloseTextDocument(this.clearDocumentDiagnostics, this, subscriptions);
+    workspace.onDidChangeWorkspaceFolders(this.refresh, this, subscriptions);
     
     this.refresh();
     this.setValidatorListener();
@@ -159,7 +160,12 @@ export class Validator {
       '-'
     ];
 
-    const spawnOptions = { timeout: 2000 };
+    const spawnOptions = {
+      cwd: workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
+        ? workspace.workspaceFolders[0].uri.fsPath
+        : undefined,
+      timeout: 2000
+    };
     const executable = `phpcs${process.platform === 'win32' ? '.bat' : ''}`;
     const command = childProcess.exec(`${execFolder}${executable} ${args.join(' ')}`, spawnOptions);
 
