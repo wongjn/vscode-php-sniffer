@@ -13,36 +13,9 @@ import {
   window,
   workspace,
 } from 'vscode';
-import childProcess = require('child_process');
-import { join } from 'path';
+import { exec } from 'child_process';
 import { PHPCSReport, PHPCSMessageType } from './phpcs-report';
 import { debounce } from 'lodash';
-
-/**
- * Kill process tree function from VSCode Go.
- * 
- * @param execProcess
- *   The process to kill.
- */
-function killTree(execProcess: childProcess.ChildProcess): void {
-  if (process.platform === 'win32') {
-    const TASK_KILL = 'C:\\Windows\\System32\\taskkill.exe';
-
-    // when killing a process in Windows its child processes are *not* killed
-    // but become root processes. Therefore we use TASKKILL.EXE
-    try {
-      childProcess.execSync(`${TASK_KILL} /F /T /PID ${execProcess.pid}`);
-    } catch (err) {
-    }
-  } else {
-    // on linux and OS X we kill all direct and indirect child processes as well
-    try {
-      const cmd = join(__dirname, '../scripts/terminateProcess.sh');
-      childProcess.spawnSync(cmd, [execProcess.pid.toString()]);
-    } catch (err) {
-    }
-  }
-}
 
 const enum runConfig {
   save = 'onSave',
@@ -167,9 +140,9 @@ export class Validator {
       timeout: 2000
     };
     const executable = `phpcs${process.platform === 'win32' ? '.bat' : ''}`;
-    const command = childProcess.exec(`${execFolder}${executable} ${args.join(' ')}`, spawnOptions);
+    const command = exec(`${execFolder}${executable} ${args.join(' ')}`, spawnOptions);
 
-    token.onCancellationRequested(() => killTree(command));
+    token.onCancellationRequested(() => !command.killed && command.kill('SIGINT'));
 
     let stdout = '';
     let stderr = '';
