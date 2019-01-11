@@ -157,13 +157,13 @@ export class Validator {
     command.on('exit', () => command.stdin.destroy());
 
     const done = new Promise((resolve, reject) => {
-      command.on('close', code => {
+      command.on('close', () => {
         if (token.isCancellationRequested) {
-          console.warn('Validation cancelled.');
+          console.warn('PHPCS: Validation cancelled.');
           resolve();
         }
         else if (!stdout) {
-          console.log('No phpcs response.');
+          console.log('PHPCS: No response.');
           resolve();
         }
         else {
@@ -185,10 +185,13 @@ export class Validator {
             });
             resolve();
           } catch(error) {
-            console.error(stdout);
-            console.error(stderr);
-            console.error(error.toString());
-            reject();
+            let message = '';
+            if (stdout) message += `${stdout}\n`;
+            if (stderr) message += `${stderr}\n`;
+            message += error.toString();
+
+            console.error(`PHPCS: ${message}`);
+            reject(message);
           }
 
           this.diagnosticCollection.set(document.uri, diagnostics);

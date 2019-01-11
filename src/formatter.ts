@@ -67,7 +67,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
       return new Promise<TextEdit[]>((resolve, reject) => {
         command.on('close', code => {
           if (token.isCancellationRequested || code !== 1) {
-            const message = code !== 1 ? stdout : 'Formatting cancelled.';
+            const message = `PHPCBF: ${code !== 1 ? stdout : 'Formatting cancelled.'}`;
             console.warn(message);
             return reject(message);
           }
