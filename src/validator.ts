@@ -131,8 +131,12 @@ export class Validator {
       '--report=json',
       `--standard="${standard}"`,
       '-q',
-      '-'
     ];
+
+    if (document.uri.scheme === 'file') {
+      args.push(`--stdin-path="${document.uri.fsPath}"`);
+    }
+    args.push('-');
 
     const spawnOptions = {
       cwd: workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
@@ -171,19 +175,21 @@ export class Validator {
           const diagnostics: Diagnostic[] = [];
 
           try {
-            const { files: { STDIN: report } }: PHPCSReport = JSON.parse(stdout);
-            report.messages.forEach(({ message, line, column, type, source }) => {
-              const zeroLine = line - 1;
-              const ZeroColumn = column - 1;
+            const { files }: PHPCSReport = JSON.parse(stdout);
+            for (const file in files) {
+              files[file].messages.forEach(({ message, line, column, type, source }) => {
+                const zeroLine = line - 1;
+                const ZeroColumn = column - 1;
 
-              diagnostics.push(
-                new Diagnostic(
-                  new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
-                  `[${source}]\n${message}`,
-                  type === PHPCSMessageType.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
-                ),
-              );
-            });
+                diagnostics.push(
+                  new Diagnostic(
+                    new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
+                    `[${source}]\n${message}`,
+                    type === PHPCSMessageType.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
+                  ),
+                );
+              });
+            }
             resolve();
           } catch(error) {
             let message = '';
