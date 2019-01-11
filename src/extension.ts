@@ -9,6 +9,6 @@ export function activate(context: ExtensionContext) {
       new Formatter(),
     )
   );
-  
+
   context.subscriptions.push(new Validator(context.subscriptions));
 }

@@ -40,7 +40,7 @@ export class Validator {
     workspace.onDidOpenTextDocument(this.validate, this, subscriptions);
     workspace.onDidCloseTextDocument(this.clearDocumentDiagnostics, this, subscriptions);
     workspace.onDidChangeWorkspaceFolders(this.refresh, this, subscriptions);
-    
+
     this.refresh();
     this.setValidatorListener();
   }
@@ -55,14 +55,14 @@ export class Validator {
 
   /**
    * Reacts on configuration change.
-   * 
+   *
    * @param event - The configuration change event.
    */
   protected onConfigChange(event: ConfigurationChangeEvent): void {
     if (!event.affectsConfiguration('phpSniffer')) {
       return;
     }
-    
+
     if (event.affectsConfiguration('phpSniffer.run') || event.affectsConfiguration('phpSniffer.onTypeDelay')) {
       this.setValidatorListener();
     }
@@ -105,7 +105,7 @@ export class Validator {
 
   /**
    * Lints a document.
-   * 
+   *
    * @param document - The document to lint.
    */
   protected validate(document: TextDocument): void {
@@ -168,7 +168,7 @@ export class Validator {
         }
         else {
           const diagnostics: Diagnostic[] = [];
-           
+
           try {
             const { files: { STDIN: report } }: PHPCSReport = JSON.parse(stdout);
             report.messages.forEach(({ message, line, column, type, source }) => {
@@ -207,7 +207,7 @@ export class Validator {
 
   /**
    * Clears diagnostics from a document.
-   * 
+   *
    * @param document - The document to clear diagnostics of.
    */
   protected clearDocumentDiagnostics({ uri }: TextDocument): void {

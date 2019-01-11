@@ -51,7 +51,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
       shell: process.platform === 'win32',
     };
     const command = spawn(`${execFolder}phpcbf`, args, spawnOptions);
-    
+
     try {
       let stdout = '';
 
@@ -88,13 +88,13 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
   /**
    * Prepares text for `phpcbf` to run on.
-   * 
+   *
    * @param document      - The document the formatting is running on.
    * @param range         - The range that formatting should be acting upon.
    * @param formatOptions - The options that the document is formatted by.
    * @returns A state object that includes the text. The postProcessor member
    *   should be run on the formatted text to reverse changes made here.
-   * 
+   *
    * @todo PHP tag and indentation processes here could be extracted to a common
    *   (functional?) interface of some sort, i.e. a micro-plugin system.
    */
@@ -136,7 +136,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
   /**
    * Gets indentation information for a document.
-   * 
+   *
    * @param lines  - The text as an array of strings per line.
    * @param param1 - Indentation options for the document.
    */
@@ -161,7 +161,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
       count = Math.min(lineIndent.match(unitCounter)!.length, count);
     }
-    
+
     // No indentation found.
     if (count === 0) {
       return null;
@@ -175,7 +175,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
   /**
    * Tests whether a range is for the full document.
-   * 
+   *
    * @param range    - The range to test.
    * @param document - The document to test with.
    * @returns `true` if the given `range` is the full `document`.
