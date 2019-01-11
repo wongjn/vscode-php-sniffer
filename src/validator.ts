@@ -162,6 +162,10 @@ export class Validator {
           console.warn('Validation cancelled.');
           resolve();
         }
+        else if (!stdout) {
+          console.log('No phpcs response.');
+          resolve();
+        }
         else {
           const diagnostics: Diagnostic[] = [];
            
