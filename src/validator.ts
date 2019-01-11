@@ -130,6 +130,7 @@ export class Validator {
     const args = [
       '--report=json',
       `--standard="${standard}"`,
+      '-q',
       '-'
     ];
 
