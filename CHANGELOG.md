@@ -3,7 +3,21 @@ All notable changes to the "phpcbf-formatter" extension will be documented in th
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.1.6] - 2019-01-08
+## [1.1.0] - 2019-01-12
+
+### Added
+- Add editorconfig
+- Add identifying prefix for console logs
+
+### Changed
+- Catch blank stdout
+- Respect file-path configs
+
+### Fixed
+- Ensure output PHPCS args do not disrupt reporting
+- Revert "Another attempt to fix memory leak with PHP CLI"
+
+## [1.0.0] - 2019-01-08
 
 ### Changed
 - - Allow path settings to resolve relatively
