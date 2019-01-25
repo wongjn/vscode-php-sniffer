@@ -12,5 +12,5 @@ insert_final_newline = true
 [package{-lock,}.json]
 indent_size = 4
 
-[.vscode/*.json]
+[**/.vscode/*.json]
 indent_size = 4
