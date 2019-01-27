@@ -1,6 +1,16 @@
 import * as assert from 'assert';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { exec } from 'child_process';
+
+function execPromise(command: string): Thenable<string> {
+  return new Promise((resolve, reject) => {
+    exec(command, (err, stdout) => {
+      if (err) reject(err);
+      resolve(stdout);
+    });
+  });
+}
 
 suite('PHP Sniffer Tests', function () {
   const projectFolder = path.join(__dirname, 'project');
@@ -13,5 +23,41 @@ suite('PHP Sniffer Tests', function () {
 
   suiteTeardown(function () {
     return fs.emptyDir(projectFolder);
+  });
+
+  suite('Global executable usage', function () {
+    let userSetDefault = '';
+
+    suiteSetup(async function () {
+      try {
+        // Check phpcs is globally installed.
+        const finder = process.platform === 'win32' ? 'where' : 'which';
+        await new Promise((resolve, reject) => {
+          exec(`${finder} phpcs`).on('close', code => code === 0 ? resolve() : reject());
+        });
+      }
+      catch (e) {
+        this.skip();
+      }
+
+      // Save user-set default_standard config option if there was any so that
+      // it can be reverted back to later.
+      const phpcsConfig = await execPromise('phpcs --config-show');
+      const matches = phpcsConfig.match(/default_standard: (.+)/);
+      if (matches) {
+        userSetDefault = matches[1];
+      }
+
+      // Set standard to Generic for consistent baseline.
+      return execPromise('phpcs --config-set default_standard Generic');
+    });
+
+    suiteTeardown(function () {
+      // Restore previous default_standard setting.
+      const cmd = userSetDefault.length > 0
+        ? `--config-set default_standard ${userSetDefault}`
+        : '--config-delete default_standard';
+      return execPromise(`phpcs ${cmd}`);
+    });
   });
 });
