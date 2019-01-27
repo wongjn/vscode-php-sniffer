@@ -72,7 +72,7 @@ suite('PHP Sniffer Tests', function () {
     test('Validation errors are reported', async function () {
       // Give diagnostics a chance to run.
       await waitPromise(500);
-      assert.strictEqual(languages.getDiagnostics(document.uri).length, 1);
+      assert.strictEqual(languages.getDiagnostics(document.uri).length, 2);
     });
 
     test('Fixable validation errors are fixed via formatting', async function () {
@@ -83,7 +83,7 @@ suite('PHP Sniffer Tests', function () {
 
       // Format (should remove new line at end of the file).
       await commands.executeCommand('editor.action.formatDocument');
-      assert.strictEqual(document.getText(), `<?php $error = 'a'; ?>`);
+      assert.strictEqual(document.getText(), `<?php $error = 1'a'; ?>`);
     });
   });
 });

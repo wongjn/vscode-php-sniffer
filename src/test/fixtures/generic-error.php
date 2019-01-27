@@ -1,1 +1,1 @@
-<?php $error = 'a'; ?>
+<?php $error = 1'a'; ?>
