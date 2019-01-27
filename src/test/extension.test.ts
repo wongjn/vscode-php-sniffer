@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { exec } from 'child_process';
-import { languages, workspace } from 'vscode';
+import { commands, languages, TextDocument, window, workspace } from 'vscode';
 
 function execPromise(command: string): Thenable<string> {
   return new Promise((resolve, reject) => {
@@ -33,6 +33,8 @@ suite('PHP Sniffer Tests', function () {
   });
 
   suite('Global executable usage', function () {
+    const fixtureDocumentPath = path.join(projectFolder, 'generic-error.php');
+    let document: TextDocument;
     let userSetDefault = '';
 
     suiteSetup(async function () {
@@ -55,8 +57,8 @@ suite('PHP Sniffer Tests', function () {
         userSetDefault = matches[1];
       }
 
-      // Set standard to Generic for consistent baseline.
-      return execPromise('phpcs --config-set default_standard Generic');
+      await execPromise('phpcs --config-set default_standard Generic');
+      document = await workspace.openTextDocument(fixtureDocumentPath);
     });
 
     suiteTeardown(function () {
@@ -68,11 +70,20 @@ suite('PHP Sniffer Tests', function () {
     });
 
     test('Validation errors are reported', async function () {
-      const fixturePath = path.join(projectFolder, 'generic-error.php');
-      const document = await workspace.openTextDocument(fixturePath);
+      // Give diagnostics a chance to run.
       await waitPromise(500);
-
       assert.strictEqual(languages.getDiagnostics(document.uri).length, 1);
+    });
+
+    test('Fixable validation errors are fixed via formatting', async function () {
+      this.timeout(5000);
+
+      // Visually open the document so commands can be run on it.
+      await window.showTextDocument(document);
+
+      // Format (should remove new line at end of the file).
+      await commands.executeCommand('editor.action.formatDocument');
+      assert.strictEqual(document.getText(), `<?php $error = 'a'; ?>`);
     });
   });
 });
