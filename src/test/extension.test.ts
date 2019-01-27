@@ -68,11 +68,11 @@ suite('PHP Sniffer Tests', function () {
     });
 
     test('Validation errors are reported', async function () {
-      const fixturePath = path.join(projectFolder, 'syntax-error.php');
+      const fixturePath = path.join(projectFolder, 'generic-error.php');
       const document = await workspace.openTextDocument(fixturePath);
       await waitPromise(500);
 
-      assert.ok(languages.getDiagnostics(document.uri).length > 0);
+      assert.strictEqual(languages.getDiagnostics(document.uri).length, 1);
     });
   });
 });
