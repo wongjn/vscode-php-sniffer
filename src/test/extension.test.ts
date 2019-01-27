@@ -2,6 +2,7 @@ import * as assert from 'assert';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { exec } from 'child_process';
+import { languages, workspace } from 'vscode';
 
 function execPromise(command: string): Thenable<string> {
   return new Promise((resolve, reject) => {
@@ -9,6 +10,12 @@ function execPromise(command: string): Thenable<string> {
       if (err) reject(err);
       resolve(stdout);
     });
+  });
+}
+
+function waitPromise(wait: number): Thenable<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, wait);
   });
 }
 
@@ -58,6 +65,14 @@ suite('PHP Sniffer Tests', function () {
         ? `--config-set default_standard ${userSetDefault}`
         : '--config-delete default_standard';
       return execPromise(`phpcs ${cmd}`);
+    });
+
+    test('Validation errors are reported', async function () {
+      const fixturePath = path.join(projectFolder, 'syntax-error.php');
+      const document = await workspace.openTextDocument(fixturePath);
+      await waitPromise(500);
+
+      assert.ok(languages.getDiagnostics(document.uri).length > 0);
     });
   });
 });
