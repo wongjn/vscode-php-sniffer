@@ -13,13 +13,48 @@ import {
   window,
   workspace,
 } from 'vscode';
-import { exec } from 'child_process';
+import { exec, ChildProcess, spawn } from 'child_process';
 import { PHPCSReport, PHPCSMessageType } from './phpcs-report';
 import { debounce } from 'lodash';
 
 const enum runConfig {
   save = 'onSave',
   type = 'onType',
+}
+
+/**
+ * Kills PHP CLIs.
+ *
+ * This is needed for Windows since ChildProcess.kill() only kills the spawner
+ * cmd.exe, even with `taskkill /T /F /pid ${pid}` where /T is supposed to kill
+ * trees from the spawner but it seems the php process is launched in a
+ * disconnected way.
+ *
+ * @param command
+ *   The process to kill.
+ */
+function phpCliKill(command: ChildProcess, processName: string) {
+  if (process.platform === 'win32' && workspace.getConfiguration('phpSniffer').get('windowsHardkill')) {
+    // Whole code block below could be more succinctly done with:
+    // `taskkill /v /fi "cputime gt 00:00:02" /fi "cputime lt 00:00:10" /fi "sessionname eq Console" /im ${processName}`
+    // but `cputime gt` filter does not seem to work in this case.
+    exec(
+      `tasklist /v /fi "cputime ge 00:00:02" /fi "cputime lt 00:00:10" /fi "imagename eq ${processName}" /fi "sessionname eq Console" /fo csv`,
+      (err, stdout) => {
+        if (err) window.showErrorMessage('PHPCS: Error trying to kill PHP CLI, you may need to kill the process yourself.');
+        if (stdout.includes('","')) {
+          const pids = stdout.split('\n').slice(1).map(row => {
+            const [, pid] = row.substr(1, row.length - 2).split('","');
+            return pid;
+          });
+
+          exec(`taskkill /F ${pids.map(pid => `/pid ${pid}`).join(' ')}`);
+        }
+      },
+    );
+  }
+
+  command.kill();
 }
 
 export class Validator {
@@ -126,6 +161,7 @@ export class Validator {
     const config = workspace.getConfiguration('phpSniffer', document.uri);
     const execFolder: string = config.get('executablesFolder', '');
     const standard: string = config.get('standard', '');
+    const windowsKillTarget: string = config.get('windowsPhpCli', 'php.exe');
 
     const args = [
       '--report=json',
@@ -142,12 +178,11 @@ export class Validator {
       cwd: workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
         ? workspace.workspaceFolders[0].uri.fsPath
         : undefined,
-      timeout: 2000
+      shell: process.platform === 'win32',
     };
-    const executable = `phpcs${process.platform === 'win32' ? '.bat' : ''}`;
-    const command = exec(`${execFolder}${executable} ${args.join(' ')}`, spawnOptions);
+    const command = spawn(`${execFolder} phpcs`, args, spawnOptions);
 
-    token.onCancellationRequested(() => !command.killed && command.kill('SIGINT'));
+    token.onCancellationRequested(() => !command.killed && phpCliKill(command, windowsKillTarget));
 
     let stdout = '';
     let stderr = '';
@@ -158,8 +193,6 @@ export class Validator {
     command.stdout.setEncoding('utf8');
     command.stdout.on('data', data => stdout += data);
     command.stderr.on('data', data => stderr += data);
-
-    command.on('exit', () => command.stdin.destroy());
 
     const done = new Promise((resolve, reject) => {
       command.on('close', () => {
@@ -208,6 +241,10 @@ export class Validator {
         this.runnerCancellations.delete(document.uri);
       });
     });
+
+    setTimeout(() => {
+      !command.killed && phpCliKill(command, windowsKillTarget);
+    }, 3000);
 
     window.setStatusBarMessage('PHP Sniffer: validating…', done);
   }

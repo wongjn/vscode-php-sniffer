@@ -58,6 +58,18 @@
                     "type": "array",
                     "default": [],
                     "markdownDescription": "Sniffs to exclude when formatting a code snippet (such as when _formatting on paste_ or on the command `format on selection`). This is passed to the `phpcbf` command as the value for `--exclude` when **not** formatting a whole file."
+                },
+                "phpSniffer.windowsHardkill": {
+                    "scope": "application",
+                    "type": "boolean",
+                    "default": false,
+                    "markdownDescription": "**Windows only.** Enables a tough `php` process killing for Windows machines. See the extension readme for why this may be required."
+                },
+                "phpSniffer.windowsPhpCli": {
+                    "scope": "resource",
+                    "type": "string",
+                    "default": "php.exe",
+                    "markdownDescription": "**Windows only.** Requires `phpSniffer.windowsHardkill` to be `true`. The name of the `php` executable that `phpcs`/`phpcbf` runs with so that this extension can hard-kill it. See the extension readme for why this may be required."
                 }
             }
         }
