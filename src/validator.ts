@@ -196,12 +196,7 @@ export class Validator {
 
     const done = new Promise((resolve, reject) => {
       command.on('close', () => {
-        if (token.isCancellationRequested) {
-          console.warn('PHPCS: Validation cancelled.');
-          resolve();
-        }
-        else if (!stdout) {
-          console.log('PHPCS: No response.');
+        if (token.isCancellationRequested || !stdout) {
           resolve();
         }
         else {
@@ -224,7 +219,7 @@ export class Validator {
               });
             }
             resolve();
-          } catch(error) {
+          } catch (error) {
             let message = '';
             if (stdout) message += `${stdout}\n`;
             if (stderr) message += `${stderr}\n`;
