@@ -1,7 +1,13 @@
 # Change Log
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## [Unreleased]
+
+### Fixed
+- Fix double-quoting in cli execution in Linux
+
+### Removed
+- Remove session filter on windows process search
 
 ## [1.1.2] - 2019-01-29
 
