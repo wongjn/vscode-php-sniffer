@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
-## [Unreleased]
+## [1.1.3] - 2019-01-29
 
 ### Fixed
 - Fix double-quoting in cli execution in Linux
