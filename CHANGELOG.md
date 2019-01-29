@@ -3,6 +3,14 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 
 ## [Unreleased]
 
+## [1.1.4] - 2019-01-29
+### Changed
+- Update CHANGELOG.md
+
+### Fixed
+- Ensure blank arguments are not passed
+- Standardize quotes through to CLI execution
+
 ## [1.1.3] - 2019-01-29
 ### Fixed
 - Fix double-quoting in cli execution in Linux
@@ -62,7 +70,8 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 ## [0.1.0] - 2018-11-26
 - Initial release
 
-[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.3...HEAD
+[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.4...HEAD
+[1.1.4]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.0...v1.1.1
