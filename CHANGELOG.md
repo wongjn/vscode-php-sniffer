@@ -3,6 +3,14 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [Unreleased]
+
+### Added
+- Add LICENSE
+
+### Changed
+- Improve PHP CLI process killing on Windows
+
 ## [1.1.0] - 2019-01-12
 
 ### Added
