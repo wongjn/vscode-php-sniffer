@@ -30,6 +30,7 @@ export class CliArguments {
    */
   public getAll(quote: boolean = false): string[] {
     return Array.from(this.args.entries())
+      .filter(([, value]) => value !== '')
       .map(([key, value]) => {
         let printValue = quote && value.includes(' ') ? `"${value}"` : value;
         return `--${key}=${printValue}`;
