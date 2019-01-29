@@ -3,7 +3,7 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased]
+## [1.1.2] - 2019-01-29
 
 ### Fixed
 - Fix validator command regression
