@@ -180,7 +180,7 @@ export class Validator {
         : undefined,
       shell: process.platform === 'win32',
     };
-    const command = spawn(`${execFolder} phpcs`, args, spawnOptions);
+    const command = spawn(`${execFolder}phpcs`, args, spawnOptions);
 
     token.onCancellationRequested(() => !command.killed && phpCliKill(command, windowsKillTarget));
 
