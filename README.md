@@ -53,5 +53,5 @@ process in the extension code and cannot kill `php.exe` directly.
 
 This extension thus searches for the process by name in
 `phpSniffer.windowsPhpCli` to kill it. Since just matching by this name could
-kill other non-related processes, the extension limits by `Session Name` of
-`Console` and `CPU TIME` of between 2s and 10s.
+kill other non-related processes, the extension limits by `CPU TIME` of between
+2s and 10s.

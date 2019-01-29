@@ -36,10 +36,10 @@ const enum runConfig {
 function phpCliKill(command: ChildProcess, processName: string) {
   if (process.platform === 'win32' && workspace.getConfiguration('phpSniffer').get('windowsHardkill')) {
     // Whole code block below could be more succinctly done with:
-    // `taskkill /v /fi "cputime gt 00:00:02" /fi "cputime lt 00:00:10" /fi "sessionname eq Console" /im ${processName}`
+    // `taskkill /v /fi "cputime gt 00:00:02" /fi "cputime lt 00:00:10" /im ${processName}`
     // but `cputime gt` filter does not seem to work in this case.
     exec(
-      `tasklist /v /fi "cputime ge 00:00:02" /fi "cputime lt 00:00:10" /fi "imagename eq ${processName}" /fi "sessionname eq Console" /fo csv`,
+      `tasklist /v /fi "cputime ge 00:00:02" /fi "cputime lt 00:00:10" /fi "imagename eq ${processName}" /fo csv`,
       (err, stdout) => {
         if (err) window.showErrorMessage('PHPCS: Error trying to kill PHP CLI, you may need to kill the process yourself.');
         if (stdout.includes('","')) {
