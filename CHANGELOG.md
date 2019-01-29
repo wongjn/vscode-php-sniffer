@@ -1,8 +1,9 @@
 # Change Log
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
-## [1.1.3] - 2019-01-29
+## [Unreleased]
 
+## [1.1.3] - 2019-01-29
 ### Fixed
 - Fix double-quoting in cli execution in Linux
 
@@ -10,12 +11,10 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 - Remove session filter on windows process search
 
 ## [1.1.2] - 2019-01-29
-
 ### Fixed
 - Fix validator command regression
 
 ## [1.1.1] - 2019-01-29
-
 ### Added
 - Add LICENSE
 
@@ -23,7 +22,6 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 - Improve PHP CLI process killing on Windows
 
 ## [1.1.0] - 2019-01-12
-
 ### Added
 - Add editorconfig
 - Add identifying prefix for console logs
@@ -37,35 +35,42 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 - Revert "Another attempt to fix memory leak with PHP CLI"
 
 ## [1.0.0] - 2019-01-08
-
 ### Changed
 - - Allow path settings to resolve relatively
 
 ## [0.1.5] - 2018-12-27
-
 ### Fixed
 - Another attempt to fix memory leak with PHP CLI
 
 ## [0.1.4] - 2018-12-17
-
 ### Changed
 - Log stderr
 - Switch to exec function to add timeout
 
 ## [0.1.3] - 2018-12-13
-
 ### Fixed
 - Attempt to kill process on error
 
 ## [0.1.2] - 2018-11-28
-
 ### Fixed
 - Attempt to alleviate PHP process memory leak
 
 ## [0.1.1] - 2018-11-27
-
 ### Security
 - Patch Event-Stream package vulnerability
 
 ## [0.1.0] - 2018-11-26
 - Initial release
+
+[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.3...HEAD
+[1.1.3]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.2...v1.1.3
+[1.1.2]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.1...v1.1.2
+[1.1.1]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.0...v1.1.1
+[1.1.0]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/wongjn/vscode-php-sniffer/compare/v0.1.5...v1.0.0
+[0.1.5]: https://github.com/wongjn/vscode-php-sniffer/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/wongjn/vscode-php-sniffer/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/wongjn/vscode-php-sniffer/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/wongjn/vscode-php-sniffer/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/wongjn/vscode-php-sniffer/compare/0.1.0...v0.1.1
+[0.1.0]: https://github.com/wongjn/vscode-php-sniffer/tree/0.1.0
