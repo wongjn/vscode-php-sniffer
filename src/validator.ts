@@ -14,8 +14,9 @@ import {
   workspace,
 } from 'vscode';
 import { exec, ChildProcess, spawn } from 'child_process';
-import { PHPCSReport, PHPCSMessageType } from './phpcs-report';
 import { debounce } from 'lodash';
+import { PHPCSReport, PHPCSMessageType } from './phpcs-report';
+import { CliArguments } from './cli-arguments';
 
 const enum runConfig {
   save = 'onSave',
@@ -163,16 +164,13 @@ export class Validator {
     const standard: string = config.get('standard', '');
     const windowsKillTarget: string = config.get('windowsPhpCli', 'php.exe');
 
-    const args = [
-      '--report=json',
-      `--standard=${standard}`,
-      '-q',
-    ];
+    const args = new CliArguments();
+    args.set('report', 'json');
+    args.set('standard', standard);
 
     if (document.uri.scheme === 'file') {
-      args.push(`--stdin-path="${document.uri.fsPath}"`);
+      args.set('stdin-path', document.uri.fsPath);
     }
-    args.push('-');
 
     const spawnOptions = {
       cwd: workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
@@ -180,7 +178,12 @@ export class Validator {
         : undefined,
       shell: process.platform === 'win32',
     };
-    const command = spawn(`${execFolder}phpcs`, args, spawnOptions);
+
+    const command = spawn(
+      `${execFolder}phpcs`,
+      [...args.getAll(spawnOptions.shell), '-q', '-'],
+      spawnOptions,
+    );
 
     token.onCancellationRequested(() => !command.killed && phpCliKill(command, windowsKillTarget));
 

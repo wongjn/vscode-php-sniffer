@@ -10,6 +10,7 @@ import {
   workspace,
 } from 'vscode';
 import { spawn } from 'child_process';
+import { CliArguments } from './cli-arguments';
 
 interface TextProcessState {
   text: string;
@@ -38,11 +39,12 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
     const excludes: Array<string> = config.get('snippetExcludeSniffs', []);
     const isFullDocument = Formatter.isFullDocumentRange(range, document);
 
-    const args = [
-      `--standard=${standard}`,
-      excludes.length && !isFullDocument ? `--exclude="${excludes.join(',')}"` : '',
-      '-',
-    ];
+    const args = new CliArguments();
+    args.set('standard', standard);
+
+    if (excludes.length && !isFullDocument) {
+      args.set('exclude', excludes.join(','));
+    }
 
     const spawnOptions = {
       cwd: workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
@@ -50,7 +52,12 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
         : undefined,
       shell: process.platform === 'win32',
     };
-    const command = spawn(`${execFolder}phpcbf`, args, spawnOptions);
+
+    const command = spawn(
+      `${execFolder}phpcbf`,
+      [...args.getAll(spawnOptions.shell), '-'],
+      spawnOptions,
+    );
 
     try {
       let stdout = '';
