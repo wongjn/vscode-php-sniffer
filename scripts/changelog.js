@@ -1,20 +1,14 @@
 /**
  * @file
  * Modifies CHANGELOG.md during npm-version command.
+ *
+ * @todo Rewrite for updated CHANGELOG format.
  */
+const readline = require('readline');
 
-const { readFileSync, writeFileSync } = require('fs');
-const { join } = require('path');
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
-const changelog = join(__dirname, '..', 'CHANGELOG.md');
-const content = readFileSync(changelog, { encoding: 'utf8' });
-
-const date = new Date();
-const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-const day = (date.getUTCDate()).toString().padStart(2, '0');
-const dateString = `${date.getUTCFullYear()}-${month}-${day}`;
-
-const replace = `## [${process.env.npm_package_version}] - ${dateString}`;
-
-const updated = content.replace(/^## \[Unreleased\]$/m, replace);
-writeFileSync(changelog, updated);
+rl.question('Update changelog', () => rl.close());
