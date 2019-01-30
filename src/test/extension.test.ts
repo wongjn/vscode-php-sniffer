@@ -33,8 +33,8 @@ suite('PHP Sniffer Tests', function () {
   });
 
   suite('Global executable usage', function () {
-    const fixtureDocumentPath = path.join(projectFolder, 'generic-error.php');
-    let document: TextDocument;
+    const genericErrorFixturePath = path.join(projectFolder, 'generic-error.php');
+    let genericErrorDocument: TextDocument;
     let userSetDefault = '';
 
     suiteSetup(async function () {
@@ -58,7 +58,7 @@ suite('PHP Sniffer Tests', function () {
       }
 
       await execPromise('phpcs --config-set default_standard Generic');
-      document = await workspace.openTextDocument(fixtureDocumentPath);
+      genericErrorDocument = await workspace.openTextDocument(genericErrorFixturePath);
     });
 
     suiteTeardown(function () {
@@ -66,24 +66,65 @@ suite('PHP Sniffer Tests', function () {
       const cmd = userSetDefault.length > 0
         ? `--config-set default_standard ${userSetDefault}`
         : '--config-delete default_standard';
-      return execPromise(`phpcs ${cmd}`);
+      Promise.all([
+        execPromise(`phpcs ${cmd}`),
+        commands.executeCommand('workbench.action.closeAllEditors'),
+      ]);
     });
 
     test('Validation errors are reported', async function () {
       // Give diagnostics a chance to run.
-      await waitPromise(500);
-      assert.strictEqual(languages.getDiagnostics(document.uri).length, 2);
+      await waitPromise(200);
+      assert.strictEqual(languages.getDiagnostics(genericErrorDocument.uri).length, 2);
     });
 
     test('Fixable validation errors are fixed via formatting', async function () {
       this.timeout(5000);
 
       // Visually open the document so commands can be run on it.
-      await window.showTextDocument(document);
+      await window.showTextDocument(genericErrorDocument);
 
       // Format (should remove new line at end of the file).
       await commands.executeCommand('editor.action.formatDocument');
-      assert.strictEqual(document.getText(), `<?php $error = 1'a'; ?>`);
+      assert.strictEqual(genericErrorDocument.getText(), `<?php $error = 1'a'; ?>`);
+    });
+
+    suite('Global composer with local ruleset', function () {
+      const semicolonFixturePath = path.join(projectFolder, 'semicolon.php');
+      let semicolonDocument: TextDocument;
+
+      suiteSetup(async function () {
+        semicolonDocument = await workspace.openTextDocument(semicolonFixturePath);
+        return workspace
+          .getConfiguration('phpSniffer', semicolonDocument.uri)
+          .update('standard', './phpcs-semicolon.xml');
+      });
+
+      suiteTeardown(function () {
+        return Promise.all([
+          workspace
+            .getConfiguration('phpSniffer', semicolonDocument.uri)
+            .update('standard', undefined),
+          commands.executeCommand('workbench.action.closeActiveEditor'),
+        ]);
+      });
+
+      test('Validation errors are reported', async function () {
+        // Give diagnostics a chance to run.
+        await waitPromise(200);
+        assert.strictEqual(languages.getDiagnostics(semicolonDocument.uri).length, 1);
+      });
+
+      test('Fixable validation errors are fixed via formatting', async function () {
+        this.timeout(5000);
+
+        // Visually open the document so commands can be run on it.
+        await window.showTextDocument(semicolonDocument);
+
+        // Format.
+        await commands.executeCommand('editor.action.formatDocument');
+        assert.strictEqual(semicolonDocument.getText(), `<?php $a = 1;\n`);
+      });
     });
   });
 });

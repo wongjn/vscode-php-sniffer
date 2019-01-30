@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<ruleset name="Fixture 1">
+  <rule ref="Squiz.WhiteSpace.SemicolonSpacing"/>
+</ruleset>
