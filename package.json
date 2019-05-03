@@ -95,7 +95,7 @@
         "@types/node": "^8.10.25",
         "tslint": "^5.8.0",
         "typescript": "^2.6.1",
-        "vscode": "^1.1.21"
+        "vscode": "^1.1.33"
     },
     "dependencies": {
         "lodash": "^4.17.11"
