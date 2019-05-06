@@ -8,7 +8,7 @@ suite('PHP Sniffer Tests', function () {
     2,
     `<?php $error = 1'a'; ?>`,
     async function () {
-      if (!hasGlobalPHPCS()) this.skip();
+      if (!await hasGlobalPHPCS()) this.skip();
 
       // Save user-set default_standard config option if there was any so that
       // it can be reverted back to later.
@@ -33,7 +33,7 @@ suite('PHP Sniffer Tests', function () {
     1,
     `<?php $a = 1;\n`,
     async function (file) {
-      if (!hasGlobalPHPCS()) this.skip();
+      if (!await hasGlobalPHPCS()) this.skip();
 
       workspace
         .getConfiguration('phpSniffer', file)
