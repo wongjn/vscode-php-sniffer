@@ -3,21 +3,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { exec } from 'child_process';
 import { commands, languages, TextDocument, window, workspace } from 'vscode';
-
-function execPromise(command: string): Thenable<string> {
-  return new Promise((resolve, reject) => {
-    exec(command, (err, stdout) => {
-      if (err) reject(err);
-      resolve(stdout);
-    });
-  });
-}
-
-function waitPromise(wait: number): Thenable<void> {
-  return new Promise(resolve => {
-    setTimeout(resolve, wait);
-  });
-}
+import { execPromise, waitPromise } from './utils';
 
 suite('PHP Sniffer Tests', function () {
   const projectFolder = path.join(__dirname, 'project');
