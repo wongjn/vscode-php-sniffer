@@ -4,6 +4,10 @@
  */
 
 import { exec } from 'child_process';
+import * as assert from 'assert';
+import * as path from 'path';
+import { IHookCallbackContext } from 'mocha';
+import { commands, languages, window, workspace, Uri } from 'vscode';
 
 /**
  * Executes a CLI command with promised result.
@@ -34,4 +38,100 @@ export function waitPromise(wait: number): Thenable<void> {
   return new Promise(resolve => {
     setTimeout(resolve, wait);
   });
+}
+
+/**
+ * Tests whether there is a global PHPCS on the current machine.
+ *
+ * @return
+ *   True if there is a phpcs in the current path.
+ */
+export async function hasGlobalPHPCS(): Promise<boolean> {
+  try {
+    const findCommand = process.platform === 'win32' ? 'where' : 'which';
+    await execPromise(`${findCommand} phpcs`);
+    return true;
+  }
+  catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Fixture directory.
+ */
+export const FIXTURES = path.resolve(__dirname, './../../src/test/fixtures');
+
+interface hookCallback {
+  (this: IHookCallbackContext): void;
+}
+interface testCaseSetup {
+  (this: IHookCallbackContext, fileUri: Uri): Thenable<hookCallback> | void;
+}
+
+/**
+ * Test case function call.
+ *
+ * @param description
+ *   Description of the suite.
+ * @param testFile
+ *   File to open and test with.
+ * @param expectedValidationErrors
+ *   Expected number of errors that should be should in diagnostics.
+ * @param expectedFormattedResult
+ *   Expected file content after running formatting.
+ * @param testSetup
+ *   Optional function to run on suiteSetup, with an optional returned function
+ *   to run on teardown.
+ */
+export function testCase(
+  description: string,
+  testFile: string,
+  expectedValidationErrors: number,
+  expectedFormattedResult: string,
+  testSetup: testCaseSetup | null = null,
+): void {
+  suite(description, function () {
+    // Construct the test file URI object.
+    const fileUri = Uri.file(path.resolve(FIXTURES, testFile));
+    // Possible teardown callback.
+    let tearDown: hookCallback | void;
+
+    suiteSetup(async function () {
+      if (testSetup) tearDown = await testSetup.call(this, fileUri);
+    });
+
+    suiteTeardown(async function () {
+      if (tearDown) await tearDown.call(this);
+    });
+
+    test('Validation errors are reported', function (done) {
+      languages.onDidChangeDiagnostics(({ uris }) => {
+        const list = uris.map(uri => uri.toString());
+        if (list.indexOf(fileUri.toString()) === -1) return;
+
+        assert.strictEqual(
+          languages.getDiagnostics(fileUri).length,
+          expectedValidationErrors
+        );
+
+        done();
+      });
+
+      workspace.openTextDocument(fileUri);
+    });
+
+    test('Fixable validation errors are fixed via formatting', async function () {
+      this.timeout(5000);
+
+      // Visually open the document so commands can be run on it.
+      const document = await workspace.openTextDocument(fileUri);
+      await window.showTextDocument(document);
+
+      // Format (should remove new line at end of the file).
+      await commands.executeCommand('editor.action.formatDocument');
+      assert.strictEqual(document.getText(), expectedFormattedResult);
+      await commands.executeCommand('workbench.action.closeAllEditors');
+    });
+  })
 }
