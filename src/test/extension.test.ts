@@ -64,12 +64,12 @@ suite('PHP Sniffer Tests', function () {
 
     testCase(
       'Local executable with preset',
-      9,
-      `<?php class my_class\n{\n}//end class\n`,
+      5,
+      `<?php class my_class\n{\n}\n`,
       async function (file) {
         await workspace
           .getConfiguration('phpSniffer', file)
-          .update('standard', 'Squiz');
+          .update('standard', 'PSR2');
 
         return () => workspace
           .getConfiguration('phpSniffer', file)
