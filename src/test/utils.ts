@@ -106,7 +106,7 @@ export function testCase(
     });
 
     test('Validation errors are reported', function (done) {
-      languages.onDidChangeDiagnostics(({ uris }) => {
+      const subscription = languages.onDidChangeDiagnostics(({ uris }) => {
         const list = uris.map(uri => uri.toString());
         if (list.indexOf(fileUri.toString()) === -1) return;
 
@@ -115,6 +115,7 @@ export function testCase(
           expectedValidationErrors
         );
 
+        subscription.dispose();
         done();
       });
 
