@@ -3,7 +3,7 @@
  * Utilities for tests.
  */
 
-import { exec } from 'child_process';
+import { exec, ExecOptions } from 'child_process';
 import * as assert from 'assert';
 import * as path from 'path';
 import { IHookCallbackContext } from 'mocha';
@@ -17,26 +17,12 @@ import { commands, languages, window, workspace, Uri } from 'vscode';
  * @return
  *   The Promise that resolves with the stdout of the command.
  */
-export function execPromise(command: string): Thenable<string> {
+export function execPromise(command: string, options: ExecOptions = {}): Thenable<string> {
   return new Promise((resolve, reject) => {
-    exec(command, (err, stdout) => {
+    exec(command, options, (err, stdout) => {
       if (err) reject(err);
       resolve(stdout);
     });
-  });
-}
-
-/**
- * setTimeout as a promise.
- *
- * @param wait
- *   How long to wait in milliseconds.
- * @return
- *   A promise that resolves after specified wait time has passed.
- */
-export function waitPromise(wait: number): Thenable<void> {
-  return new Promise(resolve => {
-    setTimeout(resolve, wait);
   });
 }
 

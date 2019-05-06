@@ -1,5 +1,7 @@
-import { workspace } from 'vscode';
-import { execPromise, testCase, hasGlobalPHPCS } from './utils';
+import { workspace, Uri } from 'vscode';
+import { join, sep } from 'path';
+import { remove } from 'fs-extra';
+import { execPromise, testCase, hasGlobalPHPCS, FIXTURES } from './utils';
 
 suite('PHP Sniffer Tests', function () {
 
@@ -44,4 +46,53 @@ suite('PHP Sniffer Tests', function () {
         .update('standard', undefined);
     },
   );
+
+  suite('Local executable', function () {
+    suiteSetup(async function () {
+      this.timeout(0);
+
+      await execPromise('composer install --no-dev', { cwd: FIXTURES });
+      await workspace
+        .getConfiguration('phpSniffer', Uri.file(FIXTURES))
+        .update('executablesFolder', `vendor${sep}bin${sep}`);
+    });
+
+    suiteTeardown(async function () {
+      await workspace
+        .getConfiguration('phpSniffer', Uri.file(FIXTURES))
+        .update('executablesFolder', undefined);
+
+      remove(join(FIXTURES, 'vendors'));
+    });
+
+    testCase(
+      'Local executable with preset',
+      9,
+      `<?php class my_class\n{\n}//end class\n`,
+      async function (file) {
+        await workspace
+          .getConfiguration('phpSniffer', file)
+          .update('standard', 'Squiz');
+
+        return () => workspace
+          .getConfiguration('phpSniffer', file)
+          .update('standard', undefined);
+      },
+    );
+
+    testCase(
+      'Local executable with local ruleset',
+      1,
+      `<?php $b = 1;\n`,
+      async function (file) {
+        await workspace
+          .getConfiguration('phpSniffer', file)
+          .update('standard', './phpcs-semicolon.xml');
+
+        return () => workspace
+          .getConfiguration('phpSniffer', file)
+          .update('standard', undefined);
+      },
+    );
+  });
 });
