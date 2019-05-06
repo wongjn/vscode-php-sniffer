@@ -1,6 +1,5 @@
 import { workspace, Uri } from 'vscode';
-import { join, sep } from 'path';
-import { remove } from 'fs-extra';
+import { sep } from 'path';
 import { execPromise, testCase, hasGlobalPHPCS, FIXTURES } from './utils';
 
 suite('PHP Sniffer Tests', function () {
@@ -61,8 +60,6 @@ suite('PHP Sniffer Tests', function () {
       await workspace
         .getConfiguration('phpSniffer', Uri.file(FIXTURES))
         .update('executablesFolder', undefined);
-
-      remove(join(FIXTURES, 'vendors'));
     });
 
     testCase(
