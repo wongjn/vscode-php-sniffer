@@ -8,6 +8,7 @@ env:
   - CODE_TESTS_WORKSPACE=src/test/fixtures CODE_DISABLE_EXTENSIONS=true
 before_script:
   - composer global require squizlabs/php_codesniffer:^3.4
+  - export PATH=$PATH:$(composer global config bin-dir --absolute)
   - if [ $TRAVIS_OS_NAME == "linux" ]; then
       export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0;
       sh -e /etc/init.d/xvfb start;
