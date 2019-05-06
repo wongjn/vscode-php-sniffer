@@ -73,9 +73,9 @@ interface testCaseSetup {
  * Test case function call.
  *
  * @param description
- *   Description of the suite.
- * @param testFile
- *   File to open and test with.
+ *   Description of the suite. Must also match the test file, transformed to
+ *   lowercase and non-word characters replaced with dashes, e.g
+ *   `My test` → `my-test.php`.
  * @param expectedValidationErrors
  *   Expected number of errors that should be should in diagnostics.
  * @param expectedFormattedResult
@@ -86,14 +86,18 @@ interface testCaseSetup {
  */
 export function testCase(
   description: string,
-  testFile: string,
   expectedValidationErrors: number,
   expectedFormattedResult: string,
   testSetup: testCaseSetup | null = null,
 ): void {
   suite(description, function () {
     // Construct the test file URI object.
-    const fileUri = Uri.file(path.resolve(FIXTURES, testFile));
+    const fileUri = Uri.file(
+      path.join(
+        FIXTURES,
+        `${description.toLowerCase().replace(/\W/g, '-')}.php`,
+      ),
+    );
     // Possible teardown callback.
     let tearDown: hookCallback | void;
 

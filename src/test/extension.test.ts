@@ -5,7 +5,6 @@ suite('PHP Sniffer Tests', function () {
 
   testCase(
     'Global executable with preset',
-    'generic-error.php',
     2,
     `<?php $error = 1'a'; ?>`,
     async function () {
@@ -31,7 +30,6 @@ suite('PHP Sniffer Tests', function () {
 
   testCase(
     'Global executable with local ruleset',
-    'semicolon.php',
     1,
     `<?php $a = 1;\n`,
     async function (file) {
