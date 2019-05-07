@@ -86,13 +86,17 @@
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test",
+        "pretest": "npm run compile",
+        "test": "mocha \"./out/test/unit/*.test.js\" && node ./node_modules/vscode/bin/test",
         "version": "node ./scripts/changelog && git add CHANGELOG.md"
     },
     "devDependencies": {
+        "@types/fs-extra": "^5.0.4",
         "@types/lodash": "^4.14.118",
         "@types/mocha": "^2.2.42",
         "@types/node": "^8.10.25",
+        "fs-extra": "^7.0.1",
+        "mocha": "^6.1.4",
         "tslint": "^5.8.0",
         "typescript": "^2.6.1",
         "vscode": "^1.1.33"
