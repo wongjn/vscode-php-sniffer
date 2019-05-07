@@ -20,15 +20,15 @@
             "preLaunchTask": "npm: watch"
         },
         {
-            "name": "Extension Tests",
+            "name": "Extension Functional Tests",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "${workspaceFolder}/src/test/fixtures",
+                "${workspaceFolder}/src/test/functional/fixtures",
                 "--disable-extensions",
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test"
+                "--extensionTestsPath=${workspaceFolder}/out/test/functional"
             ],
             "outFiles": [
                 "${workspaceFolder}/out/test/**/*.js"

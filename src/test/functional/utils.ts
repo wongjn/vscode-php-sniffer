@@ -46,7 +46,7 @@ export async function hasGlobalPHPCS(): Promise<boolean> {
 /**
  * Fixture directory.
  */
-export const FIXTURES = path.resolve(__dirname, './../../src/test/fixtures');
+export const FIXTURES = path.resolve(__dirname, '../../../src/test/functional/fixtures');
 
 interface hookCallback {
   (this: IHookCallbackContext): void;
