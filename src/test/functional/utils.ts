@@ -34,11 +34,11 @@ export function execPromise(command: string, options: ExecOptions = {}): Thenabl
  */
 export async function hasGlobalPHPCS(): Promise<boolean> {
   try {
-    const findCommand = process.platform === 'win32' ? 'where' : 'which';
-    await execPromise(`${findCommand} phpcs`);
+    await execPromise('phpcs --version');
     return true;
   }
   catch (error) {
+    console.warn(error);
     return false;
   }
 }
