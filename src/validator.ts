@@ -92,7 +92,8 @@ export class Validator {
   /**
    * Reacts on configuration change.
    *
-   * @param event - The configuration change event.
+   * @param event
+   *   The configuration change event.
    */
   protected onConfigChange(event: ConfigurationChangeEvent): void {
     if (!event.affectsConfiguration('phpSniffer')) {
@@ -141,7 +142,8 @@ export class Validator {
   /**
    * Lints a document.
    *
-   * @param document - The document to lint.
+   * @param document
+   *   The document to lint.
    */
   protected validate(document: TextDocument): void {
     if (document.languageId !== 'php') {
@@ -250,7 +252,8 @@ export class Validator {
   /**
    * Clears diagnostics from a document.
    *
-   * @param document - The document to clear diagnostics of.
+   * @param document
+   *   The document to clear diagnostics of.
    */
   protected clearDocumentDiagnostics({ uri }: TextDocument): void {
     this.diagnosticCollection.delete(uri);

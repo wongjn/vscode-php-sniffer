@@ -98,10 +98,14 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
   /**
    * Prepares text for `phpcbf` to run on.
    *
-   * @param document      - The document the formatting is running on.
-   * @param range         - The range that formatting should be acting upon.
-   * @param formatOptions - The options that the document is formatted by.
-   * @returns A state object that includes the text. The postProcessor member
+   * @param document
+   *   The document the formatting is running on.
+   * @param range
+   *   The range that formatting should be acting upon.
+   * @param formatOptions
+   *   The options that the document is formatted by.
+   * @return
+   *   A state object that includes the text. The postProcessor member
    *   should be run on the formatted text to reverse changes made here.
    *
    * @todo PHP tag and indentation processes here could be extracted to a common
@@ -146,8 +150,10 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
   /**
    * Gets indentation information for a document.
    *
-   * @param lines  - The text as an array of strings per line.
-   * @param param1 - Indentation options for the document.
+   * @param lines
+   *   The text as an array of strings per line.
+   * @param param1
+   *   Indentation options for the document.
    */
   protected static getIndentation(lines: string[], { insertSpaces, tabSize }: FormattingOptions): Indentation | null {
     const unit = insertSpaces ? ' '.repeat(tabSize) : '\t';
@@ -185,9 +191,12 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
   /**
    * Tests whether a range is for the full document.
    *
-   * @param range    - The range to test.
-   * @param document - The document to test with.
-   * @returns `true` if the given `range` is the full `document`.
+   * @param range
+   *   The range to test.
+   * @param document
+   *   The document to test with.
+   * @return
+   *   `true` if the given `range` is the full `document`.
    */
   public static isFullDocumentRange(range: Range, document: TextDocument): boolean {
     const documentRange = new Range(
