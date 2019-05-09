@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Contains the Formatter class.
+ */
+
 import {
   DocumentRangeFormattingEditProvider,
   CancellationToken,

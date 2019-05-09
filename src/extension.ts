@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Extension entry.
+ */
+
 import { ExtensionContext, languages } from 'vscode';
 import { Formatter } from './formatter';
 import { Validator } from './validator';

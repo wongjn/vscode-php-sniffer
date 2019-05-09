@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Contains the CLI arguments helper class.
+ */
+
 /* eslint no-useless-constructor: 0, no-empty-function: 0 */
 
 /**

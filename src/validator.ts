@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Contains the validator class.
+ */
+
 import {
   CancellationTokenSource,
   ConfigurationChangeEvent,

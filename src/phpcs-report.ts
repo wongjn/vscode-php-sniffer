@@ -1,4 +1,9 @@
 /**
+ * @file
+ * Shape description for PHPCS JSON report.
+ */
+
+/**
  * Types of PHPCS feedback messages.
  */
 export const enum PHPCSMessageType {
