@@ -153,23 +153,23 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
     const unit = insertSpaces ? ' '.repeat(tabSize) : '\t';
     const indentMatcher = new RegExp(`^((?:${unit})*).+`);
     const unitCounter = new RegExp(unit, 'g');
-    let count = Number.MAX_SAFE_INTEGER;
 
-    for (const line of lines) {
+    const count = lines.reduce((tally, line) => {
+      if (tally === 0) return tally;
+
       const match = indentMatcher.exec(line);
       if (!(match instanceof Array)) {
-        continue;
+        return tally;
       }
       const [, lineIndent] = match;
 
       // Minimum reached, do nothing more.
       if (lineIndent === '') {
-        count = 0;
-        break;
+        return 0;
       }
 
-      count = Math.min(lineIndent.match(unitCounter)!.length, count);
-    }
+      return Math.min(lineIndent.match(unitCounter)!.length, tally);
+    }, Number.MAX_SAFE_INTEGER);
 
     // No indentation found.
     if (count === 0) {
