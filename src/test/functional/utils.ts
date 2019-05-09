@@ -7,7 +7,9 @@ import { exec, ExecOptions } from 'child_process';
 import * as assert from 'assert';
 import * as path from 'path';
 import { IHookCallbackContext } from 'mocha';
-import { commands, languages, window, workspace, Uri } from 'vscode';
+import {
+  commands, languages, window, workspace, Uri,
+} from 'vscode';
 
 /**
  * Executes a CLI command with promised result.
@@ -36,8 +38,7 @@ export async function hasGlobalPHPCS(): Promise<boolean> {
   try {
     await execPromise('phpcs --version');
     return true;
-  }
-  catch (error) {
+  } catch (error) {
     console.warn(error);
     return false;
   }
@@ -102,7 +103,7 @@ export function testCase(
 
         assert.strictEqual(
           languages.getDiagnostics(fileUri).length,
-          expectedValidationErrors
+          expectedValidationErrors,
         );
 
         subscription.dispose();
@@ -124,5 +125,5 @@ export function testCase(
       assert.strictEqual(document.getText(), expectedFormattedResult);
       await commands.executeCommand('workbench.action.closeAllEditors');
     });
-  })
+  });
 }

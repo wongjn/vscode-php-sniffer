@@ -7,7 +7,7 @@ export function activate(context: ExtensionContext) {
     languages.registerDocumentRangeFormattingEditProvider(
       { language: 'php', scheme: 'file' },
       new Formatter(),
-    )
+    ),
   );
 
   context.subscriptions.push(new Validator(context.subscriptions));

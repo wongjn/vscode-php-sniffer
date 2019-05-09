@@ -19,7 +19,7 @@ export class CliArguments {
   public set(key: string, value: string): CliArguments {
     this.args.set(key, value);
     return this;
-  };
+  }
 
   /**
    * Get all arguments as an array to pass to child_process.spawn.
@@ -32,7 +32,7 @@ export class CliArguments {
     return Array.from(this.args.entries())
       .filter(([, value]) => value !== '')
       .map(([key, value]) => {
-        let printValue = quote && value.includes(' ') ? `"${value}"` : value;
+        const printValue = quote && value.includes(' ') ? `"${value}"` : value;
         return `--${key}=${printValue}`;
       });
   }

@@ -1,13 +1,14 @@
 import { workspace, Uri } from 'vscode';
 import { sep } from 'path';
-import { execPromise, testCase, hasGlobalPHPCS, FIXTURES } from './utils';
+import {
+  execPromise, testCase, hasGlobalPHPCS, FIXTURES,
+} from './utils';
 
 suite('PHP Sniffer Tests', function () {
-
   testCase(
     'Global executable with preset',
     2,
-    `<?php $error = 1'a'; ?>`,
+    '<?php $error = 1\'a\'; ?>',
     async function () {
       if (!await hasGlobalPHPCS()) this.skip();
 
@@ -25,14 +26,14 @@ suite('PHP Sniffer Tests', function () {
           ? `--config-set default_standard ${userSetDefault}`
           : '--config-delete default_standard';
         execPromise(`phpcs ${cmd}`);
-      }
+      };
     },
   );
 
   testCase(
     'Global executable with local ruleset',
     1,
-    `<?php $a = 1;\n`,
+    '<?php $a = 1;\n',
     async function (file) {
       if (!await hasGlobalPHPCS()) this.skip();
 
@@ -65,7 +66,7 @@ suite('PHP Sniffer Tests', function () {
     testCase(
       'Local executable with preset',
       5,
-      `<?php class my_class\n{\n}\n`,
+      '<?php class my_class\n{\n}\n',
       async function (file) {
         await workspace
           .getConfiguration('phpSniffer', file)
@@ -80,7 +81,7 @@ suite('PHP Sniffer Tests', function () {
     testCase(
       'Local executable with local ruleset',
       1,
-      `<?php $b = 1;\n`,
+      '<?php $b = 1;\n',
       async function (file) {
         await workspace
           .getConfiguration('phpSniffer', file)

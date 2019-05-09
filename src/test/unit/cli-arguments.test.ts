@@ -1,5 +1,5 @@
-import { CliArguments } from '../../cli-arguments';
 import { deepEqual } from 'assert';
+import { CliArguments } from '../../cli-arguments';
 
 suite('CliArguments', function () {
   test('Values passed on instantiation compile correctly', function () {

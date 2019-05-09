@@ -124,8 +124,7 @@ export class Validator {
         delay,
       );
       this.validatorListener = workspace.onDidChangeTextDocument(validator);
-    }
-    else {
+    } else {
       this.validatorListener = workspace.onDidSaveTextDocument(this.validate, this);
     }
   }
@@ -194,21 +193,22 @@ export class Validator {
     command.stdin.end();
 
     command.stdout.setEncoding('utf8');
-    command.stdout.on('data', data => stdout += data);
-    command.stderr.on('data', data => stderr += data);
+    command.stdout.on('data', data => { stdout += data; });
+    command.stderr.on('data', data => { stderr += data; });
 
     const done = new Promise((resolve, reject) => {
       command.on('close', () => {
         if (token.isCancellationRequested || !stdout) {
           resolve();
-        }
-        else {
+        } else {
           const diagnostics: Diagnostic[] = [];
 
           try {
             const { files }: PHPCSReport = JSON.parse(stdout);
             for (const file in files) {
-              files[file].messages.forEach(({ message, line, column, type, source }) => {
+              files[file].messages.forEach(({
+                message, line, column, type, source,
+              }) => {
                 const zeroLine = line - 1;
                 const ZeroColumn = column - 1;
 
@@ -241,7 +241,9 @@ export class Validator {
     });
 
     setTimeout(() => {
-      !command.killed && phpCliKill(command, windowsKillTarget);
+      if (!command.killed) {
+        phpCliKill(command, windowsKillTarget);
+      }
     }, 3000);
 
     window.setStatusBarMessage('PHP Sniffer: validating…', done);
@@ -255,5 +257,4 @@ export class Validator {
   protected clearDocumentDiagnostics({ uri }: TextDocument): void {
     this.diagnosticCollection.delete(uri);
   }
-
 }

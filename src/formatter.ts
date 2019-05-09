@@ -23,7 +23,6 @@ interface Indentation {
 }
 
 export class Formatter implements DocumentRangeFormattingEditProvider {
-
   /**
    * {@inheritDoc}
    */
@@ -31,7 +30,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
     document: TextDocument,
     range: Range,
     options: FormattingOptions,
-    token: CancellationToken
+    token: CancellationToken,
   ): Promise<TextEdit[]> {
     const config = workspace.getConfiguration('phpSniffer', document.uri);
     const execFolder: string = config.get('executablesFolder', '');
@@ -87,8 +86,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
           return resolve([new TextEdit(range, replacement)]);
         });
       });
-    }
-    catch (error) {
+    } catch (error) {
       if (!command.killed) {
         command.kill();
       }
@@ -199,5 +197,4 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
     return range.isEqual(documentRange);
   }
-
 }
