@@ -15,7 +15,7 @@ import {
 } from 'vscode';
 import { exec, ChildProcess, spawn } from 'child_process';
 import { debounce } from 'lodash';
-import { PHPCSReport, PHPCSMessageType } from './phpcs-report';
+import { PHPCSReport, PHPCSMessageType, PHPCSMessage } from './phpcs-report';
 import { CliArguments } from './cli-arguments';
 
 const enum runConfig {
@@ -201,27 +201,26 @@ export class Validator {
         if (token.isCancellationRequested || !stdout) {
           resolve();
         } else {
-          const diagnostics: Diagnostic[] = [];
-
           try {
             const { files }: PHPCSReport = JSON.parse(stdout);
-            for (const file in files) {
-              files[file].messages.forEach(({
+            const diagnostics = Object.values(files)
+              .reduce<PHPCSMessage[]>((stack, { messages }) => [...stack, ...messages], [])
+              .map(({
                 message, line, column, type, source,
               }) => {
                 const zeroLine = line - 1;
                 const ZeroColumn = column - 1;
 
-                diagnostics.push(
-                  new Diagnostic(
-                    new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
-                    `[${source}]\n${message}`,
-                    type === PHPCSMessageType.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
-                  ),
+                return new Diagnostic(
+                  new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
+                  `[${source}]\n${message}`,
+                  type === PHPCSMessageType.ERROR
+                    ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
                 );
               });
-            }
+
             resolve();
+            this.diagnosticCollection.set(document.uri, diagnostics);
           } catch (error) {
             let message = '';
             if (stdout) message += `${stdout}\n`;
@@ -230,9 +229,8 @@ export class Validator {
 
             console.error(`PHPCS: ${message}`);
             reject(message);
+            this.diagnosticCollection.set(document.uri, []);
           }
-
-          this.diagnosticCollection.set(document.uri, diagnostics);
         }
 
         runner.dispose();
