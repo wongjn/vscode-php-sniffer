@@ -1,3 +1,5 @@
+/* eslint no-useless-constructor: 0, no-empty-function: 0 */
+
 /**
  * CLI arguments helper class.
  */
