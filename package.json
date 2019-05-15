@@ -88,7 +88,9 @@
         "postinstall": "node ./node_modules/vscode/bin/install",
         "lint": "eslint --ignore-path .gitignore --ext .js,.ts .",
         "pretest": "npm run lint && npm run compile",
-        "test": "mocha \"./out/test/unit/*.test.js\" && node ./node_modules/vscode/bin/test",
+        "test": "npm run test:unit && npm run test:functional",
+        "test:unit": "mocha \"./out/test/unit/*.test.js\"",
+        "test:functional": "node ./node_modules/vscode/bin/test",
         "version": "node ./scripts/changelog && git add CHANGELOG.md"
     },
     "devDependencies": {

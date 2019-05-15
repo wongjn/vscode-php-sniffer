@@ -12,6 +12,14 @@
                 "kind": "build",
                 "isDefault": true
             }
-        }
+        },
+        {
+            "type": "npm",
+            "script": "test:unit",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
     ]
 }
