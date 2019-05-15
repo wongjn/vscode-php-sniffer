@@ -22,6 +22,7 @@ import { exec, ChildProcess, spawn } from 'child_process';
 import { debounce } from 'lodash';
 import { PHPCSReport, PHPCSMessageType, PHPCSMessage } from './phpcs-report';
 import { mapToCliArgs } from './cli';
+import { stringsList } from './strings';
 
 const enum runConfig {
   save = 'onSave',
@@ -230,14 +231,7 @@ export class Validator {
             resolve();
             this.diagnosticCollection.set(document.uri, diagnostics);
           } catch (error) {
-            let message = '';
-            if (stdout) message += `${stdout}\n`;
-            if (stderr) message += `${stderr}\n`;
-            message += error.toString();
-
-            console.error(`PHPCS: ${message}`);
-            reject(message);
-            this.diagnosticCollection.set(document.uri, []);
+            reject(new Error(stringsList([stdout, stderr, error.toString()])));
           }
         }
 
