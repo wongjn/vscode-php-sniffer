@@ -15,7 +15,7 @@ import {
   workspace,
 } from 'vscode';
 import { spawn } from 'child_process';
-import { CliArguments } from './cli-arguments';
+import { mapToCliArgs } from './cli';
 
 interface TextProcessState {
   text: string;
@@ -27,6 +27,7 @@ interface Indentation {
   indent: string;
 }
 
+/* eslint class-methods-use-this: 0 */
 export class Formatter implements DocumentRangeFormattingEditProvider {
   /**
    * {@inheritDoc}
@@ -43,8 +44,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
     const excludes: Array<string> = config.get('snippetExcludeSniffs', []);
     const isFullDocument = Formatter.isFullDocumentRange(range, document);
 
-    const args = new CliArguments();
-    args.set('standard', standard);
+    const args = new Map([['standard', standard]]);
 
     if (excludes.length && !isFullDocument) {
       args.set('exclude', excludes.join(','));
@@ -59,7 +59,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
     const command = spawn(
       `${execFolder}phpcbf`,
-      [...args.getAll(spawnOptions.shell), '-'],
+      [...mapToCliArgs(args, spawnOptions.shell), '-'],
       spawnOptions,
     );
 

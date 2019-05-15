@@ -21,7 +21,7 @@ import {
 import { exec, ChildProcess, spawn } from 'child_process';
 import { debounce } from 'lodash';
 import { PHPCSReport, PHPCSMessageType, PHPCSMessage } from './phpcs-report';
-import { CliArguments } from './cli-arguments';
+import { mapToCliArgs } from './cli';
 
 const enum runConfig {
   save = 'onSave',
@@ -170,9 +170,10 @@ export class Validator {
     const standard: string = config.get('standard', '');
     const windowsKillTarget: string = config.get('windowsPhpCli', 'php.exe');
 
-    const args = new CliArguments();
-    args.set('report', 'json');
-    args.set('standard', standard);
+    const args = new Map([
+      ['report', 'json'],
+      ['standard', standard],
+    ]);
 
     if (document.uri.scheme === 'file') {
       args.set('stdin-path', document.uri.fsPath);
@@ -187,7 +188,7 @@ export class Validator {
 
     const command = spawn(
       `${execFolder}phpcs`,
-      [...args.getAll(spawnOptions.shell), '-q', '-'],
+      [...mapToCliArgs(args, spawnOptions.shell), '-q', '-'],
       spawnOptions,
     );
 
