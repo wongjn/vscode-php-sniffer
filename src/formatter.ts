@@ -73,7 +73,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
       command.stdin.end();
 
       command.stdout.setEncoding('utf8');
-      command.stdout.on('data', data => stdout += data);
+      command.stdout.on('data', data => { stdout += data; });
 
       return new Promise<TextEdit[]>((resolve, reject) => {
         command.on('close', code => {
