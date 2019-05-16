@@ -189,7 +189,18 @@ export class Validator {
 
     const command = spawn(
       `${execFolder}phpcs`,
-      [...mapToCliArgs(args, spawnOptions.shell), '-q', '-'],
+      [
+        ...mapToCliArgs(args, spawnOptions.shell),
+        // Exit with 0 code even if there are sniff warnings or errors so we can
+        // use error callback for actual execution errors.
+        '--runtime-set', 'ignore_warnings_on_exit', '1',
+        '--runtime-set', 'ignore_errors_on_exit', '1',
+        // Ensure quiet output to override any output settings from config.
+        // Ensures we get JSON only.
+        '-q',
+        // Read stdin.
+        '-',
+      ],
       spawnOptions,
     );
 
@@ -206,37 +217,50 @@ export class Validator {
     command.stderr.on('data', data => { stderr += data; });
 
     const done = new Promise((resolve, reject) => {
-      command.on('close', () => {
-        if (token.isCancellationRequested || !stdout) {
-          resolve();
-        } else {
-          try {
-            const { files }: PHPCSReport = JSON.parse(stdout);
-            const diagnostics = Object.values(files)
-              .reduce<PHPCSMessage[]>((stack, { messages }) => [...stack, ...messages], [])
-              .map(({
-                message, line, column, type, source,
-              }) => {
-                const zeroLine = line - 1;
-                const ZeroColumn = column - 1;
+      // Shows errors in UI and rejects the promise.
+      const showError = (messages: string[]) => {
+        const errorMessage = stringsList(messages);
+        window.showErrorMessage(errorMessage);
+        reject(new Error(errorMessage));
+      };
 
-                return new Diagnostic(
-                  new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
-                  `[${source}]\n${message}`,
-                  type === PHPCSMessageType.ERROR
-                    ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
-                );
-              });
-
-            resolve();
-            this.diagnosticCollection.set(document.uri, diagnostics);
-          } catch (error) {
-            reject(new Error(stringsList([stdout, stderr, error.toString()])));
-          }
-        }
-
+      command.on('close', exitCode => {
         runner.dispose();
         this.runnerCancellations.delete(document.uri);
+
+        if (token.isCancellationRequested) {
+          resolve();
+          return;
+        }
+
+        if (exitCode > 0 || stderr) {
+          showError([stdout, stderr]);
+          return;
+        }
+
+        try {
+          const { files }: PHPCSReport = JSON.parse(stdout);
+          const diagnostics = Object.values(files)
+            .reduce<PHPCSMessage[]>((stack, { messages }) => [...stack, ...messages], [])
+            .map(({
+              message, line, column, type, source,
+            }) => {
+              const zeroLine = line - 1;
+              const ZeroColumn = column - 1;
+
+              return new Diagnostic(
+                new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
+                `[${source}]\n${message}`,
+                type === PHPCSMessageType.ERROR
+                  ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
+              );
+            });
+
+          resolve();
+          this.diagnosticCollection.set(document.uri, diagnostics);
+        } catch (error) {
+          showError([stdout, stderr, error.toString()]);
+        }
       });
     });
 
