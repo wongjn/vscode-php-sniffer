@@ -116,7 +116,11 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
    * @todo PHP tag and indentation processes here could be extracted to a common
    *   (functional?) interface of some sort, i.e. a micro-plugin system.
    */
-  protected static prepareText(document: TextDocument, range: Range, formatOptions: FormattingOptions): TextProcessState {
+  protected static prepareText(
+    document: TextDocument,
+    range: Range,
+    formatOptions: FormattingOptions,
+  ): TextProcessState {
     let text = document.getText(range);
 
     const isFullDocument = this.isFullDocumentRange(range, document);
@@ -160,7 +164,10 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
    * @param param1
    *   Indentation options for the document.
    */
-  protected static getIndentation(lines: string[], { insertSpaces, tabSize }: FormattingOptions): Indentation | null {
+  protected static getIndentation(
+    lines: string[],
+    { insertSpaces, tabSize }: FormattingOptions,
+  ): Indentation | null {
     const unit = insertSpaces ? ' '.repeat(tabSize) : '\t';
     const indentMatcher = new RegExp(`^((?:${unit})*).+`);
     const unitCounter = new RegExp(unit, 'g');
