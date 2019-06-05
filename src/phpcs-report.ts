@@ -29,14 +29,16 @@ export interface PHPCSMessage {
  */
 export interface PHPCSCounts {
   errors: number;
-  warning: number;
-  fixable?: number;
+  warnings: number;
+  fixable: number;
 }
 
 /**
  * Violations for a single file.
  */
-export interface PHPCSFileStatus extends PHPCSCounts {
+export interface PHPCSFileStatus {
+  errors: number;
+  warnings: number;
   messages: PHPCSMessage[];
 }
 
@@ -49,3 +51,32 @@ export interface PHPCSReport {
     [key: string]: PHPCSFileStatus;
   };
 }
+
+/**
+ * Parsed PHPCS individual message.
+ */
+export interface ParsedMessage {
+  line: number;
+  column: number;
+  message: string;
+  error: boolean;
+}
+
+/**
+ * Parses a PHPCS report to a single dimensional list of messages.
+ *
+ * @param report
+ *   The PHPCS report.
+ * @return
+ *   The list of any errors.
+ */
+export const reportFlatten = ({ files }: PHPCSReport): ParsedMessage[] => Object.values(files)
+  .reduce<PHPCSMessage[]>((stack, { messages }) => [...stack, ...messages], [])
+  .map(({
+    message, line, column, type, source,
+  }) => ({
+    line,
+    column,
+    message: `[${source}]\n${message}`,
+    error: type === PHPCSMessageType.ERROR,
+  }));

@@ -20,7 +20,7 @@ import {
 } from 'vscode';
 import { exec, ChildProcess, spawn } from 'child_process';
 import { debounce } from 'lodash';
-import { PHPCSReport, PHPCSMessageType, PHPCSMessage } from './phpcs-report';
+import { reportFlatten, PHPCSReport } from './phpcs-report';
 import { mapToCliArgs } from './cli';
 import { stringsList } from './strings';
 
@@ -63,6 +63,23 @@ function phpCliKill(command: ChildProcess, processName: string) {
 
   command.kill();
 }
+
+/**
+ * Parses PHPCS report to VSCode diagnostics list.
+ *
+ * @param report
+ *   The JSON object report from the CLI.
+ * @return
+ *   The diagnostics.
+ */
+const parseReport = (report: PHPCSReport): Diagnostic[] => reportFlatten(report)
+  .map(({
+    line, column, message, error,
+  }) => new Diagnostic(
+    new Range(line, column, line, column),
+    message,
+    error ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
+  ));
 
 export class Validator {
   private diagnosticCollection: DiagnosticCollection = languages.createDiagnosticCollection('php');
@@ -239,25 +256,11 @@ export class Validator {
         }
 
         try {
-          const { files }: PHPCSReport = JSON.parse(stdout);
-          const diagnostics = Object.values(files)
-            .reduce<PHPCSMessage[]>((stack, { messages }) => [...stack, ...messages], [])
-            .map(({
-              message, line, column, type, source,
-            }) => {
-              const zeroLine = line - 1;
-              const ZeroColumn = column - 1;
-
-              return new Diagnostic(
-                new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
-                `[${source}]\n${message}`,
-                type === PHPCSMessageType.ERROR
-                  ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
-              );
-            });
-
+          this.diagnosticCollection.set(
+            document.uri,
+            parseReport(JSON.parse(stdout)),
+          );
           resolve();
-          this.diagnosticCollection.set(document.uri, diagnostics);
         } catch (error) {
           showError([stdout, stderr, error.toString()]);
         }
