@@ -16,15 +16,11 @@ import {
 } from 'vscode';
 import { spawn } from 'child_process';
 import { mapToCliArgs } from './cli';
+import { getIndentation } from './strings';
 
 interface TextProcessState {
   text: string;
   postProcessor: (rawResult: string) => string;
-}
-
-interface Indentation {
-  replace: RegExp;
-  indent: string;
 }
 
 /* eslint class-methods-use-this: 0 */
@@ -128,7 +124,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
     const eol: string = document.eol === EndOfLine.LF ? '\n' : '\r\n';
     const lines = text.split(eol);
 
-    const indentation = isFullDocument ? null : this.getIndentation(lines, formatOptions);
+    const indentation = isFullDocument ? null : getIndentation(lines, formatOptions);
     if (indentation) {
       // Temporarily remove indentation.
       text = lines.map(line => line.replace(indentation.replace, '')).join(eol);
@@ -153,50 +149,6 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
 
         return result;
       },
-    };
-  }
-
-  /**
-   * Gets indentation information for a document.
-   *
-   * @param lines
-   *   The text as an array of strings per line.
-   * @param param1
-   *   Indentation options for the document.
-   */
-  protected static getIndentation(
-    lines: string[],
-    { insertSpaces, tabSize }: FormattingOptions,
-  ): Indentation | null {
-    const unit = insertSpaces ? ' '.repeat(tabSize) : '\t';
-    const indentMatcher = new RegExp(`^((?:${unit})*).+`);
-    const unitCounter = new RegExp(unit, 'g');
-
-    const count = lines.reduce((tally, line) => {
-      if (tally === 0) return tally;
-
-      const match = indentMatcher.exec(line);
-      if (!(match instanceof Array)) {
-        return tally;
-      }
-      const [, lineIndent] = match;
-
-      // Minimum reached, do nothing more.
-      if (lineIndent === '') {
-        return 0;
-      }
-
-      return Math.min(lineIndent.match(unitCounter)!.length, tally);
-    }, Number.MAX_SAFE_INTEGER);
-
-    // No indentation found.
-    if (count === 0) {
-      return null;
-    }
-
-    return {
-      replace: new RegExp(`^(${unit}){0,${count}}`),
-      indent: unit.repeat(count),
     };
   }
 
