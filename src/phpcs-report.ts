@@ -53,30 +53,19 @@ export interface PHPCSReport {
 }
 
 /**
- * Parsed PHPCS individual message.
- */
-export interface ParsedMessage {
-  line: number;
-  column: number;
-  message: string;
-  error: boolean;
-}
-
-/**
- * Parses a PHPCS report to a single dimensional list of messages.
+ * Parses a PHPCS JSON report to a set of diagnostics.
  *
  * @param report
- *   The PHPCS report.
+ *   The PHPCS report in JSON format.
  * @return
- *   The list of any errors.
+ *   The list of diagnostics.
  */
-export const reportFlatten = ({ files }: PHPCSReport): ParsedMessage[] => Object.values(files)
-  .reduce<PHPCSMessage[]>((stack, { messages }) => [...stack, ...messages], [])
-  .map(({
-    message, line, column, type, source,
-  }) => ({
-    line,
-    column,
-    message: `[${source}]\n${message}`,
-    error: type === PHPCSMessageType.ERROR,
-  }));
+export const reportFlatten = ({ files }: PHPCSReport): Diagnostic[] => Object.values(files)
+    .reduce<PHPCSMessage[]>((stack, { messages }) => [...stack, ...messages], [])
+    .map(({
+      message, line, column, type, source,
+    }) => new Diagnostic(
+      new Range(line, column, line, column),
+      `[${source}]\n${message}`,
+    type === PHPCSMessageType.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
+    ));

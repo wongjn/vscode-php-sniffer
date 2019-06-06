@@ -6,12 +6,9 @@
 import {
   CancellationTokenSource,
   ConfigurationChangeEvent,
-  Diagnostic,
   DiagnosticCollection,
-  DiagnosticSeverity,
   Disposable,
   languages,
-  Range,
   TextDocument,
   TextDocumentChangeEvent,
   Uri,
@@ -20,7 +17,7 @@ import {
 } from 'vscode';
 import { exec, ChildProcess, spawn } from 'child_process';
 import { debounce } from 'lodash';
-import { reportFlatten, PHPCSReport } from './phpcs-report';
+import { reportFlatten } from './phpcs-report';
 import { mapToCliArgs } from './cli';
 import { stringsList } from './strings';
 
@@ -63,23 +60,6 @@ function phpCliKill(command: ChildProcess, processName: string) {
 
   command.kill();
 }
-
-/**
- * Parses PHPCS report to VSCode diagnostics list.
- *
- * @param report
- *   The JSON object report from the CLI.
- * @return
- *   The diagnostics.
- */
-const parseReport = (report: PHPCSReport): Diagnostic[] => reportFlatten(report)
-  .map(({
-    line, column, message, error,
-  }) => new Diagnostic(
-    new Range(line, column, line, column),
-    message,
-    error ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
-  ));
 
 export class Validator {
   private diagnosticCollection: DiagnosticCollection = languages.createDiagnosticCollection('php');
@@ -258,7 +238,7 @@ export class Validator {
         try {
           this.diagnosticCollection.set(
             document.uri,
-            parseReport(JSON.parse(stdout)),
+            reportFlatten(JSON.parse(stdout)),
           );
           resolve();
         } catch (error) {

@@ -1,5 +1,6 @@
 import { equal, deepEqual } from 'assert';
-import { reportFlatten, PHPCSMessageType } from '../../phpcs-report';
+import { DiagnosticSeverity, Range } from 'vscode';
+import { PHPCSMessageType, reportFlatten } from '../../phpcs-report';
 
 suite('reportFlatten()', function () {
   test('Empty report returns an empty set', function () {
@@ -96,10 +97,11 @@ suite('reportFlatten()', function () {
       deepEqual(
         result[index],
         {
-          line,
-          column,
           message: `[${source}]\n${message}`,
-          error: type === PHPCSMessageType.ERROR,
+          severity: type === PHPCSMessageType.WARNING
+            ? DiagnosticSeverity.Warning
+            : DiagnosticSeverity.Error,
+          range: new Range(line, column, line, column),
         },
       );
     });
