@@ -1,8 +1,12 @@
+.github/**
 .vscode/**
 .vscode-test/**
 out/test/**
 out/**/*.map
+scripts/**
 src/**
 .gitignore
+.mocharc.js
+.nvmrc
 tsconfig.json
 tslint.json

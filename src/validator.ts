@@ -14,7 +14,7 @@ import {
   workspace,
 } from 'vscode';
 import { exec, ChildProcess, spawn } from 'child_process';
-import { debounce } from 'lodash';
+import debounce from 'lodash.debounce';
 import { PHPCSReport, PHPCSMessageType } from './phpcs-report';
 import { CliArguments } from './cli-arguments';
 
