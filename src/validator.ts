@@ -61,6 +61,18 @@ function phpCliKill(command: ChildProcess, processName: string) {
   command.kill();
 }
 
+/**
+ * Returns a function that will clear a given text document's diagnostics.
+ *
+ * @param diagnostics
+ *   The diagnostic collection to operate on.
+ * @return
+ *   The clearer function.
+ */
+const diagnosticsClearer = (diagnostics: DiagnosticCollection) => ({ uri }: TextDocument): void => {
+  diagnostics.delete(uri);
+};
+
 export class Validator {
   private diagnosticCollection: DiagnosticCollection = languages.createDiagnosticCollection('php');
 
@@ -77,7 +89,11 @@ export class Validator {
   constructor(subscriptions: Disposable[]) {
     workspace.onDidChangeConfiguration(this.onConfigChange, this, subscriptions);
     workspace.onDidOpenTextDocument(this.validate, this, subscriptions);
-    workspace.onDidCloseTextDocument(this.clearDocumentDiagnostics, this, subscriptions);
+    workspace.onDidCloseTextDocument(
+      diagnosticsClearer(this.diagnosticCollection),
+      null,
+      subscriptions,
+    );
     workspace.onDidChangeWorkspaceFolders(this.refresh, this, subscriptions);
 
     this.refresh();
@@ -254,15 +270,5 @@ export class Validator {
     }, 3000);
 
     window.setStatusBarMessage('PHP Sniffer: validating…', done);
-  }
-
-  /**
-   * Clears diagnostics from a document.
-   *
-   * @param document
-   *   The document to clear diagnostics of.
-   */
-  protected clearDocumentDiagnostics({ uri }: TextDocument): void {
-    this.diagnosticCollection.delete(uri);
   }
 }
