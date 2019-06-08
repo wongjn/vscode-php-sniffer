@@ -6,7 +6,6 @@
 import {
   DocumentRangeFormattingEditProvider,
   CancellationToken,
-  EndOfLine,
   FormattingOptions,
   Position,
   Range,
@@ -37,67 +36,6 @@ function isFullDocumentRange(range: Range, document: TextDocument): boolean {
   return range.isEqual(documentRange);
 }
 
-interface TextProcessState {
-  text: string;
-  postProcessor: (rawResult: string) => string;
-}
-
-/**
- * Prepares text for `phpcbf` to run on.
- *
- * @param document
- *   The document the formatting is running on.
- * @param range
- *   The range that formatting should be acting upon.
- * @param formatOptions
- *   The options that the document is formatted by.
- * @return
- *   A state object that includes the text. The postProcessor member
- *   should be run on the formatted text to reverse changes made here.
- *
- * @todo PHP tag and indentation processes here could be extracted to a common
- *   (functional?) interface of some sort, i.e. a micro-plugin system.
- */
-function prepareText(
-  document: TextDocument,
-  range: Range,
-  formatOptions: FormattingOptions,
-): TextProcessState {
-  let text = document.getText(range);
-
-  const isFullDocument = isFullDocumentRange(range, document);
-  const needsPhpTag = !isFullDocument && !text.includes('<?');
-  const eol: string = document.eol === EndOfLine.LF ? '\n' : '\r\n';
-  const lines = text.split(eol);
-
-  const indentation = isFullDocument ? null : getIndentation(lines, formatOptions);
-  if (indentation) {
-    // Temporarily remove indentation.
-    text = lines.map(line => line.replace(indentation.replace, '')).join(eol);
-  }
-
-  return {
-    text: `${needsPhpTag ? `<?php${eol}` : ''}${text}`,
-    postProcessor: (rawResult: string): string => {
-      let result = rawResult;
-
-      if (needsPhpTag) {
-        result = result.replace(`<?php${eol}`, '');
-      }
-
-      // Restore removed indentation.
-      if (indentation) {
-        result = result
-          .split(eol)
-          .map(line => `${line.length > 0 ? indentation.indent : ''}${line}`)
-          .join(eol);
-      }
-
-      return result;
-    },
-  };
-}
-
 /* eslint class-methods-use-this: 0 */
 export class Formatter implements DocumentRangeFormattingEditProvider {
   /**
@@ -109,11 +47,22 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
     options: FormattingOptions,
     token: CancellationToken,
   ): Promise<TextEdit[]> {
+    const isFullDocument = isFullDocumentRange(range, document);
+    const documentText = document.getText(range);
+    const indent: string = isFullDocument ? '' : getIndentation(documentText, options);
+
+    // The input text to pass to PHPCBF.
+    const inputText: string = isFullDocumentRange
+      // Use the text as-is.
+      ? documentText
+      // Normalize the snippet by reducing indentation. The indentation is
+      // restored on top of the PHPCBF result.
+      : documentText.replace(new RegExp(`^${indent}`, 'm'), '');
+
     const config = workspace.getConfiguration('phpSniffer', document.uri);
     const execFolder: string = config.get('executablesFolder', '');
     const standard: string = config.get('standard', '');
     const excludes: Array<string> = config.get('snippetExcludeSniffs', []);
-    const isFullDocument = isFullDocumentRange(range, document);
 
     const args = new Map([['standard', standard]]);
 
@@ -138,11 +87,7 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
       let stdout = '';
 
       token.onCancellationRequested(() => !command.killed && command.kill());
-
-      const { text, postProcessor } = prepareText(document, range, options);
-      command.stdin.write(text);
-      command.stdin.end();
-
+      command.stdin.write(inputText);
       command.stdout.setEncoding('utf8');
       command.stdout.on('data', data => { stdout += data; });
 
@@ -158,7 +103,9 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
             return reject(message);
           }
 
-          const replacement = postProcessor(stdout);
+          const replacement = isFullDocument
+            ? stdout
+            : stdout.replace(new RegExp('^(.+)', 'm'), `${indent}$1`);
           return resolve([new TextEdit(range, replacement)]);
         });
       });
