@@ -25,51 +25,27 @@ type IndentStyle = {
 };
 
 /**
- * Indentation utility.
- */
-interface Indentation {
-  // RegExp to replace the indent found.
-  replace: RegExp;
-  // Indent raw string.
-  indent: string;
-}
-
-/**
  * Gets indentation information for a document.
  *
- * @param lines
- *   The text as an array of strings per line.
+ * @param text
+ *   The text.
  * @param indentFormat
  *   Indentation options for the document.
+ * @return
+ *   The indentation string.
  */
-export function getIndentation(
-  lines: string[],
-  { insertSpaces, tabSize }: IndentStyle,
-): Indentation | null {
+export function getIndentation(text: string, { insertSpaces, tabSize }: IndentStyle): string {
   const unit = insertSpaces ? ' '.repeat(tabSize) : '\t';
+  // Expression to match at least one indent unit.
   const indentMatcher = new RegExp(`^((?:${unit})+)`);
 
-  const count = lines.reduce((tally, line) => {
-    // Already at minimum 0, do nothing more.
-    if (tally === 0) return tally;
+  const count = text.split(/\r?\n/).reduce((tally, line) => {
+    // Already at minimum 0 or skip empty line.
+    if (tally === 0 || line.length === 0) return tally;
 
-    const [linePre, indent] = line.split(indentMatcher, 3);
-
-    // No indent.
-    if (linePre.length > 0) return 0;
-    // Blank line; does not affect result.
-    if (!indent) return tally;
-
-    return Math.min(indent.length / unit.length, tally);
+    const match = line.match(indentMatcher);
+    return match ? Math.min(match[1].length / unit.length, tally) : 0;
   }, Number.MAX_SAFE_INTEGER);
 
-  // No indentation found.
-  if (count === 0) {
-    return null;
-  }
-
-  return {
-    replace: new RegExp(`^(${unit}){${count}}`),
-    indent: unit.repeat(count),
-  };
+  return unit.repeat(count);
 }
