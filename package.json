@@ -97,7 +97,7 @@
         "@types/fs-extra": "^5.0.4",
         "@types/lodash": "^4.14.118",
         "@types/mocha": "^2.2.42",
-        "@types/node": "^8.10.25",
+        "@types/node": "^10.14.9",
         "@typescript-eslint/eslint-plugin": "^1.7.0",
         "@typescript-eslint/parser": "^1.7.0",
         "eslint": "^5.16.0",
