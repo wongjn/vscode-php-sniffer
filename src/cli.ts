@@ -4,7 +4,6 @@
  */
 
 import { SpawnOptions, spawn } from 'child_process';
-import { Readable } from 'stream';
 import { EventEmitter } from 'events';
 import { stringsList } from './strings';
 
@@ -25,23 +24,6 @@ export function mapToCliArgs(args: Map<string, string>, quote: boolean = false):
       return `--${key}=${printValue}`;
     });
 }
-
-/**
- * Reads a stream as a promise.
- *
- * @param stream
- *   The read stream.
- * @return
- *   A Promise that resolves to the text stream once it has ended.
- */
-const readPromise = (stream: Readable) => new Promise<string>((resolve, reject) => {
-  let buffer: string = '';
-  stream
-    .setEncoding('utf8')
-    .on('data', data => { buffer += data; })
-    .on('end', () => resolve(buffer))
-    .on('error', error => reject(error));
-});
 
 /**
  * Converts a close event to a promise.
@@ -113,8 +95,12 @@ export async function executeCommand({
   cliProcess.stdin.write(stdin);
   cliProcess.stdin.end();
 
-  const stdout = await readPromise(cliProcess.stdout);
-  const stderr = await readPromise(cliProcess.stderr);
+  let stdout = '';
+  cliProcess.stdout.on('data', data => { stdout += data; });
+
+  let stderr = '';
+  cliProcess.stderr.on('data', data => { stderr += data; });
+
   const exitCode = await closePromise<number>(cliProcess);
 
   if (token.isCancellationRequested) return null;
