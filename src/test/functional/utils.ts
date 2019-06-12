@@ -88,6 +88,8 @@ export function testCase(
     // Possible teardown callback.
     let tearDown: hookCallback | void;
 
+    this.timeout(0);
+
     suiteSetup(async function () {
       if (testSetup) tearDown = await testSetup.call(this, fileUri);
     });
@@ -114,8 +116,6 @@ export function testCase(
     });
 
     test('Fixable validation errors are fixed via formatting', async function () {
-      this.timeout(5000);
-
       // Visually open the document so commands can be run on it.
       const document = await workspace.openTextDocument(fileUri);
       await window.showTextDocument(document);
