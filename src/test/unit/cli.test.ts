@@ -1,28 +1,85 @@
-import { deepEqual } from 'assert';
-import { mapToCliArgs } from '../../cli';
+import { deepEqual, equal, rejects } from 'assert';
+import { mapToCliArgs, executeCommand } from '../../cli';
 
 suite('CLI Utilities', function () {
-  test('Values passed compile correctly', function () {
-    const args1 = new Map([['a', 'b']]);
-    deepEqual(mapToCliArgs(args1), ['--a=b']);
+  suite('mapToCliArgs()', function () {
+    test('Values passed compile correctly', function () {
+      const args1 = new Map([['a', 'b']]);
+      deepEqual(mapToCliArgs(args1), ['--a=b']);
 
-    const args2 = new Map([['a', 'b'], ['c', '1']]);
-    deepEqual(mapToCliArgs(args2), ['--a=b', '--c=1']);
+      const args2 = new Map([['a', 'b'], ['c', '1']]);
+      deepEqual(mapToCliArgs(args2), ['--a=b', '--c=1']);
 
-    const args3 = new Map([['a', 'b'], ['c', '']]);
-    deepEqual(mapToCliArgs(args3), ['--a=b'], 'Entries with empty values should not be compiled.');
+      const args3 = new Map([['a', 'b'], ['c', '']]);
+      deepEqual(mapToCliArgs(args3), ['--a=b'], 'Entries with empty values should not be compiled.');
 
-    const args4 = new Map([['a', 'b'], ['', '1']]);
-    deepEqual(mapToCliArgs(args4), ['--a=b'], 'Entries with empty keys should not be compiled.');
+      const args4 = new Map([['a', 'b'], ['', '1']]);
+      deepEqual(mapToCliArgs(args4), ['--a=b'], 'Entries with empty keys should not be compiled.');
+    });
+
+    test('Only values that need quotes are quoted when requested', function () {
+      const args1 = new Map([
+        ['a', 'no-quotes'],
+        ['b', 'needs quotes'],
+      ]);
+
+      deepEqual(mapToCliArgs(args1), ['--a=no-quotes', '--b=needs quotes']);
+      deepEqual(mapToCliArgs(args1, true), ['--a=no-quotes', '--b="needs quotes"']);
+    });
   });
 
-  test('Only values that need quotes are quoted when requested', function () {
-    const args1 = new Map([
-      ['a', 'no-quotes'],
-      ['b', 'needs quotes'],
-    ]);
+  suite('executeCommand()', function () {
+    const stubToken = {
+      onCancellationRequested() { },
+      isCancellationRequested: false,
+    };
 
-    deepEqual(mapToCliArgs(args1), ['--a=no-quotes', '--b=needs quotes']);
-    deepEqual(mapToCliArgs(args1, true), ['--a=no-quotes', '--b="needs quotes"']);
+    test('Normal execution returns STDOUT', async function () {
+      const result = await executeCommand({
+        command: 'echo',
+        token: stubToken,
+        args: ['foobar'],
+      });
+
+      equal(result, 'foobar\n');
+    });
+
+    test('Canceling the execution via the token returns null', async function () {
+      const token = {
+        isCancellationRequested: false,
+        cancelCallback: () => { },
+        cancel() {
+          this.isCancellationRequested = true;
+          this.cancelCallback();
+        },
+        onCancellationRequested(callback: () => void) {
+          this.cancelCallback = callback;
+        },
+      };
+
+      const result = executeCommand({
+        command: process.platform === 'win32' ? 'timeout' : 'sleep',
+        token,
+        args: ['10'],
+      });
+
+      token.cancel();
+      equal(await result, null);
+    });
+
+    test('Non-zero exit code throws an error', function () {
+      rejects(
+        executeCommand({
+          command: '../../../scripts/non-zero-exit',
+          token: stubToken,
+          spawnOptions: {
+            cwd: __dirname,
+          },
+        }),
+        {
+          message: '255\nfoo\nbar',
+        },
+      );
+    });
   });
 });

@@ -15,50 +15,13 @@ import {
   window,
   workspace,
 } from 'vscode';
-import { exec, ChildProcess, spawn } from 'child_process';
 import { debounce } from 'lodash';
 import { reportFlatten } from './phpcs-report';
-import { mapToCliArgs } from './cli';
-import { stringsList } from './strings';
+import { mapToCliArgs, executeCommand, CliCommandError } from './cli';
 
 const enum runConfig {
   save = 'onSave',
   type = 'onType',
-}
-
-/**
- * Kills PHP CLIs.
- *
- * This is needed for Windows since ChildProcess.kill() only kills the spawner
- * cmd.exe, even with `taskkill /T /F /pid ${pid}` where /T is supposed to kill
- * trees from the spawner but it seems the php process is launched in a
- * disconnected way.
- *
- * @param command
- *   The process to kill.
- */
-function phpCliKill(command: ChildProcess, processName: string) {
-  if (process.platform === 'win32' && workspace.getConfiguration('phpSniffer').get('windowsHardkill')) {
-    // Whole code block below could be more succinctly done with:
-    // `taskkill /v /fi "cputime gt 00:00:02" /fi "cputime lt 00:00:10" /im ${processName}`
-    // but `cputime gt` filter does not seem to work in this case.
-    exec(
-      `tasklist /v /fi "cputime ge 00:00:02" /fi "cputime lt 00:00:10" /fi "imagename eq ${processName}" /fo csv`,
-      (err, stdout) => {
-        if (err) window.showErrorMessage('PHPCS: Error trying to kill PHP CLI, you may need to kill the process yourself.');
-        if (stdout.includes('","')) {
-          const pids = stdout.split('\n').slice(1).map(row => {
-            const [, pid] = row.substr(1, row.length - 2).split('","');
-            return pid;
-          });
-
-          exec(`taskkill /F ${pids.map(pid => `/pid ${pid}`).join(' ')}`);
-        }
-      },
-    );
-  }
-
-  command.kill();
 }
 
 /**
@@ -182,7 +145,6 @@ export class Validator {
     const config = workspace.getConfiguration('phpSniffer', document.uri);
     const execFolder: string = config.get('executablesFolder', '');
     const standard: string = config.get('standard', '');
-    const windowsKillTarget: string = config.get('windowsPhpCli', 'php.exe');
 
     const args = new Map([
       ['report', 'json'],
@@ -200,9 +162,11 @@ export class Validator {
       shell: process.platform === 'win32',
     };
 
-    const command = spawn(
-      `${execFolder}phpcs`,
-      [
+    const command = executeCommand({
+      command: `${execFolder}phpcs`,
+      token,
+      stdin: document.getText(),
+      args: [
         ...mapToCliArgs(args, spawnOptions.shell),
         // Exit with 0 code even if there are sniff warnings or errors so we can
         // use error callback for actual execution errors.
@@ -215,60 +179,23 @@ export class Validator {
         '-',
       ],
       spawnOptions,
-    );
-
-    token.onCancellationRequested(() => !command.killed && phpCliKill(command, windowsKillTarget));
-
-    let stdout = '';
-    let stderr = '';
-
-    command.stdin.write(document.getText());
-    command.stdin.end();
-
-    command.stdout.setEncoding('utf8');
-    command.stdout.on('data', data => { stdout += data; });
-    command.stderr.on('data', data => { stderr += data; });
-
-    const done = new Promise((resolve, reject) => {
-      // Shows errors in UI and rejects the promise.
-      const showError = (messages: string[]) => {
-        const errorMessage = stringsList(messages);
-        window.showErrorMessage(errorMessage);
-        reject(new Error(errorMessage));
-      };
-
-      command.on('close', exitCode => {
-        runner.dispose();
-        this.runnerCancellations.delete(document.uri);
-
-        if (token.isCancellationRequested) {
-          resolve();
-          return;
-        }
-
-        if (exitCode > 0 || stderr) {
-          showError([stdout, stderr]);
-          return;
-        }
-
-        try {
-          this.diagnosticCollection.set(
-            document.uri,
-            reportFlatten(JSON.parse(stdout)),
-          );
-          resolve();
-        } catch (error) {
-          showError([stdout, stderr, error.toString()]);
-        }
-      });
     });
 
-    setTimeout(() => {
-      if (!command.killed) {
-        phpCliKill(command, windowsKillTarget);
-      }
-    }, 3000);
+    command
+      .then(result => {
+        if (result) {
+          this.diagnosticCollection.set(
+            document.uri,
+            reportFlatten(JSON.parse(result)),
+          );
+        }
+      })
+      .catch(error => {
+        if (error instanceof CliCommandError) {
+          window.showErrorMessage(CliCommandError.toString());
+        }
+      });
 
-    window.setStatusBarMessage('PHP Sniffer: validating…', done);
+    window.setStatusBarMessage('PHP Sniffer: validating…', command);
   }
 }

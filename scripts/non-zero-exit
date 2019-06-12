@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#
+# Script for src/test/unit/cli.test.ts
+#
+
+echo -n 'foo';
+(>&2 echo -n 'bar')
+
+exit 255

@@ -2,6 +2,8 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+### Removed
+- Removed Windows-specific PHP process killing (use PHP_Codesniffer >= 3.4.2)
 
 ## [1.1.4] - 2019-01-29
 ### Changed

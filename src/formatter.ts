@@ -13,8 +13,7 @@ import {
   TextEdit,
   workspace,
 } from 'vscode';
-import { spawn } from 'child_process';
-import { mapToCliArgs } from './cli';
+import { mapToCliArgs, executeCommand, CliCommandError } from './cli';
 import { getIndentation } from './strings';
 
 /**
@@ -77,44 +76,30 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
       shell: process.platform === 'win32',
     };
 
-    const command = spawn(
-      `${execFolder}phpcbf`,
-      [...mapToCliArgs(args, spawnOptions.shell), '-'],
-      spawnOptions,
-    );
-
     try {
-      let stdout = '';
-
-      token.onCancellationRequested(() => !command.killed && command.kill());
-      command.stdin.write(inputText);
-      command.stdout.setEncoding('utf8');
-      command.stdout.on('data', data => { stdout += data; });
-
-      return new Promise<TextEdit[]>((resolve, reject) => {
-        command.on('close', code => {
-          if (token.isCancellationRequested) {
-            return resolve();
-          }
-
-          if (code !== 1) {
-            const message = `PHPCBF: ${stdout}`;
-            console.error(message);
-            return reject(message);
-          }
-
-          const replacement = isFullDocument
-            ? stdout
-            : stdout.replace(new RegExp('^(.+)', 'm'), `${indent}$1`);
-          return resolve([new TextEdit(range, replacement)]);
-        });
+      // PHPCBF uses unconventional exit codes, see
+      // https://github.com/squizlabs/PHP_CodeSniffer/issues/1270#issuecomment-272768413
+      await executeCommand({
+        command: `${execFolder}phpcbf`,
+        token,
+        args: [...mapToCliArgs(args, spawnOptions.shell), '-'],
+        stdin: inputText,
+        spawnOptions,
       });
     } catch (error) {
-      if (!command.killed) {
-        command.kill();
+      // Exit code 1 indicates all fixable errors were fixed correctly.
+      if (error instanceof CliCommandError && error.exitCode === 1) {
+        // Add indentation back in if it was not a full document format.
+        const replacement = isFullDocument
+          ? error.stdout
+          : error.stdout.replace(new RegExp('^(.+)', 'm'), `${indent}$1`);
+
+        return [new TextEdit(range, replacement)];
       }
 
-      throw error;
+      console.error(error);
     }
+
+    return [];
   }
 }
