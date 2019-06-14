@@ -3,13 +3,21 @@ node_js:
   - 10
 cache: npm
 env:
-  - CODE_TESTS_WORKSPACE=src/test/functional/fixtures CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/functional PHPENV_VERSION=7.1
+  - TEST_SCRIPT=unit
+  - TEST_SCRIPT=integration CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/integration PHPENV_VERSION=7.1
+  - TEST_SCRIPT=functional CODE_TESTS_WORKSPACE=src/test/functional/fixtures CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/functional PHPENV_VERSION=7.1
 before_script:
-  - composer global require squizlabs/php_codesniffer:^3.4
-  - export PATH=$PATH:$(composer global config bin-dir --absolute)
+  - if [ $TEST_SCRIPT == "functional" ]; then
+      composer global require squizlabs/php_codesniffer:^3.4;
+      export PATH=$PATH:$(composer global config bin-dir --absolute);
+    fi
   - if [ $TRAVIS_OS_NAME == "linux" ]; then
       export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0;
       sh -e /etc/init.d/xvfb start;
       sleep 3;
     fi
-script: npm test
+  - if [ $TEST_SCRIPT == "unit" ]; then
+      npm run lint;
+    fi
+  - npm run compile
+script: npm run test:$TEST_SCRIPT

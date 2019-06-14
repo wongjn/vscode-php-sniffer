@@ -20,6 +20,21 @@
             "preLaunchTask": "compile"
         },
         {
+            "name": "Extension Integration Tests",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--disable-extensions",
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionTestsPath=${workspaceFolder}/out/test/integration"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/out/test/**/*.js"
+            ],
+            "preLaunchTask": "compile"
+        },
+        {
             "name": "Extension Functional Tests",
             "type": "extensionHost",
             "request": "launch",
