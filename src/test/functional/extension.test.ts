@@ -1,8 +1,7 @@
 import { workspace, Uri, languages } from 'vscode';
 import { sep, join } from 'path';
-import {
-  execPromise, testCase, hasGlobalPHPCS, FIXTURES,
-} from './utils';
+import { testCase, hasGlobalPHPCS } from './utils';
+import { execPromise, FIXTURES_PATH } from '../utils';
 
 /**
  * Runs test cases for two files for preset and a local ruleset.
@@ -71,15 +70,15 @@ suite('PHP Sniffer Tests', function () {
 
   suite('Local executable', function () {
     suiteSetup(async function () {
-      await execPromise('composer install --no-dev', { cwd: FIXTURES });
+      await execPromise('composer install --no-dev', { cwd: FIXTURES_PATH });
       await workspace
-        .getConfiguration('phpSniffer', Uri.file(FIXTURES))
+        .getConfiguration('phpSniffer', Uri.file(FIXTURES_PATH))
         .update('executablesFolder', `vendor${sep}bin${sep}`);
     });
 
     suiteTeardown(async function () {
       await workspace
-        .getConfiguration('phpSniffer', Uri.file(FIXTURES))
+        .getConfiguration('phpSniffer', Uri.file(FIXTURES_PATH))
         .update('executablesFolder', undefined);
     });
 
@@ -88,7 +87,7 @@ suite('PHP Sniffer Tests', function () {
 
   suite('Execution error reporting', function () {
     test('Validator should show PHPCS execution errors', async function () {
-      const fixtureUri = Uri.file(join(FIXTURES, 'index.php'));
+      const fixtureUri = Uri.file(join(FIXTURES_PATH, 'index.php'));
       const config = workspace.getConfiguration('phpSniffer', fixtureUri);
       workspace.openTextDocument(fixtureUri);
 

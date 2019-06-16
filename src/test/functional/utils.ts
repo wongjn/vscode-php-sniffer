@@ -3,7 +3,6 @@
  * Utilities for tests.
  */
 
-import { exec, ExecOptions } from 'child_process';
 import * as assert from 'assert';
 import * as path from 'path';
 import { IHookCallbackContext } from 'mocha';
@@ -15,23 +14,7 @@ import {
   workspace,
   Uri,
 } from 'vscode';
-
-/**
- * Executes a CLI command with promised result.
- *
- * @param command
- *   The CLI command to run.
- * @return
- *   The Promise that resolves with the stdout of the command.
- */
-export function execPromise(command: string, options: ExecOptions = {}): Thenable<string> {
-  return new Promise((resolve, reject) => {
-    exec(command, options, (err, stdout) => {
-      if (err) reject(err);
-      resolve(stdout);
-    });
-  });
-}
+import { execPromise, FIXTURES_PATH } from '../utils';
 
 /**
  * Tests whether there is a global PHPCS on the current machine.
@@ -47,11 +30,6 @@ export async function hasGlobalPHPCS(): Promise<boolean> {
     return false;
   }
 }
-
-/**
- * Fixture directory.
- */
-export const FIXTURES = path.resolve(__dirname, '../../../src/test/fixtures');
 
 interface hookCallback {
   (this: IHookCallbackContext): void;
@@ -93,7 +71,7 @@ export function testCase(
 ): void {
   suite(description, function () {
     // Construct the test file URI object.
-    const fileUri = Uri.file(path.join(FIXTURES, file));
+    const fileUri = Uri.file(path.join(FIXTURES_PATH, file));
     // Possible teardown callback.
     let tearDown: hookCallback | void;
 
