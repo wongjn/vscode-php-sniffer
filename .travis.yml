@@ -1,7 +1,10 @@
 language: node_js
 node_js:
   - 10
-cache: npm
+cache:
+  npm: true
+  directories:
+    - src/test/fixtures/vendor
 env:
   - TEST_SCRIPT=unit
   - TEST_SCRIPT=integration CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/integration PHPENV_VERSION=7.1
