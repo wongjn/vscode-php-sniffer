@@ -36,6 +36,13 @@ const diagnosticsClearer = (diagnostics: DiagnosticCollection) => ({ uri }: Text
   diagnostics.delete(uri);
 };
 
+/**
+ * High-order function that runs each function over the arguments.
+ */
+const parallel = <T extends any[]>(
+  ...funcs: Function[]
+) => (...args: T): void => funcs.forEach(func => func(...args));
+
 export class Validator {
   private diagnosticCollection: DiagnosticCollection = languages.createDiagnosticCollection('php');
 
@@ -53,8 +60,11 @@ export class Validator {
     workspace.onDidChangeConfiguration(this.onConfigChange, this, subscriptions);
     workspace.onDidOpenTextDocument(this.validate, this, subscriptions);
     workspace.onDidCloseTextDocument(
-      diagnosticsClearer(this.diagnosticCollection),
-      null,
+      parallel(
+        diagnosticsClearer(this.diagnosticCollection),
+        this.cancelRun,
+      ),
+      this,
       subscriptions,
     );
     workspace.onDidChangeWorkspaceFolders(this.refresh, this, subscriptions);
@@ -122,6 +132,20 @@ export class Validator {
   }
 
   /**
+   * Cancels a validation run for a document.
+   *
+   * @param document
+   *   The document to cancel a validation run for.
+   */
+  protected cancelRun({ uri }: TextDocument): void {
+    const runner = this.runnerCancellations.get(uri);
+    if (runner) {
+      runner.cancel();
+      runner.dispose();
+    }
+  }
+
+  /**
    * Lints a document.
    *
    * @param document
@@ -132,11 +156,8 @@ export class Validator {
       return;
     }
 
-    const oldRunner = this.runnerCancellations.get(document.uri);
-    if (oldRunner) {
-      oldRunner.cancel();
-      oldRunner.dispose();
-    }
+    // Cancel any old run of this same document.
+    this.cancelRun(document);
 
     const runner = new CancellationTokenSource();
     this.runnerCancellations.set(document.uri, runner);
