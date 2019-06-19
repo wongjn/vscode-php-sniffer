@@ -192,7 +192,7 @@ export class Validator {
       })
       .catch(error => {
         if (error instanceof CliCommandError) {
-          window.showErrorMessage(CliCommandError.toString());
+          window.showErrorMessage(error.message);
         }
       });
 
