@@ -1,124 +1,80 @@
 import { strictEqual } from 'assert';
 import { CancellationTokenSource } from 'vscode';
-import { getFormattedText, getFormattedTextParams } from '../../formatter';
+import { formatterFactory } from '../../formatter';
 import { execPromise, FIXTURES_PATH } from '../utils';
 
-/**
- * Creates the parameter object for running getFormattedText() with defaults.
- */
-function configFactory(overrides: {}): getFormattedTextParams {
-  return {
-    execFolder: './vendor/bin/',
-    standard: 'PSR2',
-    text: '',
-    formatOptions: { insertSpaces: true, tabSize: 2 },
-    cwd: FIXTURES_PATH,
-    token: new CancellationTokenSource().token,
-    isFullDocument: true,
-    ...overrides,
-  };
-}
+// Returns a cancellation token.
+const getToken = () => new CancellationTokenSource().token;
 
 suite('Formatting', function () {
-  suite('getFormattedText()', function () {
+  suite('formatterFactory()', function () {
+    let configMock: {
+      data: { [key: string]: any };
+      get<T>(section: string, defaultValue: T): T;
+    };
+
     suiteSetup(async function () {
       this.timeout(0);
       await execPromise('composer install', { cwd: FIXTURES_PATH });
     });
 
-    test('Whole document formatting', async function () {
-      const config = configFactory({
-        text: `<?php
-interface MyInterface { $property; }`,
-      });
+    setup(function () {
+      configMock = {
+        data: {
+          standard: 'PSR2',
+          executablesFolder: './vendor/bin/',
+        },
+        get<T>(key: string, defaultValue: T): T {
+          return key in this.data ? this.data[key] : defaultValue;
+        },
+      };
+    });
 
-      const resultPlain = await getFormattedText(config);
+    test('Formatter formats text as expected', async function () {
+      const text = `<?php
+interface MyInterface { $property; }`;
+
       strictEqual(
-        resultPlain,
+        await formatterFactory(configMock, getToken(), FIXTURES_PATH)(text),
         `<?php
 interface MyInterface
 {
     $property;
 }
 `,
-        'The whole document should be formatted as expected.',
-      );
-
-      config.excludes = [
-        'PSR2.Classes.ClassDeclaration',
-      ];
-      strictEqual(
-        await getFormattedText(config),
-        resultPlain,
-        'The `excludes` key should not affect formatting.',
       );
     });
 
-    test('Test pure partial formatting', async function () {
-      const result = await getFormattedText(configFactory({
-        text: 'interface MyInterface { $property; }',
-        isFullDocument: false,
-      }));
+    test('Sniff exclusion works', async function () {
+      const text = `<?php
+interface MyInterface { $property; }`;
 
       strictEqual(
-        result,
-        `interface MyInterface
-{
-    $property;
+        await formatterFactory(
+          configMock,
+          getToken(),
+          FIXTURES_PATH,
+          ['PSR2.Classes.ClassDeclaration'],
+        )(text),
+        `<?php
+interface MyInterface { $property;
 }
 `,
       );
     });
 
-    test('Test partial formatting with excludes', async function () {
-      const result = await getFormattedText(configFactory({
-        text: 'interface MyInterface { $property; }',
-        excludes: [
-          'PSR2.Classes.ClassDeclaration',
-        ],
-        isFullDocument: false,
-      }));
-
-      strictEqual(
-        result,
-        `interface MyInterface { $property;
-}
-`,
-      );
-    });
-
-    test('Test indented partial formatting', async function () {
-      const result = await getFormattedText(configFactory({
-        text: `    function a($b){
-    $foo = "a";
-
-    $bar = call( $foo); }`,
-        isFullDocument: false,
-      }));
-
-      strictEqual(
-        result,
-        `    function a($b)
-    {
-        $foo = "a";
-
-        $bar = call($foo);
-    }
-`,
-      );
-    });
-
-    test('Test cancellation', async function () {
+    test('Cancellation returns empty result', async function () {
       const cancellation = new CancellationTokenSource();
-      const pendingResult = getFormattedText(configFactory({
-        text: `<?php
-interface MyInterface { $property; }`,
-        token: cancellation.token,
-      }));
+
+      const pendingResult = formatterFactory(
+        configMock,
+        cancellation.token,
+        FIXTURES_PATH,
+      )('<?php interface MyInterface { $property; }');
 
       setTimeout(() => cancellation.cancel(), 2);
 
-      strictEqual(await pendingResult, null);
+      strictEqual(await pendingResult, '');
     });
   });
 });

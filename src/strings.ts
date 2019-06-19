@@ -49,3 +49,49 @@ export function getIndentation(text: string, { insertSpaces, tabSize }: IndentSt
 
   return unit.repeat(count);
 }
+
+/**
+ * Runs a function over a text snippet with normalization.
+ *
+ * @param text
+ *   The text snippet to format.
+ * @param formatOptions
+ *   Configuration of indentation.
+ * @param processor
+ *   The processor function to run on the normalized snippet.
+ */
+export async function processSnippet(
+  text: string,
+  formatOptions: IndentStyle,
+  processor: (text: string) => Promise<string>,
+) {
+  const indent: string = getIndentation(text, formatOptions);
+  const needsPhpTag: boolean = !text.includes('<?');
+
+  let inputText: string = text;
+
+  // Remove snippet-wide indentation before sending to phpcbf.
+  if (indent) {
+    inputText = inputText.replace(new RegExp(`^${indent}`, 'mg'), '');
+  }
+
+  // Add <?php tag to the snippet so that phpcbf recognizes it as PHP code.
+  if (needsPhpTag) {
+    inputText = `<?php\n${inputText}`;
+  }
+
+  let result = await processor(inputText);
+
+  if (result) {
+    // Remove <?php tag if we added it.
+    if (needsPhpTag) {
+      result = result.replace(/<\?(php)?\n?/, '');
+    }
+    // Restore snippet indentation.
+    if (indent) {
+      result = result.replace(/^(.+)/mg, `${indent}$1`);
+    }
+  }
+
+  return result;
+}
