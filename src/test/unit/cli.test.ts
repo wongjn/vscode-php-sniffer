@@ -1,5 +1,15 @@
 import { deepEqual, equal, rejects } from 'assert';
+import { CancellationToken } from 'vscode';
 import { mapToCliArgs, executeCommand } from '../../cli';
+
+type TestStubDisposable = {
+  dispose: () => any;
+}
+
+interface TestToken extends CancellationToken {
+  cancelCallback?: (e?: any) => any;
+  cancel: () => void;
+}
 
 suite('CLI Utilities', function () {
   suite('mapToCliArgs()', function () {
@@ -30,7 +40,10 @@ suite('CLI Utilities', function () {
 
   suite('executeCommand()', function () {
     const stubToken = {
-      onCancellationRequested() { },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      onCancellationRequested(e: (e: any) => any): TestStubDisposable {
+        return { dispose() { } };
+      },
       isCancellationRequested: false,
     };
 
@@ -45,15 +58,17 @@ suite('CLI Utilities', function () {
     });
 
     test('Canceling the execution via the token returns null', async function () {
-      const token = {
+      const token: TestToken = {
         isCancellationRequested: false,
-        cancelCallback: () => { },
         cancel() {
           this.isCancellationRequested = true;
-          this.cancelCallback();
+          if (this.cancelCallback) this.cancelCallback();
         },
-        onCancellationRequested(callback: () => void) {
+        onCancellationRequested(callback: (e: any) => any): TestStubDisposable {
           this.cancelCallback = callback;
+          return {
+            dispose: () => { },
+          };
         },
       };
 

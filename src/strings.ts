@@ -3,6 +3,8 @@
  * Utilities related to strings.
  */
 
+import { FormattingOptions } from 'vscode';
+
 /**
  * Converts a list of possibly empty strings into a single string.
  *
@@ -15,16 +17,6 @@
 export const stringsList = (strings: string[]) => strings.filter(Boolean).join('\n');
 
 /**
- * Indentation style in use for indent detection.
- */
-type IndentStyle = {
-  // True if spaces are used, false for tabs.
-  insertSpaces: boolean;
-  // Number of spaces used per indent level.
-  tabSize: number;
-};
-
-/**
  * Gets indentation information for a document.
  *
  * @param text
@@ -34,7 +26,7 @@ type IndentStyle = {
  * @return
  *   The indentation string.
  */
-export function getIndentation(text: string, { insertSpaces, tabSize }: IndentStyle): string {
+export function getIndentation(text: string, { insertSpaces, tabSize }: FormattingOptions): string {
   const unit = insertSpaces ? ' '.repeat(tabSize) : '\t';
   // Expression to match at least one indent unit.
   const indentMatcher = new RegExp(`^((?:${unit})+)`);
@@ -62,7 +54,7 @@ export function getIndentation(text: string, { insertSpaces, tabSize }: IndentSt
  */
 export async function processSnippet(
   text: string,
-  formatOptions: IndentStyle,
+  formatOptions: FormattingOptions,
   processor: (text: string) => Promise<string>,
 ) {
   const indent: string = getIndentation(text, formatOptions);

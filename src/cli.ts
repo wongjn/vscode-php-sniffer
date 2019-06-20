@@ -5,6 +5,7 @@
 
 import { SpawnOptions, spawn } from 'child_process';
 import { EventEmitter } from 'events';
+import { CancellationToken } from 'vscode';
 import { stringsList } from './strings';
 
 /**
@@ -44,18 +45,10 @@ export class CliCommandError extends Error {
   }
 }
 
-// Cancellation token type alias for `executeCommand()`. One should actually
-// use `vscode.CancellationToken` with the aforementioned function but this is
-// here so this file does not need to import vscode (for unit testing).
-type CancelToken = {
-  onCancellationRequested: (onCancel: () => void) => void;
-  isCancellationRequested: boolean;
-}
-
 // Options type for `executeCommand()`.
 type ExecuteCommandOptions = {
   command: string;
-  token: CancelToken;
+  token: CancellationToken;
   args?: string[];
   stdin?: string;
   spawnOptions?: SpawnOptions;
