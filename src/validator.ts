@@ -142,6 +142,7 @@ export class Validator {
     if (runner) {
       runner.cancel();
       runner.dispose();
+      this.runnerCancellations.delete(uri);
     }
   }
 
