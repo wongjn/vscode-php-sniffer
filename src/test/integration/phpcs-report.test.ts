@@ -1,5 +1,5 @@
-import { equal, deepEqual } from 'assert';
-import { DiagnosticSeverity, Range } from 'vscode';
+import { strictEqual, deepStrictEqual } from 'assert';
+import { Diagnostic, DiagnosticSeverity, Range } from 'vscode';
 import { PHPCSMessageType, reportFlatten } from '../../phpcs-report';
 
 suite('Report Utilities', function () {
@@ -20,7 +20,7 @@ suite('Report Utilities', function () {
         },
       };
 
-      equal(reportFlatten(report).length, 0);
+      strictEqual(reportFlatten(report).length, 0);
     });
 
     test('A report is flattened correctly', function () {
@@ -90,20 +90,20 @@ suite('Report Utilities', function () {
       };
 
       const result = reportFlatten(report);
-      equal(result.length, 5);
+      strictEqual(result.length, 5);
 
       messages.forEach(({
         line, column, source, message, type,
       }, index) => {
-        deepEqual(
+        deepStrictEqual(
           result[index],
-          {
-            message: `[${source}]\n${message}`,
-            severity: type === PHPCSMessageType.WARNING
+          new Diagnostic(
+            new Range(line - 1, column - 1, line - 1, column - 1),
+            `[${source}]\n${message}`,
+            type === PHPCSMessageType.WARNING
               ? DiagnosticSeverity.Warning
               : DiagnosticSeverity.Error,
-            range: new Range(line - 1, column - 1, line - 1, column - 1),
-          },
+          ),
         );
       });
     });

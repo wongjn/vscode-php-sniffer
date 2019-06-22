@@ -1,4 +1,4 @@
-import { deepEqual, equal, rejects } from 'assert';
+import { deepStrictEqual, rejects, strictEqual } from 'assert';
 import { CancellationToken } from 'vscode';
 import { mapToCliArgs, executeCommand } from '../../cli';
 
@@ -15,16 +15,16 @@ suite('CLI Utilities', function () {
   suite('mapToCliArgs()', function () {
     test('Values passed compile correctly', function () {
       const args1 = new Map([['a', 'b']]);
-      deepEqual(mapToCliArgs(args1), ['--a=b']);
+      deepStrictEqual(mapToCliArgs(args1), ['--a=b']);
 
       const args2 = new Map([['a', 'b'], ['c', '1']]);
-      deepEqual(mapToCliArgs(args2), ['--a=b', '--c=1']);
+      deepStrictEqual(mapToCliArgs(args2), ['--a=b', '--c=1']);
 
       const args3 = new Map([['a', 'b'], ['c', '']]);
-      deepEqual(mapToCliArgs(args3), ['--a=b'], 'Entries with empty values should not be compiled.');
+      deepStrictEqual(mapToCliArgs(args3), ['--a=b'], 'Entries with empty values should not be compiled.');
 
       const args4 = new Map([['a', 'b'], ['', '1']]);
-      deepEqual(mapToCliArgs(args4), ['--a=b'], 'Entries with empty keys should not be compiled.');
+      deepStrictEqual(mapToCliArgs(args4), ['--a=b'], 'Entries with empty keys should not be compiled.');
     });
 
     test('Only values that need quotes are quoted when requested', function () {
@@ -33,8 +33,8 @@ suite('CLI Utilities', function () {
         ['b', 'needs quotes'],
       ]);
 
-      deepEqual(mapToCliArgs(args1), ['--a=no-quotes', '--b=needs quotes']);
-      deepEqual(mapToCliArgs(args1, true), ['--a=no-quotes', '--b="needs quotes"']);
+      deepStrictEqual(mapToCliArgs(args1), ['--a=no-quotes', '--b=needs quotes']);
+      deepStrictEqual(mapToCliArgs(args1, true), ['--a=no-quotes', '--b="needs quotes"']);
     });
   });
 
@@ -54,7 +54,7 @@ suite('CLI Utilities', function () {
         args: ['foobar'],
       });
 
-      equal(result, 'foobar\n');
+      strictEqual(result, 'foobar\n');
     });
 
     test('Canceling the execution via the token returns null', async function () {
@@ -79,7 +79,7 @@ suite('CLI Utilities', function () {
       });
 
       token.cancel();
-      equal(await result, null);
+      strictEqual(await result, null);
     });
 
     test('Non-zero exit code throws an error', function () {

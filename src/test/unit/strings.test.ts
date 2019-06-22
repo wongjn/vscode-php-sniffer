@@ -1,16 +1,16 @@
-import { equal, strictEqual } from 'assert';
+import { strictEqual } from 'assert';
 import { stringsList, getIndentation, processSnippet } from '../../strings';
 
 suite('String Utilities', function () {
   suite('stringsList()', function () {
     test('Values passed compile correctly', function () {
       const strings = ['a', 'b', 'c'];
-      equal(stringsList(strings), 'a\nb\nc');
+      strictEqual(stringsList(strings), 'a\nb\nc');
     });
 
     test('Empty strings are filtered out', function () {
       const strings = ['a', '', 'b', 'c', '', ''];
-      equal(stringsList(strings), 'a\nb\nc');
+      strictEqual(stringsList(strings), 'a\nb\nc');
     });
   });
 
@@ -25,7 +25,7 @@ suite('String Utilities', function () {
           },
         );
 
-        equal(result, '  ');
+        strictEqual(result, '  ');
       });
 
       test('Space indent detection with 1 line of indentation only', function () {
@@ -37,7 +37,7 @@ suite('String Utilities', function () {
           },
         );
 
-        equal(result, '  ');
+        strictEqual(result, '  ');
       });
 
       test('Space indent detection with a non-indented line', function () {
@@ -49,7 +49,7 @@ suite('String Utilities', function () {
           },
         );
 
-        equal(result, '');
+        strictEqual(result, '');
       });
 
       test('Tab indent detection with empty line', function () {
@@ -61,7 +61,7 @@ suite('String Utilities', function () {
           },
         );
 
-        equal(result, '\t');
+        strictEqual(result, '\t');
       });
 
       test('Tab indent detection with 1 line of indentation only', function () {
@@ -73,7 +73,7 @@ suite('String Utilities', function () {
           },
         );
 
-        equal(result, '\t');
+        strictEqual(result, '\t');
       });
 
       test('Tab indent detection with a non-indented line', function () {
@@ -85,7 +85,7 @@ suite('String Utilities', function () {
           },
         );
 
-        equal(result, '');
+        strictEqual(result, '');
       });
     }
 
