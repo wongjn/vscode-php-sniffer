@@ -60,7 +60,7 @@ suite('PHP Sniffer Tests', function () {
           const cmd = userSetDefault
             ? `--config-set default_standard ${userSetDefault}`
             : '--config-delete default_standard';
-          execPromise(`phpcs ${cmd}`);
+          return execPromise(`phpcs ${cmd}`);
         };
       },
     );

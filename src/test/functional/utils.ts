@@ -31,7 +31,7 @@ export async function hasGlobalPHPCS(): Promise<boolean> {
   }
 }
 
-interface hookCallback {
+type hookCallback = {
   (this: IHookCallbackContext): void;
 }
 
@@ -94,8 +94,12 @@ export function testCase(
         const subscription = languages.onDidChangeDiagnostics(({ uris }) => {
           const list = uris.map(uri => uri.toString());
           if (list.indexOf(fileUri.toString()) === -1) return;
+
+          const diagnostics = languages.getDiagnostics(fileUri);
+          if (diagnostics.length === 0) return;
+
           subscription.dispose();
-          resolve(languages.getDiagnostics(fileUri));
+          resolve(diagnostics);
         });
       });
 
