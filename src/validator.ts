@@ -128,7 +128,9 @@ export class Validator {
   protected refresh(): void {
     this.diagnosticCollection!.clear();
 
-    workspace.textDocuments.forEach(this.validate, this);
+    workspace.textDocuments
+      .filter(({ isClosed }) => !isClosed)
+      .forEach(this.validate, this);
   }
 
   /**
@@ -153,7 +155,7 @@ export class Validator {
    *   The document to lint.
    */
   protected validate(document: TextDocument): void {
-    if (document.languageId !== 'php') {
+    if (document.languageId !== 'php' || document.isClosed) {
       return;
     }
 
@@ -205,7 +207,11 @@ export class Validator {
 
     command
       .then(result => {
-        if (result) {
+        if (document.isClosed) {
+          // Clear diagnostics on a closed document.
+          this.diagnosticCollection.delete(document.uri);
+          // If the command was not cancelled.
+        } else if (result !== null) {
           this.diagnosticCollection.set(
             document.uri,
             reportFlatten(JSON.parse(result)),
@@ -216,6 +222,9 @@ export class Validator {
         if (error instanceof CliCommandError) {
           window.showErrorMessage(error.message);
         }
+
+        // Reset diagnostics for the document if there was an error.
+        this.diagnosticCollection.delete(document.uri);
       });
 
     window.setStatusBarMessage('PHP Sniffer: validating…', command);
