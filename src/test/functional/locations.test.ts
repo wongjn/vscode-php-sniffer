@@ -32,7 +32,7 @@ function functionalTestSuiteRun() {
   );
 }
 
-suite('PHP Sniffer Tests', function () {
+suite('Executable & ruleset locations', function () {
   suite('Global executable', function () {
     suiteSetup(async function () {
       if (await hasGlobalPHPCS()) this.skip();
