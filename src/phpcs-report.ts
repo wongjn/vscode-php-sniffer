@@ -53,7 +53,7 @@ export const reportFlatten = ({ files }: PHPCSReport): Diagnostic[] => Object.va
   .map(({
     message, line, column, type, source,
   }) => new Diagnostic(
-    new Range(line, column, line, column),
+    new Range(line - 1, column - 1, line - 1, column - 1),
     `[${source}]\n${message}`,
     type === PHPCSMessageType.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
   ));

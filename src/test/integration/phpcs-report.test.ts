@@ -102,7 +102,7 @@ suite('Report Utilities', function () {
             severity: type === PHPCSMessageType.WARNING
               ? DiagnosticSeverity.Warning
               : DiagnosticSeverity.Error,
-            range: new Range(line, column, line, column),
+            range: new Range(line - 1, column - 1, line - 1, column - 1),
           },
         );
       });
