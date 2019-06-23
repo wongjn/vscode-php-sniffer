@@ -14,6 +14,7 @@ import {
 } from 'vscode';
 import { mapToCliArgs, executeCommand, CliCommandError } from './cli';
 import { processSnippet } from './strings';
+import { WorkspaceConfigurationReadable } from './config';
 
 /**
  * Tests whether a range is for the full document.
@@ -34,10 +35,6 @@ function isFullDocumentRange(range: Range, document: TextDocument): boolean {
   return range.isEqual(documentRange);
 }
 
-interface WorkspaceConfigurationGet {
-  get<T>(section: string, defaultValue: T): T;
-}
-
 /**
  * Returns a formatting intermediary function.
  *
@@ -54,7 +51,7 @@ interface WorkspaceConfigurationGet {
  *   the final formatter function to format text via PHPCBF.
  */
 export function formatterFactory(
-  config: WorkspaceConfigurationGet,
+  config: WorkspaceConfigurationReadable,
   token: CancellationToken,
   cwd: string | undefined = undefined,
   excludes: string[] = [],
