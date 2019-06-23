@@ -1,33 +1,21 @@
 import { strictEqual } from 'assert';
 import { CancellationTokenSource } from 'vscode';
 import { formatterFactory } from '../../formatter';
-import { execPromise, FIXTURES_PATH } from '../utils';
+import { execPromise, FIXTURES_PATH, ConfigMock } from '../utils';
 
 // Returns a cancellation token.
 const getToken = () => new CancellationTokenSource().token;
 
 suite('Formatting', function () {
   suite('formatterFactory()', function () {
-    let configMock: {
-      data: { [key: string]: any };
-      get<T>(section: string, defaultValue: T): T;
-    };
+    const configMock = new ConfigMock({
+      standard: 'PSR2',
+      executablesFolder: './vendor/bin/',
+    });
 
     suiteSetup(async function () {
       this.timeout(0);
       await execPromise('composer install', { cwd: FIXTURES_PATH });
-    });
-
-    setup(function () {
-      configMock = {
-        data: {
-          standard: 'PSR2',
-          executablesFolder: './vendor/bin/',
-        },
-        get<T>(key: string, defaultValue: T): T {
-          return key in this.data ? this.data[key] : defaultValue;
-        },
-      };
     });
 
     test('Formatter formats text as expected', async function () {
