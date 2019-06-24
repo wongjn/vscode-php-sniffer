@@ -4,6 +4,7 @@
  */
 
 import {
+  CancellationToken,
   CancellationTokenSource,
   ConfigurationChangeEvent,
   DiagnosticCollection,
@@ -16,8 +17,10 @@ import {
   workspace,
 } from 'vscode';
 import { debounce } from 'lodash';
-import { reportFlatten } from './phpcs-report';
+import { SpawnOptions } from 'child_process';
+import { reportFlatten, PHPCSReport } from './phpcs-report';
 import { mapToCliArgs, executeCommand, CliCommandError } from './cli';
+import { WorkspaceConfigurationReadable } from './config';
 
 const enum runConfig {
   save = 'onSave',
@@ -42,6 +45,59 @@ const diagnosticsClearer = (diagnostics: DiagnosticCollection) => ({ uri }: Text
 const parallel = <T extends any[]>(
   ...funcs: Function[]
 ) => (...args: T): void => funcs.forEach(func => func(...args));
+
+/**
+ * Validates text with PHPCS.
+ *
+ * @param text
+ *   The text of the document to validate.
+ * @param token
+ *   A token to cancel validation.
+ * @param config
+ *   The configuration to run the validation.
+ * @param filePath
+ *   The path to the file, for possible path-dependent sniffs/config.
+ * @param cwd
+ *   The current working directory to use.
+ * @return
+ *   The report from PHPCS or `null` if cancelled.
+ */
+export async function validate(
+  text: string,
+  token: CancellationToken,
+  config: WorkspaceConfigurationReadable,
+  filePath: string = '',
+  cwd: string | undefined = undefined,
+): Promise<PHPCSReport | null> {
+  const args = new Map([
+    ['report', 'json'],
+    ['standard', config.get('standard', '')],
+    ['stdin-path', filePath],
+  ]);
+
+  const shell = process.platform === 'win32';
+
+  const result = await executeCommand({
+    command: `${config.get('executablesFolder', '')}phpcs`,
+    token,
+    stdin: text,
+    args: [
+      ...mapToCliArgs(args, shell),
+      // Exit with 0 code even if there are sniff warnings or errors so we can
+      // use error callback for actual execution errors.
+      '--runtime-set', 'ignore_warnings_on_exit', '1',
+      '--runtime-set', 'ignore_errors_on_exit', '1',
+      // Ensure quiet output to override any output settings from config.
+      // Ensures we get JSON only.
+      '-q',
+      // Read stdin.
+      '-',
+    ],
+    spawnOptions: { cwd, shell },
+  });
+
+  return result ? JSON.parse(result) : null;
+}
 
 export class Validator {
   private diagnosticCollection: DiagnosticCollection = languages.createDiagnosticCollection('php');
@@ -164,58 +220,25 @@ export class Validator {
 
     const runner = new CancellationTokenSource();
     this.runnerCancellations.set(document.uri, runner);
-    const { token } = runner;
 
-    const config = workspace.getConfiguration('phpSniffer', document.uri);
-    const execFolder: string = config.get('executablesFolder', '');
-    const standard: string = config.get('standard', '');
-
-    const args = new Map([
-      ['report', 'json'],
-      ['standard', standard],
-    ]);
-
-    if (document.uri.scheme === 'file') {
-      args.set('stdin-path', document.uri.fsPath);
-    }
-
-    const spawnOptions = {
-      cwd: workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
+    const resultPromise = validate(
+      document.getText(),
+      runner.token,
+      workspace.getConfiguration('phpSniffer', document.uri),
+      document.uri.scheme === 'file' ? document.uri.fsPath : '',
+      workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
         ? workspace.workspaceFolders[0].uri.fsPath
         : undefined,
-      shell: process.platform === 'win32',
-    };
+    );
 
-    const command = executeCommand({
-      command: `${execFolder}phpcs`,
-      token,
-      stdin: document.getText(),
-      args: [
-        ...mapToCliArgs(args, spawnOptions.shell),
-        // Exit with 0 code even if there are sniff warnings or errors so we can
-        // use error callback for actual execution errors.
-        '--runtime-set', 'ignore_warnings_on_exit', '1',
-        '--runtime-set', 'ignore_errors_on_exit', '1',
-        // Ensure quiet output to override any output settings from config.
-        // Ensures we get JSON only.
-        '-q',
-        // Read stdin.
-        '-',
-      ],
-      spawnOptions,
-    });
-
-    command
+    resultPromise
       .then(result => {
         if (document.isClosed) {
           // Clear diagnostics on a closed document.
           this.diagnosticCollection.delete(document.uri);
           // If the command was not cancelled.
         } else if (result !== null) {
-          this.diagnosticCollection.set(
-            document.uri,
-            reportFlatten(JSON.parse(result)),
-          );
+          this.diagnosticCollection.set(document.uri, reportFlatten(result));
         }
       })
       .catch(error => {
@@ -227,6 +250,6 @@ export class Validator {
         this.diagnosticCollection.delete(document.uri);
       });
 
-    window.setStatusBarMessage('PHP Sniffer: validating…', command);
+    window.setStatusBarMessage('PHP Sniffer: validating…', resultPromise);
   }
 }
