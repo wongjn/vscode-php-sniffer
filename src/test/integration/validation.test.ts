@@ -1,14 +1,14 @@
 import { strictEqual } from 'assert';
 import { CancellationTokenSource } from 'vscode';
 import { resolve } from 'path';
-import { execPromise, FIXTURES_PATH, ConfigMock } from '../utils';
+import { execPromise, FIXTURES_PATH, getConfigMock } from '../utils';
 import { validate } from '../../validator';
 
 suite('Validation', function () {
   suite('validate()', function () {
-    const config = new ConfigMock({
+    const config = getConfigMock({
       standard: 'PSR12',
-      executablesFolder: './vendor/bin/',
+      prefix: './vendor/bin/',
     });
 
     suiteSetup(async function () {
@@ -21,8 +21,6 @@ suite('Validation', function () {
         '<?php $a ="b"',
         new CancellationTokenSource().token,
         config,
-        undefined,
-        FIXTURES_PATH,
       );
 
       strictEqual(result!.totals.errors, 2);
@@ -34,8 +32,6 @@ suite('Validation', function () {
         '<?php $a ="b"',
         cancellation.token,
         config,
-        undefined,
-        FIXTURES_PATH,
       );
 
       setTimeout(() => cancellation.cancel(), 2);
@@ -43,17 +39,16 @@ suite('Validation', function () {
     });
 
     test('File path parameter', async function () {
-      const testConfig = new ConfigMock({
+      const testConfig = getConfigMock({
+        ...config,
+        filePath: resolve(__dirname, '../../../src/test/fixtures/ignore-me/ignored.php'),
         standard: './phpcs-semicolon.xml',
-        executablesFolder: './vendor/bin/',
       });
 
       const result = await validate(
         '<?php $a ="b"',
         new CancellationTokenSource().token,
         testConfig,
-        resolve(__dirname, '../../../src/test/fixtures/ignore-me/ignored.php'),
-        FIXTURES_PATH,
       );
 
       strictEqual(

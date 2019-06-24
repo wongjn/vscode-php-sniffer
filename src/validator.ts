@@ -17,10 +17,9 @@ import {
   workspace,
 } from 'vscode';
 import { debounce } from 'lodash';
-import { SpawnOptions } from 'child_process';
 import { reportFlatten, PHPCSReport } from './phpcs-report';
 import { mapToCliArgs, executeCommand, CliCommandError } from './cli';
-import { WorkspaceConfigurationReadable } from './config';
+import { getDocumentConfig, PHPSnifferConfigInterface } from './config';
 
 const enum runConfig {
   save = 'onSave',
@@ -55,34 +54,28 @@ const parallel = <T extends any[]>(
  *   A token to cancel validation.
  * @param config
  *   The configuration to run the validation.
- * @param filePath
- *   The path to the file, for possible path-dependent sniffs/config.
- * @param cwd
- *   The current working directory to use.
  * @return
  *   The report from PHPCS or `null` if cancelled.
  */
 export async function validate(
   text: string,
   token: CancellationToken,
-  config: WorkspaceConfigurationReadable,
-  filePath: string = '',
-  cwd: string | undefined = undefined,
+  {
+    standard, filePath, prefix, spawnOptions,
+  }: PHPSnifferConfigInterface,
 ): Promise<PHPCSReport | null> {
   const args = new Map([
     ['report', 'json'],
-    ['standard', config.get('standard', '')],
+    ['standard', standard],
     ['stdin-path', filePath],
   ]);
 
-  const shell = process.platform === 'win32';
-
   const result = await executeCommand({
-    command: `${config.get('executablesFolder', '')}phpcs`,
+    command: `${prefix}phpcs`,
     token,
     stdin: text,
     args: [
-      ...mapToCliArgs(args, shell),
+      ...mapToCliArgs(args, spawnOptions.shell as boolean),
       // Exit with 0 code even if there are sniff warnings or errors so we can
       // use error callback for actual execution errors.
       '--runtime-set', 'ignore_warnings_on_exit', '1',
@@ -93,7 +86,7 @@ export async function validate(
       // Read stdin.
       '-',
     ],
-    spawnOptions: { cwd, shell },
+    spawnOptions,
   });
 
   return result ? JSON.parse(result) : null;
@@ -224,11 +217,7 @@ export class Validator {
     const resultPromise = validate(
       document.getText(),
       runner.token,
-      workspace.getConfiguration('phpSniffer', document.uri),
-      document.uri.scheme === 'file' ? document.uri.fsPath : '',
-      workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
-        ? workspace.workspaceFolders[0].uri.fsPath
-        : undefined,
+      getDocumentConfig(document),
     );
 
     resultPromise

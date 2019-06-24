@@ -14,7 +14,7 @@ import {
 } from 'vscode';
 import { mapToCliArgs, executeCommand, CliCommandError } from './cli';
 import { processSnippet } from './strings';
-import { WorkspaceConfigurationReadable } from './config';
+import { getDocumentConfig, PHPSnifferConfigInterface } from './config';
 
 /**
  * Tests whether a range is for the full document.
@@ -38,12 +38,10 @@ function isFullDocumentRange(range: Range, document: TextDocument): boolean {
 /**
  * Returns a formatting intermediary function.
  *
- * @param config
- *   The workspace configuration object.
  * @param token
  *   A token that can be called to cancel the formatting.
- * @param cwd
- *   The current working directory to use.
+ * @param config
+ *   The normalized configuration of the extension.
  * @param excludes
  *   An optional list of sniffs to exclude.
  * @return
@@ -51,28 +49,26 @@ function isFullDocumentRange(range: Range, document: TextDocument): boolean {
  *   the final formatter function to format text via PHPCBF.
  */
 export function formatterFactory(
-  config: WorkspaceConfigurationReadable,
   token: CancellationToken,
-  cwd: string | undefined = undefined,
+  { standard, prefix, spawnOptions }: PHPSnifferConfigInterface,
   excludes: string[] = [],
 ) {
   return async (text: string) => {
-    const args = new Map([['standard', config.get('standard', '')]]);
+    const args = new Map([['standard', standard]]);
+
     if (excludes.length) {
       args.set('exclude', excludes.join(','));
     }
-
-    const shell = process.platform === 'win32';
 
     try {
       // PHPCBF uses unconventional exit codes, see
       // https://github.com/squizlabs/PHP_CodeSniffer/issues/1270#issuecomment-272768413
       await executeCommand({
-        command: `${config.get('executablesFolder', '')}phpcbf`,
+        command: `${prefix}phpcbf`,
         token,
-        args: [...mapToCliArgs(args, shell), '-'],
+        args: [...mapToCliArgs(args, spawnOptions.shell as boolean), '-'],
         stdin: text,
-        spawnOptions: { cwd, shell },
+        spawnOptions,
       });
     } catch (error) {
       // Exit code 1 indicates all fixable errors were fixed correctly.
@@ -103,11 +99,8 @@ export const Formatter = {
     const text = document.getText(range);
 
     const formatter = formatterFactory(
-      config,
       token,
-      workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
-        ? workspace.workspaceFolders[0].uri.fsPath
-        : undefined,
+      getDocumentConfig(document),
       isFullDocument ? [] : config.get('snippetExcludeSniffs', []),
     );
 

@@ -1,16 +1,16 @@
 import { strictEqual } from 'assert';
 import { CancellationTokenSource } from 'vscode';
 import { formatterFactory } from '../../formatter';
-import { execPromise, FIXTURES_PATH, ConfigMock } from '../utils';
+import { execPromise, FIXTURES_PATH, getConfigMock } from '../utils';
 
 // Returns a cancellation token.
 const getToken = () => new CancellationTokenSource().token;
 
 suite('Formatting', function () {
   suite('formatterFactory()', function () {
-    const configMock = new ConfigMock({
+    const configMock = getConfigMock({
       standard: 'PSR2',
-      executablesFolder: './vendor/bin/',
+      prefix: './vendor/bin/',
     });
 
     suiteSetup(async function () {
@@ -23,7 +23,7 @@ suite('Formatting', function () {
 interface MyInterface { $property; }`;
 
       strictEqual(
-        await formatterFactory(configMock, getToken(), FIXTURES_PATH)(text),
+        await formatterFactory(getToken(), configMock)(text),
         `<?php
 interface MyInterface
 {
@@ -39,9 +39,8 @@ interface MyInterface { $property; }`;
 
       strictEqual(
         await formatterFactory(
-          configMock,
           getToken(),
-          FIXTURES_PATH,
+          configMock,
           ['PSR2.Classes.ClassDeclaration'],
         )(text),
         `<?php
@@ -55,9 +54,8 @@ interface MyInterface { $property;
       const cancellation = new CancellationTokenSource();
 
       const pendingResult = formatterFactory(
-        configMock,
         cancellation.token,
-        FIXTURES_PATH,
+        configMock,
       )('<?php interface MyInterface { $property; }');
 
       setTimeout(() => cancellation.cancel(), 2);

@@ -1,6 +1,6 @@
 import { ExecOptions, exec } from 'child_process';
 import * as path from 'path';
-import { WorkspaceConfigurationReadable } from '../config';
+import { PHPSnifferConfigInterface } from '../config';
 
 /**
  * Executes a CLI command with promised result.
@@ -22,15 +22,40 @@ export function execPromise(command: string, options: ExecOptions = {}): Thenabl
 // Fixtures directory.
 export const FIXTURES_PATH = path.resolve(__dirname, '../../src/test/fixtures');
 
-type ConfigValues = {
-  [key: string]: any
+/**
+ * All config properties as optional.
+ */
+interface PHPSnifferOptionalConfigInterface {
+  /**
+   * Path to the file being checked/formatted.
+   */
+  filePath?: string;
+
+  /**
+   * The `standard` argument to pass to the binary.
+   */
+  standard?: string;
+
+  /**
+   * The prefix string to add before the command.
+   */
+  prefix?: string;
 }
 
-export class ConfigMock implements WorkspaceConfigurationReadable {
-  // eslint-disable-next-line no-useless-constructor, no-empty-function
-  constructor(protected data: ConfigValues = {}) { }
-
-  get<T>(key: string, defaultValue: T): T {
-    return key in this.data ? this.data[key] : defaultValue;
-  }
-}
+/**
+ * Returns a sample config for tests.
+ */
+export const getConfigMock = (
+  opts: PHPSnifferOptionalConfigInterface,
+): PHPSnifferConfigInterface => ({
+  ...{
+    filePath: '',
+    standard: '',
+    prefix: '',
+    spawnOptions: {
+      cwd: FIXTURES_PATH,
+      shell: process.platform === 'win32',
+    },
+  },
+  ...opts,
+});
