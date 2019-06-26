@@ -111,7 +111,7 @@ export class Validator {
     workspace.onDidCloseTextDocument(
       parallel(
         diagnosticsClearer(this.diagnosticCollection),
-        this.cancelRun,
+        this.cancelRun.bind(this),
       ),
       this,
       subscriptions,
