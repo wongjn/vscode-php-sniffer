@@ -96,5 +96,14 @@ suite('CLI Utilities', function () {
         },
       );
     });
+
+    test('Nonsense command rejects', function () {
+      rejects(
+        executeCommand({
+          command: 'foo-bar-baz',
+          token: stubToken,
+        }),
+      );
+    });
   });
 });
