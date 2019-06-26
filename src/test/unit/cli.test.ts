@@ -82,7 +82,7 @@ suite('CLI Utilities', function () {
       strictEqual(await result, null);
     });
 
-    test('Non-zero exit code throws an error', function () {
+    test('Non-zero exit code rejects', function () {
       rejects(
         executeCommand({
           command: '../../../scripts/non-zero-exit',
