@@ -34,9 +34,10 @@ export function mapToCliArgs(args: Map<string, string>, quote: boolean = false):
  * @return
  *   A promise that resolves to the first argument of the close event callback.
  */
-const closePromise = <T>(emitter: EventEmitter) => new Promise<T>(
-  resolve => emitter.on('close', resolve),
-);
+const closePromise = <T>(emitter: EventEmitter) => new Promise<T>((resolve, reject) => {
+  emitter.on('close', resolve);
+  emitter.on('error', reject);
+});
 
 // Special error class for CLI command non-zero exits.
 export class CliCommandError extends Error {

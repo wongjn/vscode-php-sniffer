@@ -18,7 +18,7 @@ import {
 } from 'vscode';
 import { debounce } from 'lodash';
 import { reportFlatten, PHPCSReport } from './phpcs-report';
-import { mapToCliArgs, executeCommand, CliCommandError } from './cli';
+import { mapToCliArgs, executeCommand } from './cli';
 import { getDocumentConfig, PHPSnifferConfigInterface } from './config';
 
 const enum runConfig {
@@ -231,7 +231,10 @@ export class Validator {
         }
       })
       .catch(error => {
-        if (error instanceof CliCommandError) {
+        // Show all errors apart from global phpcs missing error, due to the
+        // fact that this is currently the default base option and could be
+        // quite noisy for users with only project-level sniffers.
+        if (error.message !== 'spawn phpcs ENOENT') {
           window.showErrorMessage(error.message);
         }
 
