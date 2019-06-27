@@ -19,8 +19,11 @@ export function execPromise(command: string, options: ExecOptions = {}): Thenabl
   });
 }
 
+// Tests source directory.
+export const TESTS_PATH = path.resolve(__dirname, '../../src/test');
+
 // Fixtures directory.
-export const FIXTURES_PATH = path.resolve(__dirname, '../../src/test/fixtures');
+export const FIXTURES_PATH = path.join(TESTS_PATH, '/fixtures');
 
 /**
  * All config properties as optional.

@@ -7,6 +7,7 @@ import {
   Uri,
 } from 'vscode';
 import { getResourceConfig } from '../../config';
+import { TESTS_PATH } from '../utils';
 
 const onDidChangeWorkspaceFoldersPromise = () => new Promise<WorkspaceFoldersChangeEvent>(
   resolve => {
@@ -19,9 +20,9 @@ const onDidChangeWorkspaceFoldersPromise = () => new Promise<WorkspaceFoldersCha
 
 suite('Config', function () {
   suite('getResourceConfig()', async function () {
-    const mainFolder = Uri.file(path.resolve(__dirname, '../../../src/test/integration/fixtures/config'));
-    const subfolder = Uri.file(path.resolve(__dirname, '../../../src/test/integration/fixtures/config/subfolder'));
-    const secondaryFolder = Uri.file(path.resolve(__dirname, '../../../src/test/integration/fixtures/config0'));
+    const mainFolder = Uri.file(path.join(TESTS_PATH, '/integration/fixtures/config'));
+    const subfolder = Uri.file(path.join(TESTS_PATH, '/integration/fixtures/config/subfolder'));
+    const secondaryFolder = Uri.file(path.join(TESTS_PATH, '/integration/fixtures/config0'));
 
     let a: Uri;
     let b: Uri;

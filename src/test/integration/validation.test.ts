@@ -1,6 +1,6 @@
 import { strictEqual } from 'assert';
 import { CancellationTokenSource } from 'vscode';
-import { resolve } from 'path';
+import { join } from 'path';
 import { execPromise, FIXTURES_PATH, getConfigMock } from '../utils';
 import { validate } from '../../validator';
 
@@ -41,7 +41,7 @@ suite('Validation', function () {
     test('File path parameter', async function () {
       const testConfig = getConfigMock({
         ...config,
-        filePath: resolve(__dirname, '../../../src/test/fixtures/ignore-me/ignored.php'),
+        filePath: join(FIXTURES_PATH, '/ignore-me/ignored.php'),
         standard: './phpcs-semicolon.xml',
       });
 
