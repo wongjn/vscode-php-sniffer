@@ -19,7 +19,7 @@ import {
 import { debounce } from 'lodash';
 import { reportFlatten, PHPCSReport } from './phpcs-report';
 import { mapToCliArgs, executeCommand } from './cli';
-import { getDocumentConfig, PHPSnifferConfigInterface } from './config';
+import { getResourceConfig, PHPSnifferConfigInterface } from './config';
 
 const enum runConfig {
   save = 'onSave',
@@ -217,7 +217,7 @@ export class Validator {
     const resultPromise = validate(
       document.getText(),
       runner.token,
-      getDocumentConfig(document),
+      getResourceConfig(document.uri),
     );
 
     resultPromise

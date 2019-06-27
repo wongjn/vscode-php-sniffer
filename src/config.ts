@@ -1,4 +1,4 @@
-import { TextDocument, workspace } from 'vscode';
+import { workspace, Uri } from 'vscode';
 import { SpawnOptions } from 'child_process';
 
 /**
@@ -27,13 +27,13 @@ export interface PHPSnifferConfigInterface {
 }
 
 /**
- * Builds a quick config object reference for a document.
+ * Builds a quick config object reference for a resource.
  */
-export function getDocumentConfig(document: TextDocument): PHPSnifferConfigInterface {
-  const VSConfig = workspace.getConfiguration('phpSniffer', document.uri);
+export function getResourceConfig(uri: Uri): PHPSnifferConfigInterface {
+  const VSConfig = workspace.getConfiguration('phpSniffer', uri);
 
   return {
-    filePath: document.uri.scheme === 'file' ? document.uri.fsPath : '',
+    filePath: uri.scheme === 'file' ? uri.fsPath : '',
     standard: VSConfig.get('standard', ''),
     prefix: VSConfig.get('executablesFolder', ''),
     spawnOptions: {

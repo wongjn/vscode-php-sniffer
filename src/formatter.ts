@@ -14,7 +14,7 @@ import {
 } from 'vscode';
 import { mapToCliArgs, executeCommand, CliCommandError } from './cli';
 import { processSnippet } from './strings';
-import { getDocumentConfig, PHPSnifferConfigInterface } from './config';
+import { getResourceConfig, PHPSnifferConfigInterface } from './config';
 
 /**
  * Tests whether a range is for the full document.
@@ -100,7 +100,7 @@ export const Formatter = {
 
     const formatter = formatterFactory(
       token,
-      getDocumentConfig(document),
+      getResourceConfig(document.uri),
       isFullDocument ? [] : config.get('snippetExcludeSniffs', []),
     );
 
