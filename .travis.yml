@@ -7,7 +7,7 @@ cache:
     - src/test/fixtures/vendor
 env:
   - TEST_SCRIPT=unit
-  - TEST_SCRIPT=integration CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/integration PHPENV_VERSION=7.1
+  - TEST_SCRIPT=integration CODE_TESTS_WORKSPACE=src/test/integration/integration.code-workspace CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/integration PHPENV_VERSION=7.1
   - TEST_SCRIPT=functional CODE_TESTS_WORKSPACE=src/test/fixtures CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/functional PHPENV_VERSION=7.1
 before_script:
   - if [ $TEST_SCRIPT == "functional" ]; then
