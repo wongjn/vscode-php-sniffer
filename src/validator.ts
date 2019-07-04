@@ -111,6 +111,7 @@ export class Validator {
     this.diagnosticCollection.dispose();
     this.validatorListener!.dispose();
     this.workspaceListeners.forEach(listener => listener.dispose());
+    Array.from(this.runnerCancellations.keys()).forEach(this.cancelRun, this);
   }
 
   /**
@@ -234,6 +235,10 @@ export class Validator {
 
         // Reset diagnostics for the document if there was an error.
         this.diagnosticCollection.delete(document.uri);
+      })
+      .then(() => {
+        // Remove the token for the completed run.
+        this.runnerCancellations.delete(document.uri);
       });
 
     window.setStatusBarMessage('PHP Sniffer: validating…', resultPromise);
