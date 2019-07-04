@@ -46,6 +46,10 @@ export class Formatter implements DocumentRangeFormattingEditProvider {
       args.set('exclude', excludes.join(','));
     }
 
+    if (document.uri.scheme === 'file') {
+      args.set('stdin-path', document.uri.fsPath);
+    }
+
     const spawnOptions = {
       cwd: workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
         ? workspace.workspaceFolders[0].uri.fsPath
