@@ -27,25 +27,6 @@ const enum runConfig {
 }
 
 /**
- * Returns a function that will clear a given text document's diagnostics.
- *
- * @param diagnostics
- *   The diagnostic collection to operate on.
- * @return
- *   The clearer function.
- */
-const diagnosticsClearer = (diagnostics: DiagnosticCollection) => ({ uri }: TextDocument): void => {
-  diagnostics.delete(uri);
-};
-
-/**
- * High-order function that runs each function over the arguments.
- */
-const parallel = <T extends any[]>(
-  ...funcs: Function[]
-) => (...args: T): void => funcs.forEach(func => func(...args));
-
-/**
  * Validates text with PHPCS.
  *
  * @param text
@@ -105,18 +86,18 @@ export class Validator {
    */
   private runnerCancellations: Map<Uri, CancellationTokenSource> = new Map();
 
-  constructor(subscriptions: Disposable[]) {
-    workspace.onDidChangeConfiguration(this.onConfigChange, this, subscriptions);
-    workspace.onDidOpenTextDocument(this.validate, this, subscriptions);
-    workspace.onDidCloseTextDocument(
-      parallel(
-        diagnosticsClearer(this.diagnosticCollection),
-        this.cancelRun.bind(this),
-      ),
-      this,
-      subscriptions,
-    );
-    workspace.onDidChangeWorkspaceFolders(this.refresh, this, subscriptions);
+  /**
+   * Disposables for event listeners.
+   */
+  private workspaceListeners: Disposable[];
+
+  constructor() {
+    this.workspaceListeners = [
+      workspace.onDidChangeConfiguration(this.onConfigChange, this),
+      workspace.onDidOpenTextDocument(this.validate, this),
+      workspace.onDidCloseTextDocument(this.onDocumentClose, this),
+      workspace.onDidChangeWorkspaceFolders(this.refresh, this),
+    ];
 
     this.refresh();
     this.setValidatorListener();
@@ -128,6 +109,8 @@ export class Validator {
   public dispose(): void {
     this.diagnosticCollection.clear();
     this.diagnosticCollection.dispose();
+    this.validatorListener!.dispose();
+    this.workspaceListeners.forEach(listener => listener.dispose());
   }
 
   /**
@@ -146,6 +129,17 @@ export class Validator {
     }
 
     this.refresh();
+  }
+
+  /**
+   * Reacts on document close event.
+   *
+   * @param event
+   *   The document close event.
+   */
+  protected onDocumentClose({ uri }: TextDocument): void {
+    this.diagnosticCollection.delete(uri);
+    this.cancelRun(uri);
   }
 
   /**
@@ -185,10 +179,10 @@ export class Validator {
   /**
    * Cancels a validation run for a document.
    *
-   * @param document
-   *   The document to cancel a validation run for.
+   * @param uri
+   *   The URI of the resource to cancel a validation run for.
    */
-  protected cancelRun({ uri }: TextDocument): void {
+  protected cancelRun(uri: Uri): void {
     const runner = this.runnerCancellations.get(uri);
     if (runner) {
       runner.cancel();
@@ -209,7 +203,7 @@ export class Validator {
     }
 
     // Cancel any old run of this same document.
-    this.cancelRun(document);
+    this.cancelRun(document.uri);
 
     const runner = new CancellationTokenSource();
     this.runnerCancellations.set(document.uri, runner);

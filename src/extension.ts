@@ -13,7 +13,6 @@ export function activate(context: ExtensionContext) {
       { language: 'php', scheme: 'file' },
       Formatter,
     ),
+    new Validator(),
   );
-
-  context.subscriptions.push(new Validator(context.subscriptions));
 }
