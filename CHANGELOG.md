@@ -3,6 +3,18 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 
 ## [Unreleased]
 
+## [1.1.5] - 2019-07-04
+### Added
+- Add build status to README
+- Add Visual Studio Marketplace badge to README
+- Add tests
+
+### Changed
+- Reduce extension footprint
+
+### Fixed
+- Pass stdin-path to phpcbf
+
 ## [1.1.4] - 2019-01-29
 ### Changed
 - Update CHANGELOG.md
@@ -70,7 +82,8 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 ## [0.1.0] - 2018-11-26
 - Initial release
 
-[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.4...HEAD
+[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.5...HEAD
+[1.1.5]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.1...v1.1.2
