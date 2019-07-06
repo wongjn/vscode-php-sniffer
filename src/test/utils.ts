@@ -62,3 +62,34 @@ export const getConfigMock = (
   },
   ...opts,
 });
+
+interface TestStubDisposable {
+  dispose: () => any;
+}
+
+export const createStubToken = () => ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onCancellationRequested(): TestStubDisposable {
+    return { dispose() { } };
+  },
+  isCancellationRequested: false,
+});
+
+export const createMockToken = () => {
+  let cancelCallback: (...args: any[]) => void;
+
+  return {
+    isCancellationRequested: false,
+    cancel() {
+      this.isCancellationRequested = true;
+      if (cancelCallback) cancelCallback();
+    },
+    onCancellationRequested(callback: (...args: any[]) => void): TestStubDisposable {
+      cancelCallback = callback;
+
+      return {
+        dispose: () => { },
+      };
+    },
+  };
+};

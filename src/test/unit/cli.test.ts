@@ -1,15 +1,6 @@
 import { deepStrictEqual, rejects, strictEqual } from 'assert';
-import { CancellationToken } from 'vscode';
 import { mapToCliArgs, executeCommand } from '../../cli';
-
-type TestStubDisposable = {
-  dispose: () => any;
-}
-
-interface TestToken extends CancellationToken {
-  cancelCallback?: (e?: any) => any;
-  cancel: () => void;
-}
+import { createStubToken, createMockToken } from '../utils';
 
 suite('CLI Utilities', function () {
   suite('mapToCliArgs()', function () {
@@ -39,38 +30,18 @@ suite('CLI Utilities', function () {
   });
 
   suite('executeCommand()', function () {
-    const stubToken = {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      onCancellationRequested(e: (e: any) => any): TestStubDisposable {
-        return { dispose() { } };
-      },
-      isCancellationRequested: false,
-    };
-
     test('Normal execution returns STDOUT', async function () {
       const result = await executeCommand({
         command: 'echo',
-        token: stubToken,
+        token: createStubToken(),
         args: ['foobar'],
       });
 
       strictEqual(result, 'foobar\n');
     });
 
-    test('Canceling the execution via the token returns null', async function () {
-      const token: TestToken = {
-        isCancellationRequested: false,
-        cancel() {
-          this.isCancellationRequested = true;
-          if (this.cancelCallback) this.cancelCallback();
-        },
-        onCancellationRequested(callback: (e: any) => any): TestStubDisposable {
-          this.cancelCallback = callback;
-          return {
-            dispose: () => { },
-          };
-        },
-      };
+    test('Cancelling the execution via the token returns null', async function () {
+      const token = createMockToken();
 
       const result = executeCommand({
         command: process.platform === 'win32' ? 'timeout' : 'sleep',
@@ -86,7 +57,7 @@ suite('CLI Utilities', function () {
       rejects(
         executeCommand({
           command: '../../../scripts/non-zero-exit',
-          token: stubToken,
+          token: createStubToken(),
           spawnOptions: {
             cwd: __dirname,
           },
@@ -101,7 +72,7 @@ suite('CLI Utilities', function () {
       rejects(
         executeCommand({
           command: 'foo-bar-baz',
-          token: stubToken,
+          token: createStubToken(),
         }),
       );
     });
