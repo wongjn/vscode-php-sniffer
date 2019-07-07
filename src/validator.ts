@@ -12,7 +12,6 @@ import {
   languages,
   TextDocument,
   TextDocumentChangeEvent,
-  Uri,
   window,
   workspace,
 } from 'vscode';
@@ -20,6 +19,7 @@ import { debounce } from 'lodash';
 import { reportFlatten, PHPCSReport } from './phpcs-report';
 import { mapToCliArgs, executeCommand } from './cli';
 import { getResourceConfig, PHPSnifferConfigInterface } from './config';
+import { createTokenManager, TokenManagerInterface } from './tokens';
 
 const enum runConfig {
   save = 'onSave',
@@ -84,7 +84,7 @@ export class Validator {
   /**
    * Token to cancel a current validation runs.
    */
-  private runnerCancellations: Map<Uri, CancellationTokenSource> = new Map();
+  private tokenManager: TokenManagerInterface = createTokenManager(CancellationTokenSource);
 
   /**
    * Disposables for event listeners.
@@ -111,7 +111,7 @@ export class Validator {
     this.diagnosticCollection.dispose();
     this.validatorListener!.dispose();
     this.workspaceListeners.forEach(listener => listener.dispose());
-    Array.from(this.runnerCancellations.keys()).forEach(this.cancelRun, this);
+    this.tokenManager.clearTokens();
   }
 
   /**
@@ -140,7 +140,7 @@ export class Validator {
    */
   protected onDocumentClose({ uri }: TextDocument): void {
     this.diagnosticCollection.delete(uri);
-    this.cancelRun(uri);
+    this.tokenManager.discardToken(uri.fsPath);
   }
 
   /**
@@ -178,21 +178,6 @@ export class Validator {
   }
 
   /**
-   * Cancels a validation run for a document.
-   *
-   * @param uri
-   *   The URI of the resource to cancel a validation run for.
-   */
-  protected cancelRun(uri: Uri): void {
-    const runner = this.runnerCancellations.get(uri);
-    if (runner) {
-      runner.cancel();
-      runner.dispose();
-      this.runnerCancellations.delete(uri);
-    }
-  }
-
-  /**
    * Lints a document.
    *
    * @param document
@@ -203,17 +188,8 @@ export class Validator {
       return;
     }
 
-    // Cancel any old run of this same document.
-    this.cancelRun(document.uri);
-
-    const runner = new CancellationTokenSource();
-    this.runnerCancellations.set(document.uri, runner);
-
-    const resultPromise = validate(
-      document.getText(),
-      runner.token,
-      getResourceConfig(document.uri),
-    );
+    const token = this.tokenManager.registerToken(document.uri.fsPath);
+    const resultPromise = validate(document.getText(), token, getResourceConfig(document.uri));
 
     resultPromise
       .then(result => {
@@ -238,7 +214,7 @@ export class Validator {
       })
       .then(() => {
         // Remove the token for the completed run.
-        this.runnerCancellations.delete(document.uri);
+        this.tokenManager.discardToken(document.uri.fsPath);
       });
 
     window.setStatusBarMessage('PHP Sniffer: validating…', resultPromise);
