@@ -171,6 +171,7 @@ export class Validator {
    */
   protected refresh(): void {
     this.diagnosticCollection!.clear();
+    this.tokenManager.clearTokens();
 
     workspace.textDocuments
       .filter(({ isClosed }) => !isClosed)
@@ -211,10 +212,6 @@ export class Validator {
 
         // Reset diagnostics for the document if there was an error.
         this.diagnosticCollection.delete(document.uri);
-      })
-      .then(() => {
-        // Remove the token for the completed run.
-        this.tokenManager.discardToken(document.uri.fsPath);
       });
 
     window.setStatusBarMessage('PHP Sniffer: validating…', resultPromise);
