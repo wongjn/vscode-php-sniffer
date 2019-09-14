@@ -6,4 +6,6 @@
   <arg value="sp"/>
   <arg name="colors"/>
 
+  <exclude-pattern>*/ignore-me/*</exclude-pattern>
+
 </ruleset>

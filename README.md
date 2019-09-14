@@ -38,13 +38,6 @@ or relative to the first folder in the workspace.
 snippet (such as when _formatting on paste_ or on the command
 `format on selection`). This is passed to the `phpcbf` command as the value for
 `--exclude` when **not** formatting a whole file.
-* `phpSniffer.windowsHardkill`: **Windows only.** Enables a tough `php` process
-killing for Windows machines. See
-[Windows Hanging PHP Process](#windows-hanging-php-process) below for details.
-* `phpSniffer.windowsPhpCli`: **Windows only.** Requires
-`phpSniffer.windowsHardkill` to be `true`. The name of the `php` executable that
-`phpcs`/`phpcbf` runs with so that this extension can hard-kill it. See
-[Windows Hanging PHP Process](#windows-hanging-php-process) below for details.
 
 ## Known Issues
 
@@ -52,9 +45,7 @@ killing for Windows machines. See
 
 When `phpcs` encounters a malformed array declaration, [it can sometimes hang from an error](https://github.com/squizlabs/PHP_CodeSniffer/issues/2142).
 This is exacerbated by the fact that we do not have access to the spawned `php`
-process in the extension code and cannot kill `php.exe` directly.
-
-This extension thus searches for the process by name in
-`phpSniffer.windowsPhpCli` to kill it. Since just matching by this name could
-kill other non-related processes, the extension limits by `CPU TIME` of between
-2s and 10s.
+process in the extension code and cannot kill `php.exe` directly. This causes
+many non-exiting PHP processes on Windows machines which can really slow down
+the machine.
+The fix for this is to update `squizlabs/PHP_Codesniffer` in use to `>=3.4.2`.

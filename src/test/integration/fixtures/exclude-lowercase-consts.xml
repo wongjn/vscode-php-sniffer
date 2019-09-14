@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<ruleset name="Exclude Lowercase Constants">
+  <rule ref="PEAR"/>
+  <rule ref="Generic.PHP.LowerCaseConstant">
+    <exclude-pattern>*/exclude/*</exclude-pattern>
+  </rule>
+</ruleset>

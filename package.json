@@ -58,18 +58,6 @@
                     "type": "array",
                     "default": [],
                     "markdownDescription": "Sniffs to exclude when formatting a code snippet (such as when _formatting on paste_ or on the command `format on selection`). This is passed to the `phpcbf` command as the value for `--exclude` when **not** formatting a whole file."
-                },
-                "phpSniffer.windowsHardkill": {
-                    "scope": "application",
-                    "type": "boolean",
-                    "default": false,
-                    "markdownDescription": "**Windows only.** Enables a tough `php` process killing for Windows machines. See the extension readme for why this may be required."
-                },
-                "phpSniffer.windowsPhpCli": {
-                    "scope": "resource",
-                    "type": "string",
-                    "default": "php.exe",
-                    "markdownDescription": "**Windows only.** Requires `phpSniffer.windowsHardkill` to be `true`. The name of the `php` executable that `phpcs`/`phpcbf` runs with so that this extension can hard-kill it. See the extension readme for why this may be required."
                 }
             }
         }
@@ -86,19 +74,27 @@
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install",
-        "pretest": "npm run compile",
-        "test": "mocha \"./out/test/unit/*.test.js\" && node ./node_modules/vscode/bin/test",
+        "lint": "eslint --ignore-path .gitignore --ext .js,.ts .",
+        "pretest": "npm run lint && npm run compile",
+        "test": "npm run test:unit && npm run test:integration && npm run test:functional",
+        "test:unit": "mocha \"./out/test/unit/*.test.js\"",
+        "test:integration": "node ./node_modules/vscode/bin/test",
+        "test:functional": "node ./node_modules/vscode/bin/test",
         "version": "node ./scripts/changelog && git add CHANGELOG.md"
     },
     "devDependencies": {
         "@types/fs-extra": "^5.0.4",
         "@types/lodash.debounce": "^4.0.6",
         "@types/mocha": "^2.2.42",
-        "@types/node": "^8.10.25",
+        "@types/node": "^10.14.9",
+        "@typescript-eslint/eslint-plugin": "^1.7.0",
+        "@typescript-eslint/parser": "^1.7.0",
+        "eslint": "^5.16.0",
+        "eslint-config-airbnb-typescript": "^4.0.0",
+        "eslint-plugin-import": "^2.17.2",
         "fs-extra": "^7.0.1",
         "mocha": "^6.1.4",
-        "tslint": "^5.8.0",
-        "typescript": "^2.6.1",
+        "typescript": "^3.4.5",
         "vscode": "^1.1.33"
     },
     "dependencies": {

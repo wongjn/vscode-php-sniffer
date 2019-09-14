@@ -1,22 +1,25 @@
+/**
+ * @file
+ * Contains the validator class.
+ */
+
 import {
+  CancellationToken,
   CancellationTokenSource,
   ConfigurationChangeEvent,
-  Diagnostic,
   DiagnosticCollection,
-  DiagnosticSeverity,
   Disposable,
   languages,
-  Range,
   TextDocument,
   TextDocumentChangeEvent,
-  Uri,
   window,
   workspace,
 } from 'vscode';
-import { exec, ChildProcess, spawn } from 'child_process';
 import debounce from 'lodash.debounce';
-import { PHPCSReport, PHPCSMessageType } from './phpcs-report';
-import { CliArguments } from './cli-arguments';
+import { reportFlatten, PHPCSReport } from './phpcs-report';
+import { mapToCliArgs, executeCommand } from './cli';
+import { getResourceConfig, PHPSnifferConfigInterface } from './config';
+import { createTokenManager, TokenManagerInterface } from './tokens';
 
 const enum runConfig {
   save = 'onSave',
@@ -24,38 +27,50 @@ const enum runConfig {
 }
 
 /**
- * Kills PHP CLIs.
+ * Validates text with PHPCS.
  *
- * This is needed for Windows since ChildProcess.kill() only kills the spawner
- * cmd.exe, even with `taskkill /T /F /pid ${pid}` where /T is supposed to kill
- * trees from the spawner but it seems the php process is launched in a
- * disconnected way.
- *
- * @param command
- *   The process to kill.
+ * @param text
+ *   The text of the document to validate.
+ * @param token
+ *   A token to cancel validation.
+ * @param config
+ *   The configuration to run the validation.
+ * @return
+ *   The report from PHPCS or `null` if cancelled.
  */
-function phpCliKill(command: ChildProcess, processName: string) {
-  if (process.platform === 'win32' && workspace.getConfiguration('phpSniffer').get('windowsHardkill')) {
-    // Whole code block below could be more succinctly done with:
-    // `taskkill /v /fi "cputime gt 00:00:02" /fi "cputime lt 00:00:10" /im ${processName}`
-    // but `cputime gt` filter does not seem to work in this case.
-    exec(
-      `tasklist /v /fi "cputime ge 00:00:02" /fi "cputime lt 00:00:10" /fi "imagename eq ${processName}" /fo csv`,
-      (err, stdout) => {
-        if (err) window.showErrorMessage('PHPCS: Error trying to kill PHP CLI, you may need to kill the process yourself.');
-        if (stdout.includes('","')) {
-          const pids = stdout.split('\n').slice(1).map(row => {
-            const [, pid] = row.substr(1, row.length - 2).split('","');
-            return pid;
-          });
+export async function validate(
+  text: string,
+  token: CancellationToken,
+  {
+    standard, filePath, prefix, spawnOptions,
+  }: PHPSnifferConfigInterface,
+): Promise<PHPCSReport | null> {
+  const args = new Map([
+    ['report', 'json'],
+    ['standard', standard],
+    ['stdin-path', filePath],
+  ]);
 
-          exec(`taskkill /F ${pids.map(pid => `/pid ${pid}`).join(' ')}`);
-        }
-      },
-    );
-  }
+  const result = await executeCommand({
+    command: `${prefix}phpcs`,
+    token,
+    stdin: text,
+    args: [
+      ...mapToCliArgs(args, spawnOptions.shell as boolean),
+      // Exit with 0 code even if there are sniff warnings or errors so we can
+      // use error callback for actual execution errors.
+      '--runtime-set', 'ignore_warnings_on_exit', '1',
+      '--runtime-set', 'ignore_errors_on_exit', '1',
+      // Ensure quiet output to override any output settings from config.
+      // Ensures we get JSON only.
+      '-q',
+      // Read stdin.
+      '-',
+    ],
+    spawnOptions,
+  });
 
-  command.kill();
+  return result ? JSON.parse(result) : null;
 }
 
 export class Validator {
@@ -69,13 +84,20 @@ export class Validator {
   /**
    * Token to cancel a current validation runs.
    */
-  private runnerCancellations: Map<Uri, CancellationTokenSource> = new Map();
+  private tokenManager: TokenManagerInterface = createTokenManager(CancellationTokenSource);
 
-  constructor(subscriptions: Disposable[]) {
-    workspace.onDidChangeConfiguration(this.onConfigChange, this, subscriptions);
-    workspace.onDidOpenTextDocument(this.validate, this, subscriptions);
-    workspace.onDidCloseTextDocument(this.clearDocumentDiagnostics, this, subscriptions);
-    workspace.onDidChangeWorkspaceFolders(this.refresh, this, subscriptions);
+  /**
+   * Disposables for event listeners.
+   */
+  private workspaceListeners: Disposable[];
+
+  constructor() {
+    this.workspaceListeners = [
+      workspace.onDidChangeConfiguration(this.onConfigChange, this),
+      workspace.onDidOpenTextDocument(this.validate, this),
+      workspace.onDidCloseTextDocument(this.onDocumentClose, this),
+      workspace.onDidChangeWorkspaceFolders(this.refresh, this),
+    ];
 
     this.refresh();
     this.setValidatorListener();
@@ -87,12 +109,16 @@ export class Validator {
   public dispose(): void {
     this.diagnosticCollection.clear();
     this.diagnosticCollection.dispose();
+    this.validatorListener!.dispose();
+    this.workspaceListeners.forEach(listener => listener.dispose());
+    this.tokenManager.clearTokens();
   }
 
   /**
    * Reacts on configuration change.
    *
-   * @param event - The configuration change event.
+   * @param event
+   *   The configuration change event.
    */
   protected onConfigChange(event: ConfigurationChangeEvent): void {
     if (!event.affectsConfiguration('phpSniffer')) {
@@ -104,6 +130,17 @@ export class Validator {
     }
 
     this.refresh();
+  }
+
+  /**
+   * Reacts on document close event.
+   *
+   * @param event
+   *   The document close event.
+   */
+  protected onDocumentClose({ uri }: TextDocument): void {
+    this.diagnosticCollection.delete(uri);
+    this.tokenManager.discardToken(uri.fsPath);
   }
 
   /**
@@ -124,8 +161,7 @@ export class Validator {
         delay,
       );
       this.validatorListener = workspace.onDidChangeTextDocument(validator);
-    }
-    else {
+    } else {
       this.validatorListener = workspace.onDidSaveTextDocument(this.validate, this);
     }
   }
@@ -135,125 +171,49 @@ export class Validator {
    */
   protected refresh(): void {
     this.diagnosticCollection!.clear();
+    this.tokenManager.clearTokens();
 
-    workspace.textDocuments.forEach(this.validate, this);
+    workspace.textDocuments
+      .filter(({ isClosed }) => !isClosed)
+      .forEach(this.validate, this);
   }
 
   /**
    * Lints a document.
    *
-   * @param document - The document to lint.
+   * @param document
+   *   The document to lint.
    */
   protected validate(document: TextDocument): void {
-    if (document.languageId !== 'php') {
+    if (document.languageId !== 'php' || document.isClosed) {
       return;
     }
 
-    const oldRunner = this.runnerCancellations.get(document.uri);
-    if (oldRunner) {
-      oldRunner.cancel();
-      oldRunner.dispose();
-    }
+    const token = this.tokenManager.registerToken(document.uri.fsPath);
+    const resultPromise = validate(document.getText(), token, getResourceConfig(document.uri));
 
-    const runner = new CancellationTokenSource();
-    this.runnerCancellations.set(document.uri, runner);
-    const { token } = runner;
-
-    const config = workspace.getConfiguration('phpSniffer', document.uri);
-    const execFolder: string = config.get('executablesFolder', '');
-    const standard: string = config.get('standard', '');
-    const windowsKillTarget: string = config.get('windowsPhpCli', 'php.exe');
-
-    const args = new CliArguments();
-    args.set('report', 'json');
-    args.set('standard', standard);
-
-    if (document.uri.scheme === 'file') {
-      args.set('stdin-path', document.uri.fsPath);
-    }
-
-    const spawnOptions = {
-      cwd: workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
-        ? workspace.workspaceFolders[0].uri.fsPath
-        : undefined,
-      shell: process.platform === 'win32',
-    };
-
-    const command = spawn(
-      `${execFolder}phpcs`,
-      [...args.getAll(spawnOptions.shell), '-q', '-'],
-      spawnOptions,
-    );
-
-    token.onCancellationRequested(() => !command.killed && phpCliKill(command, windowsKillTarget));
-
-    let stdout = '';
-    let stderr = '';
-
-    command.stdin.write(document.getText());
-    command.stdin.end();
-
-    command.stdout.setEncoding('utf8');
-    command.stdout.on('data', data => stdout += data);
-    command.stderr.on('data', data => stderr += data);
-
-    const done = new Promise((resolve, reject) => {
-      command.on('close', () => {
-        if (token.isCancellationRequested || !stdout) {
-          resolve();
+    resultPromise
+      .then(result => {
+        if (document.isClosed) {
+          // Clear diagnostics on a closed document.
+          this.diagnosticCollection.delete(document.uri);
+          // If the command was not cancelled.
+        } else if (result !== null) {
+          this.diagnosticCollection.set(document.uri, reportFlatten(result));
         }
-        else {
-          const diagnostics: Diagnostic[] = [];
-
-          try {
-            const { files }: PHPCSReport = JSON.parse(stdout);
-            for (const file in files) {
-              files[file].messages.forEach(({ message, line, column, type, source }) => {
-                const zeroLine = line - 1;
-                const ZeroColumn = column - 1;
-
-                diagnostics.push(
-                  new Diagnostic(
-                    new Range(zeroLine, ZeroColumn, zeroLine, ZeroColumn),
-                    `[${source}]\n${message}`,
-                    type === PHPCSMessageType.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
-                  ),
-                );
-              });
-            }
-            resolve();
-          } catch (error) {
-            let message = '';
-            if (stdout) message += `${stdout}\n`;
-            if (stderr) message += `${stderr}\n`;
-            message += error.toString();
-
-            console.error(`PHPCS: ${message}`);
-            reject(message);
-          }
-
-          this.diagnosticCollection.set(document.uri, diagnostics);
+      })
+      .catch(error => {
+        // Show all errors apart from global phpcs missing error, due to the
+        // fact that this is currently the default base option and could be
+        // quite noisy for users with only project-level sniffers.
+        if (error.message !== 'spawn phpcs ENOENT') {
+          window.showErrorMessage(error.message);
         }
 
-        runner.dispose();
-        this.runnerCancellations.delete(document.uri);
+        // Reset diagnostics for the document if there was an error.
+        this.diagnosticCollection.delete(document.uri);
       });
-    });
 
-    setTimeout(() => {
-      !command.killed && phpCliKill(command, windowsKillTarget);
-    }, 3000);
-
-    window.setStatusBarMessage('PHP Sniffer: validating…', done);
+    window.setStatusBarMessage('PHP Sniffer: validating…', resultPromise);
   }
-
-  /**
-   * Clears diagnostics from a document.
-   *
-   * @param document - The document to clear diagnostics of.
-   */
-  protected clearDocumentDiagnostics({ uri }: TextDocument): void {
-    this.diagnosticCollection.delete(uri);
-  }
-
 }

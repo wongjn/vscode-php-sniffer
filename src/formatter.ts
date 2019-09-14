@@ -1,7 +1,10 @@
+/**
+ * @file
+ * Contains the Formatter class.
+ */
+
 import {
-  DocumentRangeFormattingEditProvider,
   CancellationToken,
-  EndOfLine,
   FormattingOptions,
   Position,
   Range,
@@ -9,199 +12,107 @@ import {
   TextEdit,
   workspace,
 } from 'vscode';
-import { spawn } from 'child_process';
-import { CliArguments } from './cli-arguments';
+import { mapToCliArgs, executeCommand, CliCommandError } from './cli';
+import { processSnippet } from './strings';
+import { getResourceConfig, PHPSnifferConfigInterface } from './config';
 
-interface TextProcessState {
-  text: string;
-  postProcessor: (rawResult: string) => string;
+/**
+ * Tests whether a range is for the full document.
+ *
+ * @param range
+ *   The range to test.
+ * @param document
+ *   The document to test with.
+ * @return
+ *   `true` if the given `range` is the full `document`.
+ */
+function isFullDocumentRange(range: Range, document: TextDocument): boolean {
+  const documentRange = new Range(
+    new Position(0, 0),
+    document.lineAt(document.lineCount - 1).range.end,
+  );
+
+  return range.isEqual(documentRange);
 }
 
-interface Indentation {
-  replace: RegExp;
-  indent: string;
-}
+/**
+ * Returns a formatting intermediary function.
+ *
+ * @param token
+ *   A token that can be called to cancel the formatting.
+ * @param config
+ *   The normalized configuration of the extension.
+ * @param excludes
+ *   An optional list of sniffs to exclude.
+ * @return
+ *   Another factory function that accepts any standards to exclude to create
+ *   the final formatter function to format text via PHPCBF.
+ */
+export function formatterFactory(
+  token: CancellationToken,
+  {
+    standard, prefix, spawnOptions, filePath,
+  }: PHPSnifferConfigInterface,
+  excludes: string[] = [],
+) {
+  return async (text: string) => {
+    const args = new Map([
+      ['standard', standard],
+      ['stdin-path', filePath],
+    ]);
 
-export class Formatter implements DocumentRangeFormattingEditProvider {
-
-  /**
-   * {@inheritDoc}
-   */
-  public async provideDocumentRangeFormattingEdits(
-    document: TextDocument,
-    range: Range,
-    options: FormattingOptions,
-    token: CancellationToken
-  ): Promise<TextEdit[]> {
-    const config = workspace.getConfiguration('phpSniffer', document.uri);
-    const execFolder: string = config.get('executablesFolder', '');
-    const standard: string = config.get('standard', '');
-    const excludes: Array<string> = config.get('snippetExcludeSniffs', []);
-    const isFullDocument = Formatter.isFullDocumentRange(range, document);
-
-    const args = new CliArguments();
-    args.set('standard', standard);
-
-    if (excludes.length && !isFullDocument) {
+    if (excludes.length) {
       args.set('exclude', excludes.join(','));
     }
 
-    if (document.uri.scheme === 'file') {
-      args.set('stdin-path', document.uri.fsPath);
-    }
-
-    const spawnOptions = {
-      cwd: workspace.workspaceFolders && workspace.workspaceFolders[0].uri.scheme === 'file'
-        ? workspace.workspaceFolders[0].uri.fsPath
-        : undefined,
-      shell: process.platform === 'win32',
-    };
-
-    const command = spawn(
-      `${execFolder}phpcbf`,
-      [...args.getAll(spawnOptions.shell), '-'],
-      spawnOptions,
-    );
-
     try {
-      let stdout = '';
-
-      token.onCancellationRequested(() => !command.killed && command.kill());
-
-      const { text, postProcessor } = Formatter.prepareText(document, range, options);
-      command.stdin.write(text);
-      command.stdin.end();
-
-      command.stdout.setEncoding('utf8');
-      command.stdout.on('data', data => stdout += data);
-
-      return new Promise<TextEdit[]>((resolve, reject) => {
-        command.on('close', code => {
-          if (token.isCancellationRequested) {
-            return resolve();
-          }
-
-          if (code !== 1) {
-            const message = `PHPCBF: ${stdout}`;
-            console.error(message);
-            return reject(message);
-          }
-
-          const replacement = postProcessor(stdout);
-          return resolve([new TextEdit(range, replacement)]);
-        });
+      // PHPCBF uses unconventional exit codes, see
+      // https://github.com/squizlabs/PHP_CodeSniffer/issues/1270#issuecomment-272768413
+      await executeCommand({
+        command: `${prefix}phpcbf`,
+        token,
+        args: [...mapToCliArgs(args, spawnOptions.shell as boolean), '-'],
+        stdin: text,
+        spawnOptions,
       });
-    }
-    catch (error) {
-      if (!command.killed) {
-        command.kill();
+    } catch (error) {
+      // Exit code 1 indicates all fixable errors were fixed correctly.
+      if (error instanceof CliCommandError && error.exitCode === 1) {
+        return error.stdout;
       }
 
+      // Re-throw the error if it was not a 1 exit code.
       throw error;
     }
-  }
 
+    return '';
+  };
+}
+
+export const Formatter = {
   /**
-   * Prepares text for `phpcbf` to run on.
-   *
-   * @param document      - The document the formatting is running on.
-   * @param range         - The range that formatting should be acting upon.
-   * @param formatOptions - The options that the document is formatted by.
-   * @returns A state object that includes the text. The postProcessor member
-   *   should be run on the formatted text to reverse changes made here.
-   *
-   * @todo PHP tag and indentation processes here could be extracted to a common
-   *   (functional?) interface of some sort, i.e. a micro-plugin system.
+   * {@inheritDoc}
    */
-  protected static prepareText(document: TextDocument, range: Range, formatOptions: FormattingOptions): TextProcessState {
-    let text = document.getText(range);
+  async provideDocumentRangeFormattingEdits(
+    document: TextDocument,
+    range: Range,
+    formatOptions: FormattingOptions,
+    token: CancellationToken,
+  ): Promise<TextEdit[]> {
+    const isFullDocument = isFullDocumentRange(range, document);
+    const config = workspace.getConfiguration('phpSniffer', document.uri);
+    const text = document.getText(range);
 
-    const isFullDocument = this.isFullDocumentRange(range, document);
-    const needsPhpTag = !isFullDocument && !text.includes('<?');
-    const eol: string = document.eol === EndOfLine.LF ? '\n' : '\r\n';
-    const lines = text.split(eol);
-
-    const indentation = isFullDocument ? null : this.getIndentation(lines, formatOptions);
-    if (indentation) {
-      // Temporarily remove indentation.
-      text = lines.map(line => line.replace(indentation.replace, '')).join(eol);
-    }
-
-    return {
-      text: `${needsPhpTag ? `<?php${eol}` : ''}${text}`,
-      postProcessor: (rawResult: string): string => {
-        let result = rawResult;
-
-        if (needsPhpTag) {
-          result = result.replace(`<?php${eol}`, '');
-        }
-
-        // Restore removed indentation.
-        if (indentation) {
-          result = result
-            .split(eol)
-            .map(line => `${line.length > 0 ? indentation.indent : ''}${line}`)
-            .join(eol);
-        }
-
-        return result;
-      },
-    };
-  }
-
-  /**
-   * Gets indentation information for a document.
-   *
-   * @param lines  - The text as an array of strings per line.
-   * @param param1 - Indentation options for the document.
-   */
-  protected static getIndentation(lines: string[], { insertSpaces, tabSize }: FormattingOptions): Indentation | null {
-    const unit = insertSpaces ? ' '.repeat(tabSize) : '\t';
-    const indentMatcher = new RegExp(`^((?:${unit})*).+`);
-    const unitCounter = new RegExp(unit, 'g');
-    let count = Number.MAX_SAFE_INTEGER;
-
-    for (const line of lines) {
-      const match = indentMatcher.exec(line);
-      if (!(match instanceof Array)) {
-        continue;
-      }
-      const [, lineIndent] = match;
-
-      // Minimum reached, do nothing more.
-      if (lineIndent === '') {
-        count = 0;
-        break;
-      }
-
-      count = Math.min(lineIndent.match(unitCounter)!.length, count);
-    }
-
-    // No indentation found.
-    if (count === 0) {
-      return null;
-    }
-
-    return {
-      replace: new RegExp(`^(${unit}){0,${count}}`),
-      indent: unit.repeat(count),
-    };
-  }
-
-  /**
-   * Tests whether a range is for the full document.
-   *
-   * @param range    - The range to test.
-   * @param document - The document to test with.
-   * @returns `true` if the given `range` is the full `document`.
-   */
-  public static isFullDocumentRange(range: Range, document: TextDocument): boolean {
-    const documentRange = new Range(
-      new Position(0, 0),
-      document.lineAt(document.lineCount - 1).range.end,
+    const formatter = formatterFactory(
+      token,
+      getResourceConfig(document.uri),
+      isFullDocument ? [] : config.get('snippetExcludeSniffs', []),
     );
 
-    return range.isEqual(documentRange);
-  }
+    const replacement: string = isFullDocument
+      ? await processSnippet(text, formatOptions, formatter)
+      : await formatter(text);
 
-}
+    return replacement ? [new TextEdit(range, replacement)] : [];
+  },
+};

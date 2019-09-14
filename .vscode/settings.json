@@ -1,4 +1,8 @@
 {
+    "eslint.validate": [
+        "javascript",
+        "typescript"
+    ],
     "search.exclude": {
         "out": true
     },

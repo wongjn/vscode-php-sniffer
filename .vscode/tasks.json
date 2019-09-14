@@ -4,6 +4,15 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "watch",
+            "dependsOn": [
+                "compile",
+                "unit tests"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "compile",
             "type": "npm",
             "script": "watch",
             "problemMatcher": "$tsc-watch",
@@ -11,6 +20,21 @@
             "group": {
                 "kind": "build",
                 "isDefault": true
+            },
+            "presentation": {
+                "group": "watch"
+            }
+        },
+        {
+            "label": "unit tests",
+            "type": "shell",
+            "command": "npm run test:unit -- --watch",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "group": "watch"
             }
         }
     ]
