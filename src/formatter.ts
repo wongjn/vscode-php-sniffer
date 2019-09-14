@@ -50,11 +50,16 @@ function isFullDocumentRange(range: Range, document: TextDocument): boolean {
  */
 export function formatterFactory(
   token: CancellationToken,
-  { standard, prefix, spawnOptions }: PHPSnifferConfigInterface,
+  {
+    standard, prefix, spawnOptions, filePath,
+  }: PHPSnifferConfigInterface,
   excludes: string[] = [],
 ) {
   return async (text: string) => {
-    const args = new Map([['standard', standard]]);
+    const args = new Map([
+      ['standard', standard],
+      ['stdin-path', filePath],
+    ]);
 
     if (excludes.length) {
       args.set('exclude', excludes.join(','));

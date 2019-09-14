@@ -62,5 +62,23 @@ interface MyInterface { $property;
 
       strictEqual(await pendingResult, '');
     });
+
+    test('Formatting respects file paths', async function () {
+      const text = `<?php a (FALSE);`;
+
+      const configMock = getConfigMock({
+        standard: '../integration/fixtures/exclude-lowercase-consts.xml',
+        prefix: './vendor/bin/',
+        filePath: '/foo/bar/baz/exclude/file.php'
+      });
+      strictEqual(
+        await formatterFactory(
+          getToken(),
+          configMock,
+          ['PSR2.Classes.ClassDeclaration'],
+        )(text),
+        '<?php a(FALSE);',
+      );
+    });
   });
 });
