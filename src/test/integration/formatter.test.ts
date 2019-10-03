@@ -64,9 +64,9 @@ interface MyInterface { $property;
     });
 
     test('Formatting respects file paths', async function () {
-      const text = `<?php a (FALSE);`;
+      const text = '<?php a (FALSE);';
 
-      const configMock = getConfigMock({
+      const filePathConfigStub = getConfigMock({
         standard: '../integration/fixtures/exclude-lowercase-consts.xml',
         prefix: './vendor/bin/',
         filePath: '/foo/bar/baz/exclude/file.php'
@@ -74,7 +74,7 @@ interface MyInterface { $property;
       strictEqual(
         await formatterFactory(
           getToken(),
-          configMock,
+          filePathConfigStub,
           ['PSR2.Classes.ClassDeclaration'],
         )(text),
         '<?php a(FALSE);',
