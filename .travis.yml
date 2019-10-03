@@ -6,21 +6,20 @@ cache:
   directories:
     - src/test/fixtures/vendor
 env:
-  - TEST_SCRIPT=unit
-  - TEST_SCRIPT=integration CODE_TESTS_WORKSPACE=src/test/integration/integration.code-workspace CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/integration PHPENV_VERSION=7.1
-  - TEST_SCRIPT=functional CODE_TESTS_WORKSPACE=src/test/fixtures CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/functional PHPENV_VERSION=7.1
+  - TEST_SCRIPT=lint
+  - TEST_SCRIPT=test:unit
+  - TEST_SCRIPT=test:integration CODE_TESTS_WORKSPACE=src/test/integration/integration.code-workspace CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/integration PHPENV_VERSION=7.1
+  - TEST_SCRIPT=test:functional CODE_TESTS_WORKSPACE=src/test/fixtures CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/functional PHPENV_VERSION=7.1
 before_script:
-  - if [ $TEST_SCRIPT == "functional" ]; then
+  - if [ $TEST_SCRIPT == "test:functional" ]; then
       composer global require squizlabs/php_codesniffer:^3.4;
       export PATH=$PATH:$(composer global config bin-dir --absolute);
     fi
   - if [ $TRAVIS_OS_NAME == "linux" ]; then
-      export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0;
-      sh -e /etc/init.d/xvfb start;
-      sleep 3;
+      export DISPLAY=':99.0'
+      /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
     fi
-  - if [ $TEST_SCRIPT == "unit" ]; then
-      npm run lint;
+  - if test $TEST_SCRIPT != 'lint'; then
+      npm run compile;
     fi
-  - npm run compile
-script: npm run test:$TEST_SCRIPT
+script: npm run $TEST_SCRIPT
