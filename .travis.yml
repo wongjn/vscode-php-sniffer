@@ -11,15 +11,15 @@ env:
   - TEST_SCRIPT=test:integration CODE_TESTS_WORKSPACE=src/test/integration/integration.code-workspace CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/integration PHPENV_VERSION=7.1
   - TEST_SCRIPT=test:functional CODE_TESTS_WORKSPACE=src/test/fixtures CODE_DISABLE_EXTENSIONS=true CODE_TESTS_PATH=${TRAVIS_BUILD_DIR}/out/test/functional PHPENV_VERSION=7.1
 before_script:
-  - if [ $TEST_SCRIPT == "test:functional" ]; then
+  - if [ "$TEST_SCRIPT" == 'test:functional' ]; then
       composer global require squizlabs/php_codesniffer:^3.4;
       export PATH=$PATH:$(composer global config bin-dir --absolute);
     fi
-  - if [ $TRAVIS_OS_NAME == "linux" ]; then
+  - if [ $TRAVIS_OS_NAME == 'linux' ]; then
       export DISPLAY=':99.0'
       /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
     fi
-  - if test $TEST_SCRIPT != 'lint'; then
+  - if test "$TEST_SCRIPT" != 'lint'; then
       npm run compile;
     fi
 script: npm run $TEST_SCRIPT
