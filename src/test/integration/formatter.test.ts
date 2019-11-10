@@ -69,7 +69,7 @@ interface MyInterface { $property;
       const filePathConfigStub = getConfigMock({
         standard: '../integration/fixtures/exclude-lowercase-consts.xml',
         prefix: './vendor/bin/',
-        filePath: '/foo/bar/baz/exclude/file.php'
+        filePath: '/foo/bar/baz/exclude/file.php',
       });
       strictEqual(
         await formatterFactory(
