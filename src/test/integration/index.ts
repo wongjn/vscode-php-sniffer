@@ -1,8 +1,31 @@
-import * as testRunner from 'vscode/lib/testrunner';
+import * as path from 'path';
+import Mocha from 'mocha';
+import glob from 'glob';
 
-testRunner.configure({
-  ui: 'tdd',
-  useColors: true,
-});
+export function run(testsRoot: string, cb: (error: any, failures?: number) => void): void {
+  // Create the mocha test
+  const mocha = new Mocha({
+    ui: 'tdd',
+  });
+  mocha.useColors(true);
 
-module.exports = testRunner;
+  glob('**/**.test.js', { cwd: testsRoot }, (globError, files) => {
+    if (globError) {
+      return cb(globError);
+    }
+
+    // Add files to the test suite
+    files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
+
+    try {
+      // Run the mocha test
+      mocha.run(failures => {
+        cb(null, failures);
+      });
+    } catch (err) {
+      cb(err);
+    }
+
+    return true;
+  });
+}

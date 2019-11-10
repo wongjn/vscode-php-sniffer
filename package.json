@@ -73,29 +73,30 @@
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
         "lint": "eslint --ignore-path .gitignore --ext .js,.ts .",
         "pretest": "npm run lint && npm run compile",
         "test": "npm run test:unit && npm run test:integration && npm run test:functional",
         "test:unit": "mocha \"./out/test/unit/*.test.js\"",
-        "test:integration": "node ./node_modules/vscode/bin/test",
-        "test:functional": "node ./node_modules/vscode/bin/test",
+        "test:integration": "node ./out/test/run.js",
         "version": "node ./scripts/changelog && git add CHANGELOG.md"
     },
     "devDependencies": {
         "@types/fs-extra": "^5.0.4",
+        "@types/glob": "^7.1.1",
         "@types/lodash.debounce": "^4.0.6",
-        "@types/mocha": "^2.2.42",
+        "@types/mocha": "^5.2.7",
         "@types/node": "^10.14.9",
+        "@types/vscode": "^1.40.0",
         "@typescript-eslint/eslint-plugin": "^1.7.0",
         "@typescript-eslint/parser": "^1.7.0",
         "eslint": "^5.16.0",
         "eslint-config-airbnb-typescript": "^4.0.0",
         "eslint-plugin-import": "^2.17.2",
         "fs-extra": "^7.0.1",
+        "glob": "^7.1.6",
         "mocha": "^6.1.4",
         "typescript": "^3.4.5",
-        "vscode": "^1.1.33"
+        "vscode-test": "^1.2.3"
     },
     "dependencies": {
         "lodash.debounce": "^4.0.8"
