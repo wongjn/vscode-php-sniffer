@@ -7,46 +7,45 @@ import { execPromise, FIXTURES_PATH } from '../utils';
  * Runs test cases for two files for preset and a local ruleset.
  */
 function functionalTestSuiteRun() {
-  testCase(
-    'Preset',
-    'class.php',
-    [
+  testCase({
+    description: 'Preset',
+    content: '<?php class my_class {}\n',
+    expectedValidationErrors: [
       { row: 0, column: 6 },
       { row: 0, column: 6 },
       { row: 0, column: 21 },
       { row: 0, column: 22 },
       { row: 0, column: 22 },
     ],
-    '<?php class my_class\n{\n}\n',
-    'PSR2',
-  );
+    expectedFormattedResult: '<?php class my_class\n{\n}\n',
+    standard: 'PSR2',
+  });
 
-  testCase(
-    'Local ruleset',
-    'index.php',
-    [
+  testCase({
+    description: 'Local ruleset',
+    content: '<?php $b = 1 ; ?>\n',
+    expectedValidationErrors: [
       { row: 0, column: 13 },
     ],
-    '<?php $b = 1; ?>\n',
-    './phpcs-semicolon.xml',
-  );
+    expectedFormattedResult: '<?php $b = 1; ?>\n',
+    standard: './phpcs-semicolon.xml',
+  });
 }
 
 suite('Executable & ruleset locations', function () {
   suite('Global executable', function () {
     suiteSetup(async function () {
-      if (await hasGlobalPHPCS()) this.skip();
+      if (!await hasGlobalPHPCS()) this.skip();
     });
 
-    testCase(
-      'Use default_standard from global config',
-      'index.php',
-      [
+    testCase({
+      description: 'Use default_standard from global config',
+      content: '<?php $b = 1 ; ?>\n',
+      expectedValidationErrors: [
         { row: 0, column: 15 },
       ],
-      '<?php $b = 1 ;\n',
-      undefined,
-      async function () {
+      expectedFormattedResult: '<?php $b = 1 ;\n',
+      async testSetup() {
         // Save user-set default_standard config option if there was any so that
         // it can be reverted back to later.
         const phpcsConfig = await execPromise('phpcs --config-show');
@@ -63,7 +62,7 @@ suite('Executable & ruleset locations', function () {
           return execPromise(`phpcs ${cmd}`);
         };
       },
-    );
+    });
 
     functionalTestSuiteRun();
   });

@@ -5,6 +5,7 @@
 
 import * as assert from 'assert';
 import * as path from 'path';
+import { createFile, writeFile, unlink } from 'fs-extra';
 import { IHookCallbackContext } from 'mocha';
 import {
   commands,
@@ -44,13 +45,22 @@ type ValidationErrorLocation = {
   column: number,
 };
 
+type TestCaseOptions = {
+  description: string,
+  content: string,
+  expectedValidationErrors: ValidationErrorLocation[],
+  expectedFormattedResult: string,
+  standard?: string,
+  testSetup?: testCaseSetup,
+}
+
 /**
  * Test case function call.
  *
  * @param description
  *   Description of the suite.
- * @param file
- *   The test file to use, relative to the fixtures folder.
+ * @param content
+ *   The content of the file for validation and before formatting.
  * @param expectedValidationErrors
  *   Expected errors that should be should be in diagnostics.
  * @param expectedFormattedResult
@@ -61,31 +71,36 @@ type ValidationErrorLocation = {
  *   Optional function to run on suiteSetup, with an optional returned function
  *   to run on teardown.
  */
-export function testCase(
-  description: string,
-  file: string,
-  expectedValidationErrors: ValidationErrorLocation[],
-  expectedFormattedResult: string,
-  standard: string | undefined = undefined,
-  testSetup: testCaseSetup | null = null,
-): void {
+export function testCase({
+  description,
+  content,
+  expectedValidationErrors,
+  expectedFormattedResult,
+  standard,
+  testSetup,
+}: TestCaseOptions): void {
+  const filePath = path.join(FIXTURES_PATH, `index${Math.floor(Math.random() * 3000)}.php`);
+  const fileUri = Uri.file(filePath);
+
   suite(description, function () {
-    // Construct the test file URI object.
-    const fileUri = Uri.file(path.join(FIXTURES_PATH, file));
     // Possible teardown callback.
     let tearDown: hookCallback | void;
 
     suiteSetup(async function () {
-      await workspace
-        .getConfiguration('phpSniffer', fileUri)
-        .update('standard', standard);
+      await Promise.all([
+        createFile(filePath),
+        workspace.getConfiguration('phpSniffer', fileUri).update('standard', standard),
+      ]);
+
+      await writeFile(filePath, content);
       if (testSetup) tearDown = await testSetup.call(this, fileUri);
     });
 
     suiteTeardown(async function () {
-      await workspace
-        .getConfiguration('phpSniffer', fileUri)
-        .update('standard', undefined);
+      await Promise.all([
+        workspace.getConfiguration('phpSniffer', fileUri).update('standard', undefined),
+        unlink(filePath),
+      ]);
       if (tearDown) await tearDown.call(this);
     });
 
