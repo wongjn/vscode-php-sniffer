@@ -1,5 +1,5 @@
-import { workspace, Uri, languages } from 'vscode';
-import { sep, join } from 'path';
+import { workspace, Uri } from 'vscode';
+import { sep } from 'path';
 import { testCase, hasGlobalPHPCS } from './utils';
 import { execPromise, FIXTURES_PATH } from '../utils';
 
@@ -82,29 +82,5 @@ suite('Executable & ruleset locations', function () {
     });
 
     functionalTestSuiteRun();
-  });
-
-  suite('Execution error reporting', function () {
-    test('Validator should show PHPCS execution errors', async function () {
-      const fixtureUri = Uri.file(join(FIXTURES_PATH, 'index.php'));
-      const config = workspace.getConfiguration('phpSniffer', fixtureUri);
-      workspace.openTextDocument(fixtureUri);
-
-      const assertionPromise = new Promise(resolve => {
-        const subscription = languages.onDidChangeDiagnostics(({ uris }) => {
-          const list = uris.map(uri => uri.toString());
-          if (list.indexOf(fixtureUri.toString()) === -1) return;
-
-          // @todo Find some way to get error messages shown in VSCode UI.
-          subscription.dispose();
-          resolve();
-        });
-      });
-
-      await config.update('standard', 'ASD');
-      await assertionPromise;
-      await config.update('standard', undefined);
-      this.skip();
-    });
   });
 });
