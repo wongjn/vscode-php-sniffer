@@ -3,27 +3,19 @@
  * Utilities for tests.
  */
 
-import * as assert from 'assert';
-import * as path from 'path';
-import { createFile, writeFile, unlink } from 'fs-extra';
-import { IHookCallbackContext } from 'mocha';
-import {
-  commands,
-  Diagnostic,
-  languages,
-  window,
-  workspace,
-  Uri,
-} from 'vscode';
-import { execPromise, FIXTURES_PATH } from '../utils';
+const assert = require('assert');
+const path = require('path');
+const { createFile, writeFile, unlink } = require('fs-extra');
+const { commands, languages, window, workspace, Uri } = require('vscode');
+const { execPromise, FIXTURES_PATH } = require('../utils');
 
 /**
  * Tests whether there is a global PHPCS on the current machine.
  *
- * @return
+ * @return {Promise<boolean>}
  *   True if there is a phpcs in the current path.
  */
-export async function hasGlobalPHPCS(): Promise<boolean> {
+async function hasGlobalPHPCS() {
   try {
     await execPromise('phpcs --version');
     return true;
@@ -32,59 +24,41 @@ export async function hasGlobalPHPCS(): Promise<boolean> {
   }
 }
 
-type hookCallback = {
-  (this: IHookCallbackContext): void;
-}
-
-type testCaseSetup = {
-  (this: IHookCallbackContext, fileUri: Uri): Thenable<hookCallback> | void;
-}
-
-type ValidationErrorLocation = {
-  row: number,
-  column: number,
-};
-
-type TestCaseOptions = {
-  description: string,
-  content: string,
-  expectedValidationErrors: ValidationErrorLocation[],
-  expectedFormattedResult: string,
-  standard?: string,
-  testSetup?: testCaseSetup,
-}
+module.exports.hasGlobalPHPCS = hasGlobalPHPCS;
 
 /**
  * Test case function call.
  *
- * @param description
+ * @param {object} options
+ *   Options for the test case.
+ * @param {string} options.description
  *   Description of the suite.
- * @param content
+ * @param {string} options.content
  *   The content of the file for validation and before formatting.
- * @param expectedValidationErrors
+ * @param {{ row: number, column: number }[]} options.expectedValidationErrors
  *   Expected errors that should be should be in diagnostics.
- * @param expectedFormattedResult
+ * @param {string} options.expectedFormattedResult
  *   Expected file content after running formatting.
- * @param standard
+ * @param {string} [options.standard]
  *   The standard to test with.
- * @param testSetup
+ * @param {Function} [options.testSetup]
  *   Optional function to run on suiteSetup, with an optional returned function
  *   to run on teardown.
  */
-export function testCase({
+function testCase({
   description,
   content,
   expectedValidationErrors,
   expectedFormattedResult,
   standard,
   testSetup,
-}: TestCaseOptions): void {
+}) {
   const filePath = path.join(FIXTURES_PATH, `index${Math.floor(Math.random() * 3000)}.php`);
   const fileUri = Uri.file(filePath);
 
   suite(description, function () {
     // Possible teardown callback.
-    let tearDown: hookCallback | void;
+    let tearDown;
 
     suiteSetup(async function () {
       await Promise.all([
@@ -105,9 +79,9 @@ export function testCase({
     });
 
     test('Validation errors are reported', async function () {
-      const diagnosticsPromise = new Promise<Diagnostic[]>(resolve => {
+      const diagnosticsPromise = new Promise((resolve) => {
         const subscription = languages.onDidChangeDiagnostics(({ uris }) => {
-          const list = uris.map(uri => uri.toString());
+          const list = uris.map((uri) => uri.toString());
           if (list.indexOf(fileUri.toString()) === -1) return;
 
           const diagnostics = languages.getDiagnostics(fileUri);
@@ -146,3 +120,5 @@ export function testCase({
     });
   });
 }
+
+module.exports.testCase = testCase;

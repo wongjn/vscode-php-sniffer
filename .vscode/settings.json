@@ -1,10 +1,5 @@
 {
     "eslint.validate": [
-        "javascript",
-        "typescript"
-    ],
-    "search.exclude": {
-        "out": true
-    },
-    "typescript.tsc.autoDetect": "off"
+        "javascript"
+    ]
 }

@@ -6,24 +6,9 @@
         {
             "label": "watch",
             "dependsOn": [
-                "compile",
                 "unit tests"
             ],
             "problemMatcher": []
-        },
-        {
-            "label": "compile",
-            "type": "npm",
-            "script": "watch",
-            "problemMatcher": "$tsc-watch",
-            "isBackground": true,
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "group": "watch"
-            }
         },
         {
             "label": "unit tests",

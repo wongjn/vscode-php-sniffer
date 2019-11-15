@@ -1,36 +1,14 @@
 module.exports = {
   root: true,
   extends: [
-    'airbnb-typescript/base',
-    'plugin:import/typescript',
+    'airbnb-base',
   ],
-  env: {
-    node: true,
-  },
   rules: {
-    'import/prefer-default-export': 0,
+    'no-underscore-dangle': 0,
+    'object-curly-newline': ['error', { multiline: true, minProperties: 99 }],
     'import/no-unresolved': [
-      2,
-      {
-        ignore: [
-          'vscode',
-        ],
-      },
-    ],
-    'import/no-extraneous-dependencies': [
-      2,
-      {
-        devDependencies: [
-          './src/test/**'
-        ],
-      },
+      'error',
+      { commonjs: true, caseSensitive: true, ignore: ['vscode'] }
     ],
   },
-  overrides: {
-    files: ['**/*.ts'],
-    parser: '@typescript-eslint/parser',
-    parserOptions: {
-      project: './tsconfig.json',
-    },
-  }
 };

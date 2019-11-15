@@ -1,8 +1,8 @@
-import { strictEqual } from 'assert';
-import { CancellationTokenSource } from 'vscode';
-import { join } from 'path';
-import { execPromise, FIXTURES_PATH, getConfigMock } from '../utils';
-import { validate } from '../../validator';
+const { strictEqual } = require('assert');
+const { CancellationTokenSource } = require('vscode');
+const { join } = require('path');
+const { execPromise, FIXTURES_PATH, getConfigMock } = require('../utils');
+const { validate } = require('../../lib/validator');
 
 suite('Validation', function () {
   suite('validate()', function () {
@@ -23,16 +23,12 @@ suite('Validation', function () {
         config,
       );
 
-      strictEqual(result!.totals.errors, 2);
+      strictEqual(result.totals.errors, 2);
     });
 
     test('Cancellation returns null', async function () {
       const cancellation = new CancellationTokenSource();
-      const pending = validate(
-        '<?php $a ="b"',
-        cancellation.token,
-        config,
-      );
+      const pending = validate('<?php $a ="b"', cancellation.token, config);
 
       setTimeout(() => cancellation.cancel(), 2);
       strictEqual(await pending, null);
@@ -52,7 +48,7 @@ suite('Validation', function () {
       );
 
       strictEqual(
-        result!.totals.errors + result!.totals.warnings,
+        result.totals.errors + result.totals.warnings,
         0,
         'Using fixtures/phpcs-semicolon.xml, files in ignore-me/ should be ignored.',
       );

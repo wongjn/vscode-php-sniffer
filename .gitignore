@@ -1,5 +1,3 @@
-out
 node_modules
 .vscode-test/
 *.vsix
-src/test/fixtures/vendor/

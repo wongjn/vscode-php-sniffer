@@ -1,9 +1,14 @@
-import { strictEqual } from 'assert';
-import { CancellationTokenSource } from 'vscode';
-import { formatterFactory } from '../../formatter';
-import { execPromise, FIXTURES_PATH, getConfigMock } from '../utils';
+const { strictEqual } = require('assert');
+const { CancellationTokenSource } = require('vscode');
+const { formatterFactory } = require('../../lib/formatter');
+const { execPromise, FIXTURES_PATH, getConfigMock } = require('../utils');
 
-// Returns a cancellation token.
+/**
+ * Returns a cancellation token.
+ *
+ * @return {import('vscode').CancellationToken}
+ *   A cancellation token.
+ */
 const getToken = () => new CancellationTokenSource().token;
 
 suite('Formatting', function () {

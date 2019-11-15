@@ -4,7 +4,7 @@ node_js:
 cache:
   npm: true
   directories:
-    - src/test/fixtures/vendor
+    - test/fixtures/vendor
 env:
   - TEST_SCRIPT=lint
   - TEST_SCRIPT=test:unit
