@@ -54,7 +54,7 @@ suite('CLI Utilities', function () {
     });
 
     test('Non-zero exit code rejects', function () {
-      rejects(
+      return rejects(
         executeCommand({
           command: './non-zero-exit',
           token: createStubToken(),
@@ -65,7 +65,7 @@ suite('CLI Utilities', function () {
     });
 
     test('Nonsense command rejects', function () {
-      rejects(
+      return rejects(
         executeCommand({
           command: 'foo-bar-baz',
           token: createStubToken(),
