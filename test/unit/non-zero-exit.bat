@@ -1,5 +1,5 @@
 ::
-:: Script for test/unit/cli.test.ts
+:: Script for cli.test.js
 ::
 
 @Echo off
