@@ -1,5 +1,5 @@
 const { strictEqual } = require('assert');
-const { stringsList, getIndentation, processSnippet } = require('../../lib/strings');
+const { stringsList, processSnippet } = require('../../lib/strings');
 
 suite('String Utilities', function () {
   suite('stringsList()', function () {
@@ -11,90 +11,6 @@ suite('String Utilities', function () {
     test('Empty strings are filtered out', function () {
       const strings = ['a', '', 'b', 'c', '', ''];
       strictEqual(stringsList(strings), 'a\nb\nc');
-    });
-  });
-
-  suite('getIndentation()', function () {
-    function testGetIndentation(eol) {
-      test('Space indent detection with empty line', function () {
-        const result = getIndentation(
-          `  Lorem${eol}  Ipsum  dolor${eol}${eol}  Amet`,
-          {
-            insertSpaces: true,
-            tabSize: 2,
-          },
-        );
-
-        strictEqual(result, '  ');
-      });
-
-      test('Space indent detection with 1 line of indentation only', function () {
-        const result = getIndentation(
-          `    Lorem${eol}    Ipsum  dolor${eol}  ${eol}    Amet`,
-          {
-            insertSpaces: true,
-            tabSize: 2,
-          },
-        );
-
-        strictEqual(result, '  ');
-      });
-
-      test('Space indent detection with a non-indented line', function () {
-        const result = getIndentation(
-          `    Lorem${eol}    Ipsum  dolor${eol}ABCD${eol}    Amet`,
-          {
-            insertSpaces: true,
-            tabSize: 2,
-          },
-        );
-
-        strictEqual(result, '');
-      });
-
-      test('Tab indent detection with empty line', function () {
-        const result = getIndentation(
-          `\tLorem${eol}\tIpsum  dolor${eol}${eol}\tAmet${eol}${eol}`,
-          {
-            insertSpaces: false,
-            tabSize: 1,
-          },
-        );
-
-        strictEqual(result, '\t');
-      });
-
-      test('Tab indent detection with 1 line of indentation only', function () {
-        const result = getIndentation(
-          `\tLorem${eol}\tIpsum  dolor${eol}\t${eol}\tAmet`,
-          {
-            insertSpaces: false,
-            tabSize: 1,
-          },
-        );
-
-        strictEqual(result, '\t');
-      });
-
-      test('Tab indent detection with a non-indented line', function () {
-        const result = getIndentation(
-          `\tLorem${eol}\tIpsum  dolor${eol}ABCD${eol}\tAmet`,
-          {
-            insertSpaces: false,
-            tabSize: 1,
-          },
-        );
-
-        strictEqual(result, '');
-      });
-    }
-
-    suite('LF line endings', function () {
-      testGetIndentation('\n');
-    });
-
-    suite('CRLF line endings', function () {
-      testGetIndentation('\r\n');
     });
   });
 
