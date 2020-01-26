@@ -78,7 +78,7 @@ suite('Config', function () {
       strictEqual(result.filePath, b.fsPath);
       strictEqual(result.prefix, 'A-Folder');
       strictEqual(result.standard, 'B-Standard');
-      strictEqual(result.spawnOptions.cwd, mainFolder.fsPath);
+      strictEqual(result.spawnOptions.cwd, subfolder.fsPath);
     });
 
     test('Document in a secondary workspace folder', function () {
@@ -86,7 +86,7 @@ suite('Config', function () {
       strictEqual(result.filePath, c.fsPath);
       strictEqual(result.prefix, 'A-Folder');
       strictEqual(result.standard, 'C-Standard');
-      strictEqual(result.spawnOptions.cwd, mainFolder.fsPath);
+      strictEqual(result.spawnOptions.cwd, secondaryFolder.fsPath);
     });
   });
 });

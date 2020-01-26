@@ -2,6 +2,10 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- Execution of `phpcbf` and `phpcs` will always use the workspace folder for a
+  given file (if it is in a workspace)
+
 ### Removed
 - Removed Windows-specific PHP process killing (use PHP_Codesniffer >= 3.4.2)
 
