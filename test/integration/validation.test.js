@@ -2,10 +2,10 @@ const { strictEqual } = require('assert');
 const { CancellationTokenSource } = require('vscode');
 const { join } = require('path');
 const { execPromise, FIXTURES_PATH, getConfigMock } = require('../utils');
-const { validate } = require('../../lib/validator');
+const { runPhpcs } = require('../../lib/validator');
 
 suite('Validation', function () {
-  suite('validate()', function () {
+  suite('runPhpcs()', function () {
     const config = getConfigMock({
       standard: 'PSR12',
       prefix: './vendor/bin/',
@@ -17,7 +17,7 @@ suite('Validation', function () {
     });
 
     test('Normal run', async function () {
-      const result = await validate(
+      const result = await runPhpcs(
         '<?php $a ="b"',
         new CancellationTokenSource().token,
         config,
@@ -28,7 +28,7 @@ suite('Validation', function () {
 
     test('Cancellation returns null', async function () {
       const cancellation = new CancellationTokenSource();
-      const pending = validate('<?php $a ="b"', cancellation.token, config);
+      const pending = runPhpcs('<?php $a ="b"', cancellation.token, config);
 
       setTimeout(() => cancellation.cancel(), 2);
       strictEqual(await pending, null);
@@ -41,7 +41,7 @@ suite('Validation', function () {
         standard: './phpcs-semicolon.xml',
       });
 
-      const result = await validate(
+      const result = await runPhpcs(
         '<?php $a ="b"',
         new CancellationTokenSource().token,
         testConfig,
