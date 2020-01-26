@@ -1,5 +1,5 @@
-import { strictEqual } from 'assert';
-import { stringsList, getIndentation, processSnippet } from '../../strings';
+const { strictEqual } = require('assert');
+const { stringsList, processSnippet } = require('../../lib/strings');
 
 suite('String Utilities', function () {
   suite('stringsList()', function () {
@@ -14,130 +14,42 @@ suite('String Utilities', function () {
     });
   });
 
-  suite('getIndentation()', function () {
-    function testGetIndentation(eol: string): void {
-      test('Space indent detection with empty line', function () {
-        const result = getIndentation(
-          `  Lorem${eol}  Ipsum  dolor${eol}${eol}  Amet`,
-          {
-            insertSpaces: true,
-            tabSize: 2,
-          },
-        );
-
-        strictEqual(result, '  ');
-      });
-
-      test('Space indent detection with 1 line of indentation only', function () {
-        const result = getIndentation(
-          `    Lorem${eol}    Ipsum  dolor${eol}  ${eol}    Amet`,
-          {
-            insertSpaces: true,
-            tabSize: 2,
-          },
-        );
-
-        strictEqual(result, '  ');
-      });
-
-      test('Space indent detection with a non-indented line', function () {
-        const result = getIndentation(
-          `    Lorem${eol}    Ipsum  dolor${eol}ABCD${eol}    Amet`,
-          {
-            insertSpaces: true,
-            tabSize: 2,
-          },
-        );
-
-        strictEqual(result, '');
-      });
-
-      test('Tab indent detection with empty line', function () {
-        const result = getIndentation(
-          `\tLorem${eol}\tIpsum  dolor${eol}${eol}\tAmet${eol}${eol}`,
-          {
-            insertSpaces: false,
-            tabSize: 1,
-          },
-        );
-
-        strictEqual(result, '\t');
-      });
-
-      test('Tab indent detection with 1 line of indentation only', function () {
-        const result = getIndentation(
-          `\tLorem${eol}\tIpsum  dolor${eol}\t${eol}\tAmet`,
-          {
-            insertSpaces: false,
-            tabSize: 1,
-          },
-        );
-
-        strictEqual(result, '\t');
-      });
-
-      test('Tab indent detection with a non-indented line', function () {
-        const result = getIndentation(
-          `\tLorem${eol}\tIpsum  dolor${eol}ABCD${eol}\tAmet`,
-          {
-            insertSpaces: false,
-            tabSize: 1,
-          },
-        );
-
-        strictEqual(result, '');
-      });
-    }
-
-    suite('LF line endings', function () {
-      testGetIndentation('\n');
-    });
-
-    suite('CRLF line endings', function () {
-      testGetIndentation('\r\n');
-    });
-  });
-
-  type Format = {
-    insertSpaces: boolean;
-    tabSize: number;
-  };
-
   /**
    * Utility to test aspects of processSnippet() for a snippet.
    *
-   * @param description
+   * @param {string} description
    *   The human-readable description of the test.
-   * @param text
+   * @param {string} text
    *   The snippet of text to pass to processSnippet().
-   * @param processorInput
+   * @param {string} processorInput
    *   The text string that should have been passed the the processor.
-   * @param appendOutput
+   * @param {string} appendOutput
    *   Modification is tested by appending `\ntest` to the snippet; this
    *   argument specifies what that line actually looks like after final output
    *   (no need for newline at the start of the argument).
-   * @param format
+   * @param {import('vscode').FormattingOptions} [format={ insertSpaces: true, tabSize: 2 }]
    *   The formatting options specifying how the snippet is indented.
    */
   function processSnippetTest(
-    description: string,
-    text: string,
-    processorInput: string,
-    appendOutput: string,
-    format: Format = { insertSpaces: true, tabSize: 2 },
+    description,
+    text,
+    processorInput,
+    appendOutput,
+    format = { insertSpaces: true, tabSize: 2 },
   ) {
     test(description, async function () {
-      const assertProcessor = async (input: string): Promise<string> => {
+      const assertProcessor = async (input) => {
         strictEqual(input, processorInput, 'Input text to processor.');
         return input;
       };
+
       strictEqual(
         await processSnippet(text, format, assertProcessor),
         text,
         'End result unchanged.',
       );
 
-      const appendProcessor = async (input: string): Promise<string> => `${input}\ntext`;
+      const appendProcessor = async (input) => `${input}\ntext`;
       strictEqual(
         await processSnippet(text, format, appendProcessor),
         `${text}\n${appendOutput}`,

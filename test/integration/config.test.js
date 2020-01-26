@@ -1,32 +1,33 @@
-import { strictEqual } from 'assert';
-import * as path from 'path';
-import {
-  ConfigurationTarget,
-  workspace,
-  WorkspaceFoldersChangeEvent,
-  Uri,
-} from 'vscode';
-import { getResourceConfig } from '../../config';
-import { TESTS_PATH } from '../utils';
+const { strictEqual } = require('assert');
+const path = require('path');
+const { ConfigurationTarget, workspace, Uri } = require('vscode');
+const { getResourceConfig } = require('../../lib/config');
 
-const onDidChangeWorkspaceFoldersPromise = () => new Promise<WorkspaceFoldersChangeEvent>(
-  resolve => {
-    const subscription = workspace.onDidChangeWorkspaceFolders(event => {
-      subscription.dispose();
-      resolve(event);
-    });
-  },
-);
+/**
+ * Returns a workspace-change detecting promise.
+ *
+ * @return {Promise<import('vscode').WorkspaceFoldersChangeEvent>}
+ *   A promise that resolves once a workspace folder change event has ocurred.
+ */
+const onDidChangeWorkspaceFoldersPromise = () => new Promise((resolve) => {
+  const subscription = workspace.onDidChangeWorkspaceFolders((event) => {
+    subscription.dispose();
+    resolve(event);
+  });
+});
 
 suite('Config', function () {
   suite('getResourceConfig()', async function () {
-    const mainFolder = Uri.file(path.join(TESTS_PATH, '/integration/fixtures/config'));
-    const subfolder = Uri.file(path.join(TESTS_PATH, '/integration/fixtures/config/subfolder'));
-    const secondaryFolder = Uri.file(path.join(TESTS_PATH, '/integration/fixtures/config0'));
+    const mainFolder = Uri.file(path.join(__dirname, '/fixtures/config'));
+    const subfolder = Uri.file(path.join(__dirname, '/fixtures/config/subfolder'));
+    const secondaryFolder = Uri.file(path.join(__dirname, '/fixtures/config0'));
 
-    let a: Uri;
-    let b: Uri;
-    let c: Uri;
+    /** @type {import('vscode').Uri} */
+    let a;
+    /** @type {import('vscode').Uri} */
+    let b;
+    /** @type {import('vscode').Uri} */
+    let c;
 
     suiteSetup(async function () {
       // Set up workspace folders.
@@ -77,7 +78,7 @@ suite('Config', function () {
       strictEqual(result.filePath, b.fsPath);
       strictEqual(result.prefix, 'A-Folder');
       strictEqual(result.standard, 'B-Standard');
-      strictEqual(result.spawnOptions.cwd, mainFolder.fsPath);
+      strictEqual(result.spawnOptions.cwd, subfolder.fsPath);
     });
 
     test('Document in a secondary workspace folder', function () {
@@ -85,7 +86,7 @@ suite('Config', function () {
       strictEqual(result.filePath, c.fsPath);
       strictEqual(result.prefix, 'A-Folder');
       strictEqual(result.standard, 'C-Standard');
-      strictEqual(result.spawnOptions.cwd, mainFolder.fsPath);
+      strictEqual(result.spawnOptions.cwd, secondaryFolder.fsPath);
     });
   });
 });

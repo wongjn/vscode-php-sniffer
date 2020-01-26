@@ -1,5 +1,5 @@
-import * as path from 'path';
-import { runTests } from 'vscode-test';
+const path = require('path');
+const { runTests } = require('vscode-test');
 
 async function test() {
   try {
@@ -10,13 +10,13 @@ async function test() {
     await runTests({
       extensionDevelopmentPath,
       extensionTestsPath: path.resolve(__dirname, './integration'),
-      launchArgs: [path.resolve(__dirname, '../../src/test/integration/integration.code-workspace')],
+      launchArgs: [path.resolve(__dirname, './integration/integration.code-workspace')],
     });
 
     await runTests({
       extensionDevelopmentPath,
       extensionTestsPath: path.resolve(__dirname, './functional'),
-      launchArgs: [path.resolve(__dirname, '../../src/test/fixtures')],
+      launchArgs: [path.resolve(__dirname, './fixtures')],
     });
   } catch (err) {
     process.exit(1);

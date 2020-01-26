@@ -1,5 +1,4 @@
-out
-node_modules
-.vscode-test/
+/node_modules
+/.vscode-test/
 *.vsix
-src/test/fixtures/vendor/
+test/**/vendor

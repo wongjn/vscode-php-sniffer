@@ -11,13 +11,20 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "--disable-extensions",
                 "--extensionDevelopmentPath=${workspaceFolder}"
+            ]
+        },
+        {
+            "name": "Extension Unit Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "stopOnEntry": false,
+            "args": ["--timeout", "999999", "--colors", "./test/unit/*.test.js"],
+            "skipFiles": [
+                "<node_internals>/**"
             ],
-            "outFiles": [
-                "${workspaceFolder}/out/**/*.js"
-            ],
-            "preLaunchTask": "compile"
+            "smartStep": true
         },
         {
             "name": "Extension Integration Tests",
@@ -25,15 +32,10 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "${workspaceFolder}/src/test/integration/integration.code-workspace",
-                "--disable-extensions",
+                "${workspaceFolder}/test/integration/integration.code-workspace",
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test/integration"
-            ],
-            "outFiles": [
-                "${workspaceFolder}/out/test/**/*.js"
-            ],
-            "preLaunchTask": "compile"
+                "--extensionTestsPath=${workspaceFolder}/test/integration"
+            ]
         },
         {
             "name": "Extension Functional Tests",
@@ -41,15 +43,10 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "${workspaceFolder}/src/test/fixtures",
-                "--disable-extensions",
+                "${workspaceFolder}/test/fixtures",
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test/functional"
-            ],
-            "outFiles": [
-                "${workspaceFolder}/out/test/**/*.js"
-            ],
-            "preLaunchTask": "compile"
+                "--extensionTestsPath=${workspaceFolder}/test/functional"
+            ]
         }
     ]
 }

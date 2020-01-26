@@ -1,6 +1,6 @@
-import { strictEqual, deepStrictEqual } from 'assert';
-import { Diagnostic, DiagnosticSeverity, Range } from 'vscode';
-import { PHPCSMessageType, reportFlatten } from '../../phpcs-report';
+const { strictEqual } = require('assert');
+const { DiagnosticSeverity, Range } = require('vscode');
+const { reportFlatten } = require('../../lib/phpcs-report');
 
 suite('Report Utilities', function () {
   suite('reportFlatten()', function () {
@@ -31,7 +31,7 @@ suite('Report Utilities', function () {
           message: 'Missing file doc comment',
           source: 'PEAR.Commenting.FileComment.Missing',
           severity: 5,
-          type: PHPCSMessageType.ERROR,
+          type: 'ERROR',
           line: 2,
           column: 1,
           fixable: false,
@@ -40,7 +40,7 @@ suite('Report Utilities', function () {
           message: 'TRUE, FALSE and NULL must be lowercase; expected \'false\' but found \'FALSE\'',
           source: 'Generic.PHP.LowerCaseConstant.Found',
           severity: 5,
-          type: PHPCSMessageType.ERROR,
+          type: 'ERROR',
           line: 4,
           column: 12,
           fixable: true,
@@ -49,7 +49,7 @@ suite('Report Utilities', function () {
           message: 'Line indented incorrectly; expected at least 4 spaces, found 1',
           source: 'PEAR.WhiteSpace.ScopeIndent.Incorrect',
           severity: 5,
-          type: PHPCSMessageType.ERROR,
+          type: 'ERROR',
           line: 6,
           column: 2,
           fixable: true,
@@ -58,7 +58,7 @@ suite('Report Utilities', function () {
           message: 'Missing function doc comment',
           source: 'PEAR.Commenting.FunctionComment.Missing',
           severity: 5,
-          type: PHPCSMessageType.ERROR,
+          type: 'ERROR',
           line: 9,
           column: 1,
           fixable: false,
@@ -67,7 +67,7 @@ suite('Report Utilities', function () {
           message: 'Inline control structures are discouraged',
           source: 'Generic.ControlStructures.InlineControlStructure.Discouraged',
           severity: 5,
-          type: PHPCSMessageType.WARNING,
+          type: 'WARNING',
           line: 11,
           column: 5,
           fixable: true,
@@ -92,19 +92,14 @@ suite('Report Utilities', function () {
       const result = reportFlatten(report);
       strictEqual(result.length, 5);
 
-      messages.forEach(({
-        line, column, source, message, type,
-      }, index) => {
-        deepStrictEqual(
-          result[index],
-          new Diagnostic(
-            new Range(line - 1, column - 1, line - 1, column - 1),
-            `[${source}]\n${message}`,
-            type === PHPCSMessageType.WARNING
-              ? DiagnosticSeverity.Warning
-              : DiagnosticSeverity.Error,
-          ),
+      messages.forEach(({ line, column, source, message, type }, index) => {
+        strictEqual(
+          JSON.stringify(result[index].range),
+          JSON.stringify(new Range(line - 1, column - 1, line - 1, column - 1)),
         );
+        strictEqual(result[index].message, message);
+        strictEqual(result[index].severity, DiagnosticSeverity[type === 'WARNING' ? 'Warning' : 'Error']);
+        strictEqual(result[index].source, `PHPCS:${source}`);
       });
     });
   });

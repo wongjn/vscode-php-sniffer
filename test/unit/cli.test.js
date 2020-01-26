@@ -1,6 +1,6 @@
-import { deepStrictEqual, rejects, strictEqual } from 'assert';
-import { mapToCliArgs, executeCommand } from '../../cli';
-import { createStubToken, createMockToken } from '../utils';
+const { deepStrictEqual, rejects, strictEqual } = require('assert');
+const { mapToCliArgs, executeCommand } = require('../../lib/cli');
+const { createStubToken, createMockToken } = require('../utils');
 
 suite('CLI Utilities', function () {
   suite('mapToCliArgs()', function () {
@@ -54,22 +54,18 @@ suite('CLI Utilities', function () {
     });
 
     test('Non-zero exit code rejects', function () {
-      rejects(
+      return rejects(
         executeCommand({
-          command: '../../../scripts/non-zero-exit',
+          command: './non-zero-exit',
           token: createStubToken(),
-          spawnOptions: {
-            cwd: __dirname,
-          },
+          spawnOptions: { cwd: __dirname },
         }),
-        {
-          message: '255\nfoo\nbar',
-        },
+        { message: '255\nfoo\nbar' },
       );
     });
 
     test('Nonsense command rejects', function () {
-      rejects(
+      return rejects(
         executeCommand({
           command: 'foo-bar-baz',
           token: createStubToken(),

@@ -1,7 +1,7 @@
-import { workspace, Uri } from 'vscode';
-import { sep } from 'path';
-import { testCase, hasGlobalPHPCS } from './utils';
-import { execPromise, FIXTURES_PATH } from '../utils';
+const { workspace, Uri } = require('vscode');
+const { sep } = require('path');
+const { testCase, hasGlobalPHPCS } = require('./utils');
+const { execPromise, FIXTURES_PATH } = require('../utils');
 
 /**
  * Runs test cases for two files for preset and a local ruleset.
