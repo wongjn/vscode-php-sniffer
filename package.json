@@ -84,6 +84,7 @@
         "eslint-config-airbnb-base": "^14.0.0",
         "eslint-plugin-import": "^2.18.2",
         "fs-extra": "^7.0.1",
+        "get-stdin": "^7.0.0",
         "glob": "^7.1.6",
         "mocha": "^6.1.4",
         "typescript": "^3.7.3",

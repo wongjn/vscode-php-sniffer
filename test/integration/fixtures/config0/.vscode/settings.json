@@ -1,3 +1,4 @@
 {
   "phpSniffer.standard": "C-Standard",
+  "phpSniffer.executablesFolder": "../execs/",
 }

@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+/**
+ * @file
+ * Fake PHPCBF executable for tests.
+ */
+
+const getStdin = require('get-stdin');
+
+getStdin()
+  .then((stdin) => {
+    console.log(
+      JSON.stringify({
+        arg: process.argv.slice(1).join(' '),
+        stdin,
+      }),
+    );
+  })
+  .finally(() => process.exit(1));
