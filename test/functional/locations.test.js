@@ -35,6 +35,7 @@ function functionalTestSuiteRun() {
 suite('Executable & ruleset locations', function () {
   suite('Global executable', function () {
     suiteSetup(async function () {
+      this.timeout(20000);
       if (!await hasGlobalPHPCS()) this.skip();
     });
 
@@ -69,6 +70,7 @@ suite('Executable & ruleset locations', function () {
 
   suite('Local executable', function () {
     suiteSetup(async function () {
+      this.timeout(60000);
       await execPromise('composer install --no-dev', { cwd: FIXTURES_PATH });
       await workspace
         .getConfiguration('phpSniffer', Uri.file(FIXTURES_PATH))
