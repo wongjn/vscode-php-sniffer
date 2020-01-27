@@ -9,7 +9,8 @@ and lint PHP code.
 ## Features
 
 - Runs `phpcs` to lint PHP code.
-- Runs `phpcbf` to format fixable PHP code validation errors.
+- Runs `phpcbf` to format fixable PHP code validation errors, using the built-in
+  commands "Format Document" or "Format Selection".
 
 ## Requirements
 
