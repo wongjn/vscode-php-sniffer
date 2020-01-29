@@ -45,7 +45,7 @@
                     "scope": "resource",
                     "type": "string",
                     "default": "",
-                    "markdownDescription": "Use this to specify a different executable if it is not in your global `PATH`, such as when using `PHP_Codesniffer` as a project-scoped dependency. Include a trailing slash. Can be absolute, or relative to the workspace folder."
+                    "markdownDescription": "Use this to specify a different executables folder if it is not in your global `PATH`, such as when using `PHP_Codesniffer` as a project-scoped dependency. Can be absolute, or relative to the workspace folder."
                 },
                 "phpSniffer.autoDetect": {
                     "scope": "resource",

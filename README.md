@@ -27,11 +27,10 @@ This extension contributes the following settings:
 amount of milliseconds the validator will wait after typing has stopped before
 it will run. The validator will also cancel an older run if the run is on the
 same file.
-* `phpSniffer.executablesFolder`: The folder where both `phpcs` and `phpcbf`
+* `phpSniffer.executablesFolder`: The **folder** where both `phpcs` and `phpcbf`
 executables are. Use this to specify a different executable if it is not in your
 global `PATH`, such as when using `PHP_Codesniffer` as a project-scoped
-dependency. Include a trailing slash. Can be absolute, or relative to the
-workspace folder.
+dependency. Can be absolute, or relative to the workspace folder.
 * `phpSniffer.autoDetect`: Set to `true` for the extension to auto-detect
 `phpSniffer.executablesFolder` as `./vendor/bin/` per workspace folder (applies
 only if `phpSniffer.executablesFolder` is empty).

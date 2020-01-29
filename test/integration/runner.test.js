@@ -149,6 +149,34 @@ suite('Runner', function () {
           assert(result.arg.includes(' --exclude=ExcludeMe,IgnoreThis '));
         });
       });
+
+      suite('No trailing slash needed for "phpSniffer.executablesFolder"', function () {
+        let beforeValue;
+
+        suiteSetup(function () {
+          const config = workspace.getConfiguration('phpSniffer', a);
+
+          // Save config value for reverting.
+          beforeValue = config.inspect('executablesFolder').workspaceValue;
+
+          // Set workspace config.
+          return workspace
+            .getConfiguration('phpSniffer', a)
+            .update('executablesFolder', '../execs', ConfigurationTarget.Workspace);
+        });
+
+        suiteTeardown(async function () {
+          // Revert workspace config.
+          return workspace
+            .getConfiguration('phpSniffer', a)
+            .update('executablesFolder', beforeValue, ConfigurationTarget.Workspace);
+        });
+
+        test('Result', function () {
+          const run = createRunner(new CancellationTokenSource().token, a);
+          return assert.doesNotReject(run.phpcs('a'));
+        });
+      });
     });
 
     suite('Folder resolution', function () {
