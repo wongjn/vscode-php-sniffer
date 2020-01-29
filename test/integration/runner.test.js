@@ -16,7 +16,7 @@ const onDidChangeWorkspaceFoldersPromise = () => new Promise((resolve) => {
   });
 });
 
-suite.only('Runner', function () {
+suite('Runner', function () {
   suite('createRunner()', function () {
     const mainFolder = Uri.file(path.join(__dirname, '/fixtures/config'));
 
