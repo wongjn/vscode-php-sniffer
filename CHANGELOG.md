@@ -9,6 +9,11 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 ### Changed
 - Execution of `phpcbf` and `phpcs` will always use the workspace folder for a
   given file (if it is in a workspace)
+  - `phpSniffer.standard` and `phpSniffer.executablesFolder` are now evaluated
+    per file — relative paths are relative to the file's workspace folder.
+  - Since there is a current working directory to work with, this change means
+    [PHP_CodeSniffer can detect common ruleset config files](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Advanced-Usage#using-a-default-configuration-file)
+    in a more expected way.
 
 ### Removed
 - Removed Windows-specific PHP process killing (use PHP_Codesniffer >= 3.4.2)

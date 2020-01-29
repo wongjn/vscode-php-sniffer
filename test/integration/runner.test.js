@@ -1,7 +1,9 @@
 const assert = require('assert');
 const path = require('path');
+const { unlink, promises: fsAsync } = require('fs');
 const { CancellationTokenSource, ConfigurationTarget, workspace, Uri } = require('vscode');
 const { createRunner } = require('../../lib/runner');
+const { execPromise, FIXTURES_PATH } = require('../utils');
 
 /**
  * Returns a workspace-change detecting promise.
@@ -237,6 +239,57 @@ suite('Runner', function () {
         test('Result', async function () {
           const run = createRunner(new CancellationTokenSource().token, subjectUri);
           assert.strictEqual(await run.phpcbf("<?php $foo = 'bar';"), 'CALLED THIS\n');
+        });
+      });
+
+      suite('PHP_CodeSniffer auto-discovers xml ruleset', function () {
+        const folderUri = Uri.file(FIXTURES_PATH);
+        const subjectUri = Uri.file(path.resolve(FIXTURES_PATH, 'target'));
+        const rulesetFile = path.resolve(FIXTURES_PATH, '.phpcs.xml');
+
+        suiteSetup(async function () {
+          // Set up workspace folder.
+          const onChange = onDidChangeWorkspaceFoldersPromise(workspace);
+          workspace.updateWorkspaceFolders(0, 0, { uri: folderUri });
+          await onChange;
+
+          // Create ruleset file.
+          const onCreate = fsAsync.writeFile(rulesetFile, `<?xml version="1.0"?>
+<ruleset name="Fixture Ruleset">
+  <rule ref="Generic.PHP.LowerCaseConstant"/>
+</ruleset>`);
+          const composerInstall = execPromise('composer install --no-dev', { cwd: FIXTURES_PATH });
+          this.timeout(20000);
+
+          // Set workspace config.
+          const onConfigChange = workspace
+            .getConfiguration('phpSniffer', subjectUri)
+            .update('autoDetect', true, ConfigurationTarget.Workspace);
+
+          return Promise.all([onCreate, onConfigChange, composerInstall]);
+        });
+
+        suiteTeardown(async function () {
+          // Revert workspace config.
+          await workspace
+            .getConfiguration('phpSniffer', subjectUri)
+            .update('autoDetect', undefined, ConfigurationTarget.Workspace);
+
+          // Delete ruleset file.
+          const onDelete = new Promise((resolve, reject) => {
+            unlink(rulesetFile, (err) => (err ? reject(err) : resolve()));
+          });
+
+          // Revert workspace folder.
+          const onChange = onDidChangeWorkspaceFoldersPromise(workspace);
+          workspace.updateWorkspaceFolders(0, 1);
+
+          return Promise.all([onDelete, onChange]);
+        });
+
+        test('Result', async function () {
+          const run = createRunner(new CancellationTokenSource().token, folderUri);
+          assert.strictEqual(await run.phpcbf('<?php $foo = TRUE;'), '<?php $foo = true;');
         });
       });
     });

@@ -37,7 +37,13 @@ workspace folder.
 only if `phpSniffer.executablesFolder` is empty).
 * `phpSniffer.standard`: The standards to check against. This is passed to the
 `phpcbf` and `phpcs` executables as the value for `--standard`. Can be absolute,
-or relative to the workspace folder.
+or relative to the workspace folder. If not set,
+[PHP_CodeSniffer will attempt to find a file to use](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Advanced-Usage#using-a-default-configuration-file),
+at the root of the currently open file's workspace folder in the following order:
+  1. `.phpcs.xml`
+  2. `phpcs.xml`
+  3. `.phpcs.xml.dist`
+  4. `phpcs.xml.dist`
 * `phpSniffer.snippetExcludeSniffs`: Sniffs to exclude when formatting a code
 snippet (such as when _formatting on paste_ or on the command
 `format on selection`). This is passed to the `phpcbf` command as the value for
