@@ -61,20 +61,20 @@ suite('Runner', function () {
 
     suite('.phpcs()', function () {
       test('Binary file location', async function () {
-        const run = createRunner(workspace, new CancellationTokenSource().token, a);
+        const run = createRunner(new CancellationTokenSource().token, a);
         assert.doesNotReject(run.phpcs('a'));
       });
 
       test('Returns JSON-parsed STDOUT', async function () {
         const tokenSource = new CancellationTokenSource();
-        const run = createRunner(workspace, tokenSource.token, a);
+        const run = createRunner(tokenSource.token, a);
 
         assert.strictEqual(String(await run.phpcs('a')), '[object Object]');
       });
 
       test('Token cancellation returns null', async function () {
         const tokenSource = new CancellationTokenSource();
-        const run = createRunner(workspace, tokenSource.token, a);
+        const run = createRunner(tokenSource.token, a);
 
         const result = run.phpcs('a');
         setTimeout(() => tokenSource.cancel(), 1);
@@ -83,14 +83,14 @@ suite('Runner', function () {
       });
 
       test('Function parameter passed through as STDIN', async function () {
-        const run = createRunner(workspace, new CancellationTokenSource().token, a);
+        const run = createRunner(new CancellationTokenSource().token, a);
         const stdin = String(Math.random());
 
         assert.strictEqual((await run.phpcs(stdin)).stdin, stdin);
       });
 
       test('Args are passed through', async function () {
-        const run = createRunner(workspace, new CancellationTokenSource().token, a);
+        const run = createRunner(new CancellationTokenSource().token, a);
         const result = await run.phpcs('a');
 
         assert(result.arg.includes(` --stdin-path=${a.fsPath} `));
@@ -105,20 +105,20 @@ suite('Runner', function () {
 
     suite('.phpcbf()', function () {
       test('Binary file location', async function () {
-        const run = createRunner(workspace, new CancellationTokenSource().token, a);
+        const run = createRunner(new CancellationTokenSource().token, a);
         assert.doesNotReject(run.phpcbf('a'));
       });
 
       test('Returns raw STDOUT string', async function () {
         const tokenSource = new CancellationTokenSource();
-        const run = createRunner(workspace, tokenSource.token, a);
+        const run = createRunner(tokenSource.token, a);
 
         assert.strictEqual(typeof await run.phpcbf('a'), 'string');
       });
 
       test('Token cancellation returns original text', async function () {
         const tokenSource = new CancellationTokenSource();
-        const run = createRunner(workspace, tokenSource.token, a);
+        const run = createRunner(tokenSource.token, a);
         const stdin = String(Math.random());
 
         const result = run.phpcbf(stdin);
@@ -128,7 +128,7 @@ suite('Runner', function () {
       });
 
       test('Function parameter passed through as STDIN', async function () {
-        const run = createRunner(workspace, new CancellationTokenSource().token, a);
+        const run = createRunner(new CancellationTokenSource().token, a);
         const stdin = String(Math.random());
         const result = JSON.parse(await run.phpcbf(stdin));
 
@@ -136,7 +136,7 @@ suite('Runner', function () {
       });
 
       test('Args are passed through', async function () {
-        const run = createRunner(workspace, new CancellationTokenSource().token, a);
+        const run = createRunner(new CancellationTokenSource().token, a);
         const result = JSON.parse(await run.phpcbf('a'));
 
         assert(result.arg.includes(` --stdin-path=${a.fsPath} `));
@@ -145,7 +145,7 @@ suite('Runner', function () {
       });
 
       test('Sniffs are excluded for partial document', async function () {
-        const run = createRunner(workspace, new CancellationTokenSource().token, a, false);
+        const run = createRunner(new CancellationTokenSource().token, a, false);
         const result = JSON.parse(await run.phpcbf('a'));
 
         assert(result.arg.includes(' --exclude=ExcludeMe,IgnoreThis '));
@@ -179,17 +179,17 @@ suite('Runner', function () {
       });
 
       test('Main document', async function () {
-        const run = createRunner(workspace, new CancellationTokenSource().token, a);
+        const run = createRunner(new CancellationTokenSource().token, a);
         assert((await run.phpcs('a')).arg.includes('--standard=A-Standard'));
       });
 
       test('Document in a subfolder', async function () {
-        const run = createRunner(workspace, new CancellationTokenSource().token, b);
+        const run = createRunner(new CancellationTokenSource().token, b);
         assert((await run.phpcs('b')).arg.includes('--standard=B-Standard'));
       });
 
       test('Document in a secondary workspace folder', async function () {
-        const run = createRunner(workspace, new CancellationTokenSource().token, c);
+        const run = createRunner(new CancellationTokenSource().token, c);
         assert((await run.phpcs('c')).arg.includes('--standard=C-Standard'));
       });
     });
