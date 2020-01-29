@@ -20,7 +20,7 @@ module.exports = {
         { language: 'php', scheme: 'file' },
         Formatter,
       ),
-      createValidator(vscode),
+      createValidator(),
     );
   },
 };
