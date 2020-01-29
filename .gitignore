@@ -2,3 +2,4 @@
 /.vscode-test/
 *.vsix
 test/**/vendor
+!test/integration/fixtures/auto/vendor

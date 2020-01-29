@@ -32,6 +32,9 @@ executables are. Use this to specify a different executable if it is not in your
 global `PATH`, such as when using `PHP_Codesniffer` as a project-scoped
 dependency. Include a trailing slash. Can be absolute, or relative to the
 workspace folder.
+* `phpSniffer.autoDetect`: Set to `true` for the extension to auto-detect
+`phpSniffer.executablesFolder` as `./vendor/bin/` per workspace folder (applies
+only if `phpSniffer.executablesFolder` is empty).
 * `phpSniffer.standard`: The standards to check against. This is passed to the
 `phpcbf` and `phpcs` executables as the value for `--standard`. Can be absolute,
 or relative to the workspace folder.

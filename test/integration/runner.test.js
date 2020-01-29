@@ -204,5 +204,41 @@ suite('Runner', function () {
         assert((await run.phpcs('c')).arg.includes('--standard=C-Standard'));
       });
     });
+
+    suite('Automatic detection', function () {
+      suite('Executables folder discovered', function () {
+        const folderUri = Uri.file(path.resolve(__dirname, 'fixtures/auto'));
+        const subjectUri = Uri.file(path.resolve(__dirname, 'fixtures/auto/target'));
+
+        suiteSetup(async function () {
+          // Set up workspace folder.
+          const onChange = onDidChangeWorkspaceFoldersPromise(workspace);
+          workspace.updateWorkspaceFolders(0, 0, { uri: folderUri });
+          await onChange;
+
+          // Set workspace config.
+          await workspace
+            .getConfiguration('phpSniffer', subjectUri)
+            .update('autoDetect', true, ConfigurationTarget.Workspace);
+        });
+
+        suiteTeardown(async function () {
+          // Revert workspace config.
+          await workspace
+            .getConfiguration('phpSniffer', subjectUri)
+            .update('autoDetect', undefined, ConfigurationTarget.Workspace);
+
+          // Revert workspace folder.
+          const onChange = onDidChangeWorkspaceFoldersPromise(workspace);
+          workspace.updateWorkspaceFolders(0, 1);
+          await onChange;
+        });
+
+        test('Result', async function () {
+          const run = createRunner(new CancellationTokenSource().token, subjectUri);
+          assert.strictEqual(await run.phpcbf("<?php $foo = 'bar';"), 'CALLED THIS\n');
+        });
+      });
+    });
   });
 });

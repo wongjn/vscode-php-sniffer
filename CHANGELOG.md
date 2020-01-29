@@ -2,6 +2,10 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+### Added
+- Add `phpSniffer.autoDetect` setting to auto-discover executables at
+  `[workspaceFolder]/vendor/bin` if `phpSniffer.executablesFolder` is unset.
+
 ### Changed
 - Execution of `phpcbf` and `phpcs` will always use the workspace folder for a
   given file (if it is in a workspace)
