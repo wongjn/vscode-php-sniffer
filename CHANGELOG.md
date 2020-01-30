@@ -14,6 +14,7 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
   - Since there is a current working directory to work with, this change means
     [PHP_CodeSniffer can detect common ruleset config files](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Advanced-Usage#using-a-default-configuration-file)
     in a more expected way.
+- Respect `<file>` tags in ruleset files
 
 ### Removed
 - Removed Windows-specific PHP process killing (use PHP_Codesniffer >= 3.4.2)

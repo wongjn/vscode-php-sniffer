@@ -3,6 +3,8 @@
     // for the documentation about the extensions.json format
     "recommendations": [
         "dbaeumer.vscode-eslint",
-        "editorconfig.editorconfig"
+        "editorconfig.editorconfig",
+        "bmewburn.vscode-intelephense-client",
+        "felixfbecker.php-debug",
     ]
 }

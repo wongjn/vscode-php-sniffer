@@ -94,6 +94,7 @@ suite('Runner', function () {
           assert(result.arg.includes(` --stdin-path=${a.fsPath} `));
           assert(result.arg.includes(' --report=json '));
           assert(result.arg.includes(' --standard=A-Standard '));
+          assert(result.arg.includes(' --bootstrap='));
           assert(result.arg.includes(' --runtime-set ignore_warnings_on_exit 1 '));
           assert(result.arg.includes(' --runtime-set ignore_errors_on_exit 1 '));
           assert(result.arg.includes(' -q '));
@@ -139,6 +140,7 @@ suite('Runner', function () {
 
           assert(result.arg.includes(` --stdin-path=${a.fsPath} `));
           assert(result.arg.includes(' --standard=A-Standard '));
+          assert(result.arg.includes(' --bootstrap='));
           assert(result.arg.endsWith(' -'));
         });
 
@@ -319,6 +321,131 @@ suite('Runner', function () {
           const run = createRunner(new CancellationTokenSource().token, folderUri);
           assert.strictEqual(await run.phpcbf('<?php $foo = TRUE;'), '<?php $foo = true;');
         });
+      });
+    });
+  });
+
+  suite('Bootstrap file for <file> directives', function () {
+    const testContent = '<?php $foo = true;';
+
+    const folderUri = Uri.file(FIXTURES_PATH);
+    const subjectUri = Uri.file(path.resolve(FIXTURES_PATH, 'target'));
+
+    suiteSetup(async function () {
+      // Set up workspace folder.
+      const onChange = onDidChangeWorkspaceFoldersPromise(workspace);
+      workspace.updateWorkspaceFolders(0, 0, { uri: folderUri });
+      await onChange;
+
+      this.timeout(20000);
+      const config = workspace.getConfiguration('phpSniffer', subjectUri);
+
+      return Promise.all([
+        execPromise('composer install --no-dev', { cwd: FIXTURES_PATH }),
+        config.update('executablesFolder', './vendor/bin/', ConfigurationTarget.Workspace),
+      ]);
+    });
+
+    suiteTeardown(async function () {
+      await workspace
+        .getConfiguration('phpSniffer', subjectUri)
+        .update('executablesFolder', undefined, ConfigurationTarget.Workspace);
+
+      // Revert workspace folder.
+      const onChange = onDidChangeWorkspaceFoldersPromise(workspace);
+      workspace.updateWorkspaceFolders(0, 1);
+      return onChange;
+    });
+
+    suite('Directory', function () {
+      // Set workspace config.
+      suiteSetup(
+        () => workspace
+          .getConfiguration('phpSniffer', subjectUri)
+          .update('standard', './bootstrap-file.directory.xml', ConfigurationTarget.Workspace),
+      );
+
+      // Revert workspace config.
+      suiteTeardown(
+        () => workspace
+          .getConfiguration('phpSniffer', subjectUri)
+          .update('standard', undefined, ConfigurationTarget.Workspace),
+      );
+
+      test('Not matches <file>', async function () {
+        const uri = Uri.file(path.resolve(FIXTURES_PATH, 'ignore-me/index.php'));
+        const run = createRunner(new CancellationTokenSource().token, uri);
+        assert.strictEqual((await run.phpcs(testContent)).totals.errors, 0);
+      });
+
+      test('Matches <file>', async function () {
+        const uri = Uri.file(path.resolve(FIXTURES_PATH, 'include/index.php'));
+        const run = createRunner(new CancellationTokenSource().token, uri);
+        assert.strictEqual((await run.phpcs(testContent)).totals.errors, 1);
+      });
+    });
+
+    suite('File', function () {
+      // Set workspace config.
+      suiteSetup(
+        () => workspace
+          .getConfiguration('phpSniffer', subjectUri)
+          .update('standard', './bootstrap-file.file.xml', ConfigurationTarget.Workspace),
+      );
+
+      // Revert workspace config.
+      suiteTeardown(
+        () => workspace
+          .getConfiguration('phpSniffer', subjectUri)
+          .update('standard', undefined, ConfigurationTarget.Workspace),
+      );
+
+      test('Not matches <file>', async function () {
+        {
+          const uri = Uri.file(path.resolve(FIXTURES_PATH, 'ignore-me/index.php'));
+          const run = createRunner(new CancellationTokenSource().token, uri);
+          assert.strictEqual((await run.phpcs(testContent)).totals.errors, 0);
+        }
+        {
+          const uri = Uri.file(path.resolve(FIXTURES_PATH, 'include/class.php'));
+          const run = createRunner(new CancellationTokenSource().token, uri);
+          assert.strictEqual((await run.phpcs(testContent)).totals.errors, 0);
+        }
+      });
+
+      test('Matches <file>', async function () {
+        this.timeout(0);
+        const uri = Uri.file(path.resolve(FIXTURES_PATH, 'include/index.php'));
+        const run = createRunner(new CancellationTokenSource().token, uri);
+        assert.strictEqual((await run.phpcs(testContent)).totals.errors, 1);
+      });
+    });
+
+    suite('Extending', function () {
+      // Set workspace config.
+      suiteSetup(
+        () => workspace
+          .getConfiguration('phpSniffer', subjectUri)
+          .update('standard', './include/bootstrap-file.inherit.xml', ConfigurationTarget.Workspace),
+      );
+
+      // Revert workspace config.
+      suiteTeardown(
+        () => workspace
+          .getConfiguration('phpSniffer', subjectUri)
+          .update('standard', undefined, ConfigurationTarget.Workspace),
+      );
+
+      test('Not matches <file>', async function () {
+        const uri = Uri.file(path.resolve(FIXTURES_PATH, 'include/class.php'));
+        const run = createRunner(new CancellationTokenSource().token, uri);
+        assert.strictEqual((await run.phpcs(testContent)).totals.errors, 0);
+      });
+
+      test('Matches <file>', async function () {
+        const uri = Uri.file(path.resolve(FIXTURES_PATH, 'include/index.php'));
+        const run = createRunner(new CancellationTokenSource().token, uri);
+        assert.strictEqual((await run.phpcs(testContent)).totals.errors, 1);
       });
     });
   });

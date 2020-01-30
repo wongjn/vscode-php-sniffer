@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<ruleset name="Bootstrap File Test - File">
+  <rule ref="Generic.PHP.UpperCaseConstant"/>
+  <file>./include/index.php</file>
+</ruleset>
