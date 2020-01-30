@@ -84,7 +84,6 @@
     "devDependencies": {
         "@types/lodash.debounce": "^4.0.6",
         "@types/node": "^10.14.9",
-        "@types/ramda": "^0.26.37",
         "@types/vscode": "^1.40.0",
         "eslint": "^6.6.0",
         "eslint-config-airbnb-base": "^14.0.0",
@@ -97,7 +96,6 @@
         "vscode-test": "^1.2.3"
     },
     "dependencies": {
-        "lodash.debounce": "^4.0.8",
-        "ramda": "^0.26.1"
+        "lodash.debounce": "^4.0.8"
     }
 }
