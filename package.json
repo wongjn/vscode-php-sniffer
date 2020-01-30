@@ -57,7 +57,7 @@
                     "scope": "resource",
                     "type": "string",
                     "default": "",
-                    "markdownDescription": "The standards to check against. This is passed to the `phpcbf` and `phpcs` executables as the value for `--standard`. Can be absolute, or relative to the workspace folder. If not set, [PHP_CodeSniffer will attempt to find a file to use](https: //github.com/squizlabs/PHP_CodeSniffer/wiki/Advanced-Usage#using-a-default-configuration-file)."
+                    "markdownDescription": "The standards to check against. This is passed to the `phpcbf` and `phpcs` executables as the value for `--standard`. Can be absolute, or relative to the workspace folder. If not set, [PHP_CodeSniffer will attempt to find a file to use](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Advanced-Usage#using-a-default-configuration-file)."
                 },
                 "phpSniffer.snippetExcludeSniffs": {
                     "scope": "resource",
