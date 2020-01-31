@@ -2,6 +2,8 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+
+## [1.2.0] - 2020-01-31
 ### Added
 - Add `phpSniffer.autoDetect` setting to auto-discover executables at
   `[workspaceFolder]/vendor/bin` if `phpSniffer.executablesFolder` is unset.
@@ -101,7 +103,8 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 ## [0.1.0] - 2018-11-26
 - Initial release
 
-[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.5...HEAD
+[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.5...v1.2.0
 [1.1.5]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.2...v1.1.3
