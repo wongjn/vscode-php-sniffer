@@ -5,6 +5,7 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 ### Added
 - Add `phpSniffer.autoDetect` setting to auto-discover executables at
   `[workspaceFolder]/vendor/bin` if `phpSniffer.executablesFolder` is unset.
+- Add status bar indicator when formatting
 
 ### Changed
 - Execution of `phpcbf` and `phpcs` will always use the workspace folder for a
@@ -15,6 +16,8 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
     [PHP_CodeSniffer can detect common ruleset config files](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Advanced-Usage#using-a-default-configuration-file)
     in a more expected way.
 - Respect `<file>` tags in ruleset files
+- `phpSniffer.executablesFolder` no longer requires trailing slash
+- Change validating status bar indicator to use progress indicator
 
 ### Removed
 - Removed Windows-specific PHP process killing (use PHP_Codesniffer >= 3.4.2)
