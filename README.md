@@ -11,6 +11,16 @@ and lint PHP code.
 - Runs `phpcs` to lint PHP code.
 - Runs `phpcbf` to format fixable PHP code validation errors, using the built-in
   commands "Format Document" or "Format Selection".
+  - One may need to set this extension as the default PHP language formatter if
+    you have more than one PHP language extension enabled. Use the following
+    snippet in a `settings.json`:
+    ```json
+    {
+      "[php]": {
+        "editor.defaultFormatter": "wongjn.php-sniffer"
+      }
+    }
+    ```
 
 ## Requirements
 
@@ -18,6 +28,32 @@ and lint PHP code.
 - [PHP_Codesniffer](https://github.com/squizlabs/PHP_CodeSniffer)
 
 ## Extension Settings
+
+### Quick Setup
+
+`settings.json`:
+
+```json
+{
+  "phpSniffer.autoDetect": true
+}
+```
+
+And if your projects look like this:
+
+```
+workspace-folder/
+  vendor/
+    bin/
+      phpcs
+      phpcbf
+  .phpcs.xml
+```
+
+Validation and formatting will work (see below for alternative filenames for
+`.phpcs.xml`).
+
+### In Depth
 
 This extension contributes the following settings:
 
