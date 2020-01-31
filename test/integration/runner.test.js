@@ -267,8 +267,9 @@ suite('Runner', function () {
         });
 
         test('Result', async function () {
+          this.timeout(0);
           const run = createRunner(new CancellationTokenSource().token, subjectUri);
-          assert.strictEqual(await run.phpcbf("<?php $foo = 'bar';"), 'CALLED THIS\n');
+          assert.strictEqual((await run.phpcs('Foo')).CALLED, 'THIS');
         });
       });
 

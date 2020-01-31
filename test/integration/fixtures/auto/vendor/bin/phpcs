@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+/**
+ * @file
+ * Fake PHPCS executable for tests.
+ */
+
+console.log('{"CALLED": "THIS"}');
+process.exit(0);

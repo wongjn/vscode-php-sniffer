@@ -1,8 +1,0 @@
-#!/usr/bin/env node
-/**
- * @file
- * Fake PHPCBF executable for tests.
- */
-
-console.log('CALLED THIS');
-process.exit(1);
