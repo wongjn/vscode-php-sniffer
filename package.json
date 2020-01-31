@@ -84,7 +84,7 @@
     "devDependencies": {
         "@types/lodash.debounce": "^4.0.6",
         "@types/node": "^10.14.9",
-        "@types/vscode": "^1.40.0",
+        "@types/vscode": "^1.29.0",
         "eslint": "^6.6.0",
         "eslint-config-airbnb-base": "^14.0.0",
         "eslint-plugin-import": "^2.18.2",
