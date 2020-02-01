@@ -2,6 +2,8 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+### Fixed
+- Fix validation error character position with tab indentation
 
 ## [1.2.0] - 2020-01-31
 ### Added

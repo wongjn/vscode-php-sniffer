@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<ruleset name="Tab Indent">
+  <arg name="tab-width" value="12"/>
+  <rule ref="Generic.PHP.LowerCaseConstant"/>
+</ruleset>

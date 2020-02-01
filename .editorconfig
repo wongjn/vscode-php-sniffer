@@ -14,3 +14,8 @@ indent_size = 4
 
 [**/.vscode/*.json]
 indent_size = 4
+
+# Avoid interfering with tests.
+[**/test/fixtures/**/*.php]
+indent_style = unset
+indent_size = unset
