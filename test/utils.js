@@ -1,3 +1,4 @@
+const assert = require('assert');
 const { exec } = require('child_process');
 const path = require('path');
 
@@ -113,3 +114,23 @@ const createMockToken = () => {
 };
 
 module.exports.createMockToken = createMockToken;
+
+/**
+ * Asserts two positions are the same.
+ *
+ * @param {import('vscode').Position} actual
+ *   The actual position.
+ * @param {import('vscode').Position} expected
+ *   The expected position to receive.
+ */
+module.exports.assertPosition = (actual, expected) => {
+  assert.ok(expected.isEqual(actual), new assert.AssertionError({
+    message: `Expected positions to be the same:
+
+Line ${actual.line}, Character ${actual.character} != Line ${expected.line}, Character ${expected.character}
+`,
+    actual: { line: actual.line, character: actual.character },
+    expected: { line: expected.line, character: expected.character },
+    operator: 'assertPosition',
+  }));
+};

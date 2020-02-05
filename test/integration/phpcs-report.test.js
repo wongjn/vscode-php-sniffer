@@ -1,5 +1,6 @@
 const { strictEqual } = require('assert');
-const { DiagnosticSeverity, Range } = require('vscode');
+const { DiagnosticSeverity, Position, Range } = require('vscode');
+const { assertPosition } = require('../utils');
 const { reportFlatten } = require('../../lib/phpcs-report');
 
 suite('Report Utilities', function () {
@@ -20,7 +21,7 @@ suite('Report Utilities', function () {
         },
       };
 
-      strictEqual(reportFlatten(report).length, 0);
+      strictEqual(reportFlatten(report, 'a').length, 0);
     });
 
     test('A report is flattened correctly', function () {
@@ -89,7 +90,7 @@ suite('Report Utilities', function () {
         },
       };
 
-      const result = reportFlatten(report);
+      const result = reportFlatten(report, 'a\n'.repeat(10));
       strictEqual(result.length, 5);
 
       messages.forEach(({ line, column, source, message, type }, index) => {
@@ -100,6 +101,38 @@ suite('Report Utilities', function () {
         strictEqual(result[index].message, message);
         strictEqual(result[index].severity, DiagnosticSeverity[type === 'WARNING' ? 'Warning' : 'Error']);
         strictEqual(result[index].source, `PHPCS:${source}`);
+      });
+    });
+
+    suite('Tabbed text position', function () {
+      const toReport = (messages) => ({ files: { 'file/path.php': { messages } } });
+
+      test('Tabs before position', function () {
+        const message = {
+          message: 'message',
+          source: 'source',
+          severity: 5,
+          type: 'ERROR',
+          line: 1,
+          column: 5,
+        };
+
+        const [result] = reportFlatten(toReport(message), '\tfoo bar', 4);
+        assertPosition(result.range.start, new Position(0, 1));
+      });
+
+      test('Tabs before and after position', function () {
+        const message = {
+          message: 'message',
+          source: 'source',
+          severity: 5,
+          type: 'ERROR',
+          line: 1,
+          column: 5,
+        };
+
+        const [result] = reportFlatten(toReport(message), '\tfoo bar\t200', 4);
+        assertPosition(result.range.start, new Position(0, 1));
       });
     });
   });
