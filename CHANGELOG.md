@@ -2,6 +2,9 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- Bypass non-file documents
+
 ### Fixed
 - Fix validation error character position with tab indentation
 
