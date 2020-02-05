@@ -117,7 +117,7 @@ suite('Report Utilities', function () {
           column: 5,
         };
 
-        const [result] = reportFlatten(toReport(message), '\tfoo bar', 4);
+        const [result] = reportFlatten(toReport([message]), '\tfoo bar', 4);
         assertPosition(result.range.start, new Position(0, 1));
       });
 
@@ -131,7 +131,7 @@ suite('Report Utilities', function () {
           column: 5,
         };
 
-        const [result] = reportFlatten(toReport(message), '\tfoo bar\t200', 4);
+        const [result] = reportFlatten(toReport([message]), '\tfoo bar\t200', 4);
         assertPosition(result.range.start, new Position(0, 1));
       });
     });
