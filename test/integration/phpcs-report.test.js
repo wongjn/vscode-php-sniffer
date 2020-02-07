@@ -100,7 +100,7 @@ suite('Report Utilities', function () {
         );
         strictEqual(result[index].message, message);
         strictEqual(result[index].severity, DiagnosticSeverity[type === 'WARNING' ? 'Warning' : 'Error']);
-        strictEqual(result[index].source, `PHPCS:${source}`);
+        strictEqual(result[index].code, source);
       });
     });
 

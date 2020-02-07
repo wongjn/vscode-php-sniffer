@@ -2,6 +2,8 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- Move sniff info in diagnostics
 
 ## [1.2.2] - 2020-02-07
 ### Fixed
