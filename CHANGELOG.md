@@ -2,6 +2,8 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+### Fixed
+- Fix erroneous diagnostic position with tab indent where column is 1
 
 ## [1.2.1] - 2020-02-06
 ### Changed

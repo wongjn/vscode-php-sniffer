@@ -104,7 +104,7 @@ suite('Report Utilities', function () {
       });
     });
 
-    suite('Tabbed text position', function () {
+    suite.only('Tabbed text position', function () {
       const toReport = (messages) => ({ files: { 'file/path.php': { messages } } });
 
       test('Tabs before position', function () {
@@ -133,6 +133,20 @@ suite('Report Utilities', function () {
 
         const [result] = reportFlatten(toReport([message]), '\tfoo bar\t200', 4);
         assertPosition(result.range.start, new Position(0, 1));
+      });
+
+      test('Tabs with error at column 1', function () {
+        const message = {
+          message: 'message',
+          source: 'source',
+          severity: 5,
+          type: 'ERROR',
+          line: 1,
+          column: 1,
+        };
+
+        const [result] = reportFlatten(toReport([message]), '\tfoo bar', 4);
+        assertPosition(result.range.start, new Position(0, 0));
       });
     });
   });
