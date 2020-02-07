@@ -104,7 +104,7 @@ suite('Report Utilities', function () {
       });
     });
 
-    suite.only('Tabbed text position', function () {
+    suite('Tabbed text position', function () {
       const toReport = (messages) => ({ files: { 'file/path.php': { messages } } });
 
       test('Tabs before position', function () {
