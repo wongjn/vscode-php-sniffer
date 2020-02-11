@@ -2,6 +2,8 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+
+## [1.2.3] - 2020-02-11
 ### Changed
 - Move sniff info in diagnostics
 - Rework tab-indented diagnostic position fix to **not** use VSCode-configured
@@ -119,7 +121,8 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 ## [0.1.0] - 2018-11-26
 - Initial release
 
-[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.3...HEAD
+[1.2.3]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.1.5...v1.2.0
