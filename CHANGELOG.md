@@ -4,6 +4,8 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 ## [Unreleased]
 ### Changed
 - Move sniff info in diagnostics
+- Rework tab-indented diagnostic position fix to **not** use VSCode-configured
+  tab spacing (reverts to the behavior before `1.2.1`)
 - Set validator to use progress indicator
 
 ## [1.2.2] - 2020-02-07

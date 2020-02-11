@@ -7,17 +7,20 @@ suite('Report Utilities', function () {
   suite('reportFlatten()', function () {
     test('Empty report returns an empty set', function () {
       const report = {
-        files: {
-          'file/path.php': {
+        vscodeOptions: { tabWidth: 1 },
+        result: {
+          files: {
+            'file/path.php': {
+              errors: 0,
+              warnings: 0,
+              messages: [],
+            },
+          },
+          totals: {
             errors: 0,
             warnings: 0,
-            messages: [],
+            fixable: 0,
           },
-        },
-        totals: {
-          errors: 0,
-          warnings: 0,
-          fixable: 0,
         },
       };
 
@@ -76,17 +79,20 @@ suite('Report Utilities', function () {
       ];
 
       const report = {
-        files: {
-          'file/path.php': {
+        vscodeOptions: { tabWidth: 1 },
+        result: {
+          files: {
+            'file/path.php': {
+              errors: 4,
+              warnings: 1,
+              messages,
+            },
+          },
+          totals: {
             errors: 4,
             warnings: 1,
-            messages,
+            fixable: 3,
           },
-        },
-        totals: {
-          errors: 4,
-          warnings: 1,
-          fixable: 3,
         },
       };
 
@@ -105,7 +111,10 @@ suite('Report Utilities', function () {
     });
 
     suite('Tabbed text position', function () {
-      const toReport = (messages) => ({ files: { 'file/path.php': { messages } } });
+      const toReport = (messages) => ({
+        vscodeOptions: { tabWidth: 4 },
+        result: { files: { 'file/path.php': { messages } } },
+      });
 
       test('Tabs before position', function () {
         const message = {
@@ -117,7 +126,7 @@ suite('Report Utilities', function () {
           column: 5,
         };
 
-        const [result] = reportFlatten(toReport([message]), '\tfoo bar', 4);
+        const [result] = reportFlatten(toReport([message]), '\tfoo bar');
         assertPosition(result.range.start, new Position(0, 1));
       });
 
@@ -131,7 +140,7 @@ suite('Report Utilities', function () {
           column: 5,
         };
 
-        const [result] = reportFlatten(toReport([message]), '\tfoo bar\t200', 4);
+        const [result] = reportFlatten(toReport([message]), '\tfoo bar\t200');
         assertPosition(result.range.start, new Position(0, 1));
       });
 
@@ -145,7 +154,7 @@ suite('Report Utilities', function () {
           column: 1,
         };
 
-        const [result] = reportFlatten(toReport([message]), '\tfoo bar', 4);
+        const [result] = reportFlatten(toReport([message]), '\tfoo bar');
         assertPosition(result.range.start, new Position(0, 0));
       });
     });

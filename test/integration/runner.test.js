@@ -376,13 +376,13 @@ suite('Runner', function () {
       test('Not matches <file>', async function () {
         const uri = Uri.file(path.resolve(FIXTURES_PATH, 'ignore-me/index.php'));
         const run = createRunner(new CancellationTokenSource().token, uri);
-        assert.strictEqual((await run.phpcs(testContent)).totals.errors, 0);
+        assert.strictEqual((await run.phpcs(testContent)).result.totals.errors, 0);
       });
 
       test('Matches <file>', async function () {
         const uri = Uri.file(path.resolve(FIXTURES_PATH, 'include/index.php'));
         const run = createRunner(new CancellationTokenSource().token, uri);
-        assert.strictEqual((await run.phpcs(testContent)).totals.errors, 1);
+        assert.strictEqual((await run.phpcs(testContent)).result.totals.errors, 1);
       });
     });
 
@@ -405,12 +405,12 @@ suite('Runner', function () {
         {
           const uri = Uri.file(path.resolve(FIXTURES_PATH, 'ignore-me/index.php'));
           const run = createRunner(new CancellationTokenSource().token, uri);
-          assert.strictEqual((await run.phpcs(testContent)).totals.errors, 0);
+          assert.strictEqual((await run.phpcs(testContent)).result.totals.errors, 0);
         }
         {
           const uri = Uri.file(path.resolve(FIXTURES_PATH, 'include/class.php'));
           const run = createRunner(new CancellationTokenSource().token, uri);
-          assert.strictEqual((await run.phpcs(testContent)).totals.errors, 0);
+          assert.strictEqual((await run.phpcs(testContent)).result.totals.errors, 0);
         }
       });
 
@@ -418,7 +418,7 @@ suite('Runner', function () {
         this.timeout(0);
         const uri = Uri.file(path.resolve(FIXTURES_PATH, 'include/index.php'));
         const run = createRunner(new CancellationTokenSource().token, uri);
-        assert.strictEqual((await run.phpcs(testContent)).totals.errors, 1);
+        assert.strictEqual((await run.phpcs(testContent)).result.totals.errors, 1);
       });
     });
 
@@ -440,13 +440,13 @@ suite('Runner', function () {
       test('Not matches <file>', async function () {
         const uri = Uri.file(path.resolve(FIXTURES_PATH, 'include/class.php'));
         const run = createRunner(new CancellationTokenSource().token, uri);
-        assert.strictEqual((await run.phpcs(testContent)).totals.errors, 0);
+        assert.strictEqual((await run.phpcs(testContent)).result.totals.errors, 0);
       });
 
       test('Matches <file>', async function () {
         const uri = Uri.file(path.resolve(FIXTURES_PATH, 'include/index.php'));
         const run = createRunner(new CancellationTokenSource().token, uri);
-        assert.strictEqual((await run.phpcs(testContent)).totals.errors, 1);
+        assert.strictEqual((await run.phpcs(testContent)).result.totals.errors, 1);
       });
     });
   });

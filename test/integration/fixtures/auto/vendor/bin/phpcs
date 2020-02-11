@@ -4,5 +4,5 @@
  * Fake PHPCS executable for tests.
  */
 
-console.log('{"CALLED": "THIS"}');
+console.log('{"CALLED": "THIS"');
 process.exit(0);
