@@ -2,6 +2,8 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+### Fixed
+- Fix document snippet formatting not working (Format selection, etc.)
 
 ## [1.2.3] - 2020-02-11
 ### Changed
