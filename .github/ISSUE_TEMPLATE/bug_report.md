@@ -24,7 +24,7 @@ A clear and concise description of what you expected to happen.
  - OS: [e.g. Windows 10]
  - VSCode version: [e.g. 1.30.2]
  - PHP CLI version: [e.g. 7.1.26]
--  squizlabs/PHP_CodeSniffer version: [e.g. 3.4.0]
+ - squizlabs/PHP_CodeSniffer version: [e.g. 3.4.0] (global ❌/✔)
 
 **Extension settings**
 ```json
@@ -32,6 +32,7 @@ A clear and concise description of what you expected to happen.
     "phpSniffer.run": "onSave",
     "phpSniffer.onTypeDelay": 250,
     "phpSniffer.executablesFolder": "",
+    "phpSniffer.autoDetect": false,
     "phpSniffer.standard": "",
     "phpSniffer.snippetExcludeSniffs" : [],
 }
