@@ -9,6 +9,9 @@ env:
   - TEST_SCRIPT=lint
   - TEST_SCRIPT=test:unit
   - TEST_SCRIPT=test:integration PHPENV_VERSION=7.1
+  - TEST_SCRIPT=test:integration PHPENV_VERSION=7.2
+  - TEST_SCRIPT=test:integration PHPENV_VERSION=7.3
+  - TEST_SCRIPT=test:integration PHPENV_VERSION=7.4
 before_script:
   - |
     if [ "$TEST_SCRIPT" == 'test:integration' ]; then
