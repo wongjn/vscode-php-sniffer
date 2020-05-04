@@ -421,7 +421,7 @@ suite('Runner', function () {
       });
     });
 
-    suite.only('Graceful handling of non-existent paths in rulesets', function () {
+    suite('Graceful handling of non-existent paths in rulesets', function () {
       // Set workspace config.
       suiteSetup(
         () => workspace
