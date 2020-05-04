@@ -33,7 +33,7 @@ foreach ($this->ruleset->paths as $ruleset_path) {
     $full_path = realpath($ruleset_dir . DIRECTORY_SEPARATOR . (string) $file_path);
 
     // Found a match, no more processing needed, exit.
-    if (strpos($processing_file, $full_path) === 0) return;
+    if ($full_path && strpos($processing_file, $full_path) === 0) return;
   }
 }
 

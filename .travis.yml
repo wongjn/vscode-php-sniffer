@@ -12,6 +12,7 @@ env:
 before_script:
   - |
     if [ "$TEST_SCRIPT" == 'test:integration' ]; then
+      phpenv config-add test/php.ini
       composer global require squizlabs/php_codesniffer:^3.4
       export PATH=$PATH:$(composer global config bin-dir --absolute)
     fi

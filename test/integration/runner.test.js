@@ -415,7 +415,28 @@ suite('Runner', function () {
       });
 
       test('Matches <file>', async function () {
-        this.timeout(0);
+        const uri = Uri.file(path.resolve(FIXTURES_PATH, 'include/index.php'));
+        const run = createRunner(new CancellationTokenSource().token, uri);
+        assert.strictEqual((await run.phpcs(testContent)).result.totals.errors, 1);
+      });
+    });
+
+    suite.only('Graceful handling of non-existent paths in rulesets', function () {
+      // Set workspace config.
+      suiteSetup(
+        () => workspace
+          .getConfiguration('phpSniffer', subjectUri)
+          .update('standard', './bootstrap-file.error.xml', ConfigurationTarget.Workspace),
+      );
+
+      // Revert workspace config.
+      suiteTeardown(
+        () => workspace
+          .getConfiguration('phpSniffer', subjectUri)
+          .update('standard', undefined, ConfigurationTarget.Workspace),
+      );
+
+      test('No JavaScript errors', async function () {
         const uri = Uri.file(path.resolve(FIXTURES_PATH, 'include/index.php'));
         const run = createRunner(new CancellationTokenSource().token, uri);
         assert.strictEqual((await run.phpcs(testContent)).result.totals.errors, 1);
