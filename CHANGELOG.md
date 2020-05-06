@@ -2,6 +2,8 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+### Fixed
+- Fix deprecation error from bootstrap file (#29)
 
 ## [1.2.4] - 2020-02-21
 ### Fixed
