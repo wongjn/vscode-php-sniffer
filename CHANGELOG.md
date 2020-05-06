@@ -2,6 +2,8 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+
+## [1.2.5] - 2020-05-06
 ### Fixed
 - Fix deprecation error from bootstrap file (#29)
 
@@ -127,7 +129,8 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 ## [0.1.0] - 2018-11-26
 - Initial release
 
-[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.4...HEAD
+[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.5...HEAD
+[1.2.5]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.4...v1.2.5
 [1.2.4]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.3...v1.2.4
 [1.2.3]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.1...v1.2.2
