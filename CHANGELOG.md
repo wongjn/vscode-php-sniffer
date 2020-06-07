@@ -2,6 +2,8 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+### Fixed
+- Fix error with unquoted spaces with `executablesFolder` in Windows
 
 ## [1.2.5] - 2020-05-06
 ### Fixed
