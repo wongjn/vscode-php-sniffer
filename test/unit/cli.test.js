@@ -72,5 +72,18 @@ suite('CLI Utilities', function () {
         }),
       );
     });
+
+    test('Command with spaces', async function () {
+      const result = await executeCommand({
+        command: './command with spaces',
+        token: createStubToken(),
+        spawnOptions: {
+          shell: process.platform === 'win32',
+          cwd: __dirname,
+        },
+      });
+
+      strictEqual(result, 'foo');
+    });
   });
 });

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#
+# Script for cli.test.js
+#
+
+echo -n 'foo';
