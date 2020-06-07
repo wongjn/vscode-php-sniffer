@@ -60,7 +60,7 @@ suite('CLI Utilities', function () {
           token: createStubToken(),
           spawnOptions: { cwd: __dirname },
         }),
-        { message: '255\nfoo\nbar' },
+        { message: 'foo\nbar' },
       );
     });
 

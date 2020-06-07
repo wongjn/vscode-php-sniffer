@@ -5,6 +5,9 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 ### Fixed
 - Fix error with unquoted spaces with `executablesFolder` in Windows
 
+### Removed
+- Remove exit code from error messages
+
 ## [1.2.5] - 2020-05-06
 ### Fixed
 - Fix deprecation error from bootstrap file (#29)
