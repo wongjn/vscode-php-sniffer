@@ -2,6 +2,8 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+
+## [1.2.6] - 2020-06-07
 ### Fixed
 - Fix error with unquoted spaces with `executablesFolder` in Windows
 
@@ -134,7 +136,8 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 ## [0.1.0] - 2018-11-26
 - Initial release
 
-[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.5...HEAD
+[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.6...HEAD
+[1.2.6]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.5...v1.2.6
 [1.2.5]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.4...v1.2.5
 [1.2.4]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.3...v1.2.4
 [1.2.3]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.2...v1.2.3
