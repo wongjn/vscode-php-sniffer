@@ -2,6 +2,9 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+### Added
+- Reword ENOENT errors
+
 ### Fixed
 - Avoid "write EPIPE" error (#35)
 
