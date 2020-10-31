@@ -83,6 +83,8 @@ at the root of the currently open file's workspace folder in the following order
 snippet (such as when _formatting on paste_ or on the command
 `format on selection`). This is passed to the `phpcbf` command as the value for
 `--exclude` when **not** formatting a whole file.
+* `phpSniffer.disableWhenDebugging`: Disable sniffing when any debug session is
+active.
 
 ## Known Issues
 

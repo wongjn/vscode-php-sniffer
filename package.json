@@ -64,6 +64,12 @@
                     "type": "array",
                     "default": [],
                     "markdownDescription": "Sniffs to exclude when formatting a code snippet (such as when _formatting on paste_ or on the command `format on selection`). This is passed to the `phpcbf` command as the value for `--exclude` when **not** formatting a whole file."
+                },
+                "phpSniffer.disableWhenDebugging": {
+                    "scope": "machine",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Disable sniffing when any debug session is active."
                 }
             }
         }

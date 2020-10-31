@@ -4,6 +4,7 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 ## [Unreleased]
 ### Added
 - Reword ENOENT errors
+- Add new setting `disableWhenDebugging` to disable `phpcs` when any debug session is active (#42)
 
 ### Fixed
 - Avoid "write EPIPE" error (#35)
