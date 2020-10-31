@@ -2,6 +2,8 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+### Fixed
+- Avoid "write EPIPE" error (#35)
 
 ## [1.2.6] - 2020-06-07
 ### Fixed
