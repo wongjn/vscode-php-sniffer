@@ -31,7 +31,13 @@
                     "default": "onSave",
                     "enum": [
                         "onSave",
-                        "onType"
+                        "onType",
+                        "never"
+                    ],
+                    "markdownEnumDescriptions": [
+                        "Run `phpcs` on save.",
+                        "Run `phpcs` after typing after `<onTypeDelay>`milliseconds.",
+                        "Don't run `phpcs` ever."
                     ],
                     "markdownDescription": "When to run `phpcs`."
                 },

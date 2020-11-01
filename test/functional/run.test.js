@@ -124,4 +124,24 @@ suite('Validator run', function () {
     assert(Date.now() - now > 1000, 'Validation ran after `onTypeDelay` elapsed.');
   });
 
+  test('never', async function () {
+    await workspace
+      .getConfiguration('phpSniffer', Uri.file(FIXTURES_PATH))
+      .update('run', 'never');
+
+    const document = await workspace.openTextDocument(fileUri);
+
+    await wait(700);
+    assert.strictEqual(languages.getDiagnostics(fileUri).length, 0, 'No validation errors.');
+
+    (await window.showTextDocument(document)).edit((edit) => {
+      edit.replace(new Range(0, 12, 0, 20), 'MyClass');
+    });
+
+    await wait(700);
+    assert.strictEqual(languages.getDiagnostics(fileUri).length, 0, 'No validation errors.');
+
+    await wait(700);
+    assert.strictEqual(languages.getDiagnostics(fileUri).length, 0, 'No validation errors.');
+  });
 });

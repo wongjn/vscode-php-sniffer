@@ -57,8 +57,8 @@ Validation and formatting will work (see below for alternative filenames for
 
 This extension contributes the following settings:
 
-* `phpSniffer.run`: When to run `phpcs` (the linter). Can be `onSave` or
-`onType`.
+* `phpSniffer.run`: When to run `phpcs` (the linter). Can be `onSave`, `onType`
+or `never`.
 * `phpSniffer.onTypeDelay`: When `phpSniffer.run` is `onType`, this sets the
 amount of milliseconds the validator will wait after typing has stopped before
 it will run. The validator will also cancel an older run if the run is on the
