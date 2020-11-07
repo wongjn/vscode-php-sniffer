@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<ruleset name="CSS">
+  <rule ref="Squiz.CSS.ColonSpacing"/>
+</ruleset>
