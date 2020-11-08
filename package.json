@@ -45,7 +45,7 @@
                     "type": "number",
                     "default": 250,
                     "minimum": 0,
-                    "markdownDescription": "When `phpSniffer.run` is `onType`, this sets the amount of milliseconds the validator will wait after typing has stopped before it will run."
+                    "markdownDescription": "When `#phpSniffer.run#` is `onType`, this sets the amount of milliseconds the validator will wait after typing has stopped before it will run."
                 },
                 "phpSniffer.extraFiles": {
                     "type": "array",
