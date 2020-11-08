@@ -3,8 +3,8 @@
  * Extension entry.
  */
 
-const vscode = require('vscode');
-const { Formatter } = require('./lib/formatter');
+const { languages } = require('vscode');
+const { activateGenericFormatter, Formatter } = require('./lib/formatter');
 const { createValidator } = require('./lib/validator');
 
 module.exports = {
@@ -16,10 +16,8 @@ module.exports = {
    */
   activate(context) {
     context.subscriptions.push(
-      vscode.languages.registerDocumentRangeFormattingEditProvider(
-        { language: 'php', scheme: 'file' },
-        Formatter,
-      ),
+      languages.registerDocumentRangeFormattingEditProvider({ language: 'php', scheme: 'file' }, Formatter),
+      activateGenericFormatter(),
       createValidator(),
     );
   },
