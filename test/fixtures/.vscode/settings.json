@@ -1,6 +1,5 @@
 {
     "php.validate.enable": false,
-    "[php]": {
-        "editor.defaultFormatter": "wongjn.php-sniffer"
-    }
+    "css.validate": false,
+    "editor.defaultFormatter": "wongjn.php-sniffer"
 }

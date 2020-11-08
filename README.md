@@ -4,16 +4,16 @@
 [![PHP Sniffer on the Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version-short/wongjn.php-sniffer.svg)](https://marketplace.visualstudio.com/items?itemName=wongjn.php-sniffer)
 
 Uses [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer) to format
-and lint PHP code.
+and lint (mainly) PHP code.
 
 ## Features
 
-- Runs `phpcs` to lint PHP code.
-- Runs `phpcbf` to format fixable PHP code validation errors, using the built-in
-  commands "Format Document" or "Format Selection".
-  - One may need to set this extension as the default PHP language formatter if
-    you have more than one PHP language extension enabled. Use the following
-    snippet in a `settings.json`:
+- Runs `phpcs` to lint code.
+- Runs `phpcbf` to format fixable code validation errors, using the built-in
+  commands "Format Document" or "Format Selection" (PHP only).
+  - One may need to set this extension as the default language formatter for
+    some languages. The following snippet is an example for PHP that can be
+    added in a `settings.json`:
     ```json
     {
       "[php]": {
@@ -63,6 +63,11 @@ or `never`.
 amount of milliseconds the validator will wait after typing has stopped before
 it will run. The validator will also cancel an older run if the run is on the
 same file.
+* `phpSniffer.extraFiles`: [Glob patterns](https://code.visualstudio.com/api/references/vscode-api#GlobPattern)
+of extra files to match that this extension should run on. Useful for standards
+that don't just validate PHP files. This extension will **always** run on PHP
+files — be sure to have your `files.associations` setting correctly setup for
+PHP files.
 * `phpSniffer.executablesFolder`: The **folder** where both `phpcs` and `phpcbf`
 executables are. Use this to specify a different executable if it is not in your
 global `PATH`, such as when using `PHP_Codesniffer` as a project-scoped
@@ -79,8 +84,8 @@ at the root of the currently open file's workspace folder in the following order
   2. `phpcs.xml`
   3. `.phpcs.xml.dist`
   4. `phpcs.xml.dist`
-* `phpSniffer.snippetExcludeSniffs`: Sniffs to exclude when formatting a code
-snippet (such as when _formatting on paste_ or on the command
+* `phpSniffer.snippetExcludeSniffs`: Sniffs to exclude when formatting a PHP
+code snippet (such as when _formatting on paste_ or on the command
 `format on selection`). This is passed to the `phpcbf` command as the value for
 `--exclude` when **not** formatting a whole file.
 * `phpSniffer.disableWhenDebugging`: Disable sniffing when any debug session is

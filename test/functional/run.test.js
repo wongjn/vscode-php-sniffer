@@ -3,31 +3,7 @@ const path = require('path');
 const { commands, languages, Range, window, workspace, Uri } = require('vscode');
 const { createFile, writeFile, unlink } = require('fs-extra');
 const { execPromise, FIXTURES_PATH } = require('../utils');
-
-/**
- * Get diagnostics for a file.
- *
- * @param {Uri} fileUri
- *   The URI of the file to get diagnostics of.
- * @return {Promise<import('vscode').Diagnostic[]>}
- *   Diagnostics for the file.
- */
-const getNextDiagnostics = (fileUri) => {
-  const existingCount = languages.getDiagnostics(fileUri).length;
-
-  return new Promise((resolve) => {
-    const subscription = languages.onDidChangeDiagnostics(({ uris }) => {
-      const list = uris.map((uri) => uri.toString());
-      if (list.indexOf(fileUri.toString()) === -1) return;
-
-      const diagnostics = languages.getDiagnostics(fileUri);
-      if (diagnostics.length !== existingCount) {
-        resolve(diagnostics);
-        subscription.dispose();
-      }
-    });
-  });
-};
+const { getNextDiagnostics } = require('./utils');
 
 /**
  * Constructs a promise that waits for the given length of time.

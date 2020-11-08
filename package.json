@@ -18,7 +18,7 @@
         "phpcbf"
     ],
     "activationEvents": [
-        "onLanguage:php"
+        "onStartupFinished"
     ],
     "main": "./extension",
     "contributes": {
@@ -46,6 +46,13 @@
                     "default": 250,
                     "minimum": 0,
                     "markdownDescription": "When `phpSniffer.run` is `onType`, this sets the amount of milliseconds the validator will wait after typing has stopped before it will run."
+                },
+                "phpSniffer.extraFiles": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "default": [],
+                    "markdownDescription": "[Glob patterns](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) of extra files to match that this extension should run on. Useful for standards that don't just validate PHP files.",
+                    "items": { "type": "string" }
                 },
                 "phpSniffer.executablesFolder": {
                     "scope": "resource",
