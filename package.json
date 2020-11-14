@@ -2,7 +2,7 @@
     "name": "php-sniffer",
     "displayName": "PHP Sniffer",
     "description": "Uses PHP_CodeSniffer to format and lint PHP code.",
-    "version": "1.2.6",
+    "version": "1.3.0",
     "engines": {
         "vscode": "^1.29.0"
     },
@@ -52,7 +52,9 @@
                     "uniqueItems": true,
                     "default": [],
                     "markdownDescription": "[Glob patterns](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) of extra files to match that this extension should run on. Useful for standards that don't just validate PHP files.",
-                    "items": { "type": "string" }
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "phpSniffer.executablesFolder": {
                     "scope": "resource",

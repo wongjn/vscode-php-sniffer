@@ -2,11 +2,15 @@
 All notable changes to the "PHP Sniffer" extension will be documented in this file.
 
 ## [Unreleased]
+
+## [1.3.0] - 2020-11-14
 ### Added
-- Reword ENOENT errors
 - Add new setting `disableWhenDebugging` to disable `phpcs` when any debug session is active (#42)
 - Add option to disable validation (#38)
 - Add setting for running on non-PHP files (#16)
+
+### Changed
+- Reword ENOENT errors
 
 ### Fixed
 - Avoid "write EPIPE" error (#35)
@@ -144,7 +148,8 @@ All notable changes to the "PHP Sniffer" extension will be documented in this fi
 ## [0.1.0] - 2018-11-26
 - Initial release
 
-[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.6...HEAD
+[Unreleased]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.6...v1.3.0
 [1.2.6]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.5...v1.2.6
 [1.2.5]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.4...v1.2.5
 [1.2.4]: https://github.com/wongjn/vscode-php-sniffer/compare/v1.2.3...v1.2.4
