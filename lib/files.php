@@ -40,5 +40,12 @@ foreach ($this->ruleset->paths as $ruleset_path) {
 // There are file directives, and the processing file did not match any of them;
 // ignore the processing file.
 if ($has_files) {
+  // This code fix ensures compatibility with Windows paths by converting them
+  // to use forward slashes, addressing a "Compilation failed" warning
+  // related to preg_match in PHP_CodeSniffer.
+  if (DIRECTORY_SEPARATOR === '\\') {
+    $processing_file = str_replace(DIRECTORY_SEPARATOR, '/', $processing_file);
+  }
+
   $this->ruleset->ignorePatterns[$processing_file] = 'absolute';
 }
